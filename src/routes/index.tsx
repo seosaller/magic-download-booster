@@ -404,30 +404,19 @@ function Index() {
                     )}
 
                     {render.state === "done" && render.url && (
-                      <div>
-                        <button
-                          type="button"
-                          disabled={!!dls["HQ"] && !dls["HQ"]?.done}
-                          onClick={() =>
-                            void downloadWithProgress(
-                              "HQ",
-                              render.url!,
-                              `fb-video-${(result.render?.label ?? "hq").toLowerCase()}.mp4`,
-                            )
-                          }
-                          className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {dls["HQ"]?.done ? "Downloaded" : "Save"}{" "}
-                          {result.render?.label ?? "HQ"} file
-                        </button>
-                        {dlBar("HQ")}
-                        {dls["HQ"]?.error && (
-                          <p className="mt-1 text-xs text-destructive">
-                            {dls["HQ"].error}
-                          </p>
+                      <a
+                        href={dl(
+                          render.url,
+                          "mp4",
+                          result.render?.label ?? "hq",
                         )}
-                      </div>
+                        download
+                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        Save {result.render?.label ?? "HQ"} file
+                      </a>
                     )}
+
 
                     {render.state === "error" && (
                       <div className="rounded-lg border border-destructive/40 p-3 text-center">
