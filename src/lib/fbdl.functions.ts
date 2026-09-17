@@ -275,18 +275,13 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
           // the same video id still carries the high-res DASH representations.
           if (!parsed.render) {
             const rid = id ?? videoId(v.url, html);
-            if (rid) {
-              for (const rv of renderVariants(rid)) {
-                if (rv.url === v.url) continue;
-                try {
-                  const alt = parse(await fetchHtml(rv.url, rv.mobile));
-                  if (alt.render) {
-                    parsed.render = alt.render;
-                    break;
-                  }
-                } catch {
-                  /* try next variant */
-                }
+            const rv = rid ? renderVariants(rid)[0] : undefined;
+            if (rv && rv.url !== v.url) {
+              try {
+                const alt = parse(await fetchHtml(rv.url, rv.mobile));
+                if (alt.render) parsed.render = alt.render;
+              } catch {
+                /* keep the plain HD/SD links */
               }
             }
           }
