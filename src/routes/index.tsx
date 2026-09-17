@@ -60,6 +60,7 @@ type RenderUi = {
   progress: number;
   url?: string;
   error?: string;
+  needKey?: boolean;
 };
 
 function fmtSize(bytes?: number) {
@@ -77,6 +78,13 @@ function Index() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FbResult | null>(null);
   const [render, setRender] = useState<RenderUi>({ state: "idle", progress: 0 });
+  const [apiKey, setApiKey] = useState("");
+  const [keyOpen, setKeyOpen] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("cc_api_key");
+    if (saved) setApiKey(saved);
+  }, []);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -103,7 +111,7 @@ function Index() {
 
   async function poll(jobId: string, tries = 0) {
     try {
-      const s = await check({ data: { jobId } });
+      const s = await check({ data: { jobId, apiKey } });
       if (s.status === "finished" && s.url) {
         setRender({ state: "done", progress: 100, url: s.url });
         return;
@@ -113,7 +121,9 @@ function Index() {
           state: "error",
           progress: 0,
           error: s.error ?? "Render fail ho gaya.",
+          needKey: s.code === "credits",
         });
+        if (s.code === "credits") setKeyOpen(true);
         return;
       }
       setRender({ state: "working", progress: Math.max(5, s.progress) });
@@ -137,14 +147,17 @@ function Index() {
     setRender({ state: "working", progress: 5 });
     try {
       const started = await begin({
-        data: { video: r.video, audio: r.audio, label: r.label },
+        data: { video: r.video, audio: r.audio, label: r.label, apiKey },
       });
       if (!started.ok || !started.jobId) {
         setRender({
           state: "error",
           progress: 0,
           error: started.error ?? "Render shuru nahi ho saka.",
+          needKey: started.code === "credits" || started.code === "config",
         });
+        if (started.code === "credits" || started.code === "config")
+          setKeyOpen(true);
         return;
       }
       void poll(started.jobId);
@@ -309,6 +322,11 @@ function Index() {
                         <p className="text-sm text-destructive">
                           {render.error}
                         </p>
+                        {render.needKey && (
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            Upar wale HD/SD downloads phir bhi kaam karte hain.
+                          </p>
+                        )}
                         <button
                           type="button"
                           onClick={() => void onRender()}
@@ -316,6 +334,46 @@ function Index() {
                         >
                           Try again
                         </button>
+                      </div>
+                    )}
+
+                    {(keyOpen || apiKey) && result.render && (
+                      <div className="rounded-lg border border-border p-3 text-left">
+                        <p className="text-sm font-semibold">
+                          Apni free render key (CloudConvert)
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Free account roz 25 render deta hai. Key{" "}
+                          <a
+                            href="https://cloudconvert.com/dashboard/api/v2/keys"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="cursor-pointer font-medium text-primary underline"
+                          >
+                            yahan se lein
+                          </a>{" "}
+                          aur neeche paste karein — ye sirf aapke browser mein
+                          save hoti hai.
+                        </p>
+                        <div className="mt-2 flex gap-2">
+                          <input
+                            type="password"
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            placeholder="API key paste karein"
+                            className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              localStorage.setItem("cc_api_key", apiKey.trim());
+                              setRender({ state: "idle", progress: 0 });
+                            }}
+                            className="cursor-pointer rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                          >
+                            Save
+                          </button>
+                        </div>
                       </div>
                     )}
 
