@@ -346,31 +346,17 @@ function Index() {
                   </h2>
                   <div className="flex flex-col gap-2">
                     {result.links.map((l) => (
-                      <div key={l.quality}>
-                        <button
-                          type="button"
-                          disabled={!!dls[l.quality] && !dls[l.quality]?.done}
-                          onClick={() =>
-                            void downloadWithProgress(
-                              l.quality,
-                              l.url,
-                              `fb-video-${l.quality.toLowerCase()}.mp4`,
-                            )
-                          }
-                          className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {dls[l.quality]?.done ? "Downloaded" : "Download"}{" "}
-                          {l.quality}
-                          {l.size ? ` (${fmtSize(l.size)})` : ""}
-                        </button>
-                        {dlBar(l.quality)}
-                        {dls[l.quality]?.error && (
-                          <p className="mt-1 text-xs text-destructive">
-                            {dls[l.quality]?.error}
-                          </p>
-                        )}
-                      </div>
+                      <a
+                        key={l.quality}
+                        href={dl(l.url, "mp4", l.quality)}
+                        download
+                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        Download {l.quality}
+                        {l.size ? ` (${fmtSize(l.size)})` : ""}
+                      </a>
                     ))}
+
                     {result.render && render.state === "idle" && (
                       <button
                         type="button"
