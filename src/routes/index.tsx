@@ -33,7 +33,7 @@ const steps = [
   { n: "1", t: "Open Facebook", d: "Find the video or reel you want to save." },
   { n: "2", t: "Copy the link", d: "Use the Share menu and tap Copy link." },
   { n: "3", t: "Paste it here", d: "Drop the link in the box above." },
-  { n: "4", t: "Download", d: "Pick HD or SD and save the file." },
+  { n: "4", t: "Download", d: "Pick SD, HD or 2K/4K render and save it." },
 ];
 
 const faqs = [
