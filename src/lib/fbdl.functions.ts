@@ -2,9 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 
 export type FbResult = {
   ok: boolean;
-  error?: string;
-  title?: string;
-  thumbnail?: string;
+  error?: string | undefined;
+  title?: string | undefined;
+  thumbnail?: string | undefined;
   links: { quality: string; url: string }[];
 };
 
