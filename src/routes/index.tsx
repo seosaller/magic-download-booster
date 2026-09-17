@@ -184,7 +184,7 @@ function Index() {
           </a>
           <a
             href="#faq"
-            className="cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
           >
             Help
           </a>
@@ -216,7 +216,7 @@ function Index() {
             <button
               type="submit"
               disabled={loading}
-              className="cursor-pointer rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="cursor-pointer rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Please wait..." : "Download"}
             </button>
@@ -263,7 +263,7 @@ function Index() {
                         key={l.quality}
                         href={dl(l.url, "mp4", l.quality)}
                         download
-                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
                       >
                         Download {l.quality}
                         {l.size ? ` (${fmtSize(l.size)})` : ""}
@@ -274,7 +274,7 @@ function Index() {
                       <button
                         type="button"
                         onClick={() => void onRender()}
-                        className="cursor-pointer rounded-lg border-2 border-primary px-4 py-3 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                        className="cursor-pointer rounded-lg border-2 border-primary px-4 py-3 text-center text-sm font-semibold text-primary transition active:scale-[0.96] hover:bg-primary hover:text-primary-foreground"
                       >
                         Download {result.render.label} ({result.render.height}p
                         {result.render.size
@@ -310,7 +310,7 @@ function Index() {
                           result.render?.label ?? "hq",
                         )}
                         download
-                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
                       >
                         Save {result.render?.label ?? "HQ"} file
                       </a>
@@ -369,7 +369,7 @@ function Index() {
                               localStorage.setItem("cc_api_key", apiKey.trim());
                               setRender({ state: "idle", progress: 0 });
                             }}
-                            className="cursor-pointer rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                            className="cursor-pointer rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
                           >
                             Save
                           </button>
@@ -380,7 +380,7 @@ function Index() {
                     {result.thumbnail && (
                       <a
                         href={dl(result.thumbnail, "jpg", "thumb")}
-                        className="cursor-pointer rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold transition-colors hover:bg-accent"
+                        className="cursor-pointer rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold transition active:scale-[0.96] active:brightness-95 hover:bg-accent"
                       >
                         Download Image
                       </a>
