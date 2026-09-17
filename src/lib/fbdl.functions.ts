@@ -81,29 +81,37 @@ function build(
 
 /** Newer Facebook pages ship the streams as JSON representations instead of DASH XML. */
 function parseRepresentations(html: string): FbResult["render"] {
-  const re =
-    /\{"base_url":"((?:\\.|[^"\\])*)"[^{}]*?"mime_type":"(video|audio)\/mp4"[^{}]*?\}/g;
-  const re2 =
-    /"mime_type":"(video|audio)\/mp4"[^{}]*?"base_url":"((?:\\.|[^"\\])*)"/g;
   let bestVideo: { url: string; height: number } | undefined;
-  let bestAudio: { url: string } | undefined;
+  let bestAudio: { url: string; rate: number } | undefined;
 
-  const consider = (chunk: string, kind: string, rawUrl: string) => {
-    const url = unescapeJson(rawUrl).replace(/&amp;/g, "&");
-    if (!url.startsWith("http")) return;
-    if (kind === "video") {
-      const height = Number(chunk.match(/"height":(\d+)/)?.[1] ?? 0);
-      if (!bestVideo || height > bestVideo.height) bestVideo = { url, height };
-    } else if (!bestAudio) bestAudio = { url };
-  };
+  // The JSON blob is often embedded escaped inside a <script> string.
+  const plain = html.replace(/\\"/g, '"').replace(/\\\//g, "/");
 
-  for (const m of html.matchAll(re)) consider(m[0], m[2]!, m[1]!);
-  if (!bestVideo || !bestAudio)
-    for (const m of html.matchAll(re2)) consider(m[0], m[1]!, m[2]!);
+  for (const text of [html, plain]) {
+    const segments = text.split(/"representation_id"\s*:/).slice(1);
+    for (const seg of segments) {
+      const chunk = seg.slice(0, 4000);
+      const rawUrl = chunk.match(/"base_url"\s*:\s*"((?:\\.|[^"\\])*)"/)?.[1];
+      if (!rawUrl) continue;
+      const url = unescapeJson(rawUrl).replace(/&amp;/g, "&");
+      if (!url.startsWith("http")) continue;
+      const mime = chunk.match(/"mime_type"\s*:\s*"(video|audio)/)?.[1];
+      if (mime === "video") {
+        const height = Number(chunk.match(/"height"\s*:\s*(\d+)/)?.[1] ?? 0);
+        if (!bestVideo || height > bestVideo.height)
+          bestVideo = { url, height };
+      } else if (mime === "audio") {
+        const rate = Number(chunk.match(/"bandwidth"\s*:\s*(\d+)/)?.[1] ?? 0);
+        if (!bestAudio || rate > bestAudio.rate) bestAudio = { url, rate };
+      }
+    }
+    if (bestVideo && bestAudio && bestVideo.height > 0) break;
+  }
 
   if (!bestVideo || !bestAudio || bestVideo.height <= 0) return undefined;
   return build(bestVideo, bestAudio);
 }
+
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
@@ -196,7 +204,11 @@ function parse(html: string): FbResult {
         "Is link se video nahi mili. Video public honi chahiye (private ya login-only videos support nahi).",
     };
 
-  const render = parseDash(html) ?? parseRepresentations(html);
+  const render =
+    parseDash(html) ??
+    parseDash(html.replace(/\\"/g, '"').replace(/\\\//g, "/")) ??
+    parseRepresentations(html);
+
   return { ok: true, title, thumbnail, links, render };
 }
 

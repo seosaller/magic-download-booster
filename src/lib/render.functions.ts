@@ -1,11 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 
-export type RenderStart = { ok: boolean; jobId?: string; error?: string };
+export type RenderStart = {
+  ok: boolean;
+  jobId?: string;
+  error?: string;
+  code?: "credits" | "config" | "other";
+};
 export type RenderStatus = {
   status: "waiting" | "processing" | "finished" | "error";
   progress: number;
   url?: string | undefined;
   error?: string | undefined;
+  code?: "credits" | "other" | undefined;
 };
 
 const API = "https://api.cloudconvert.com/v2";
@@ -24,21 +30,30 @@ function isAllowed(u: string) {
 }
 
 export const startRender = createServerFn({ method: "POST" })
-  .inputValidator((input: { video: string; audio: string; label: string }) => {
-    const video = String(input?.video ?? "");
-    const audio = String(input?.audio ?? "");
-    const label = String(input?.label ?? "hq").slice(0, 20);
-    if (!isAllowed(video) || !isAllowed(audio))
-      throw new Error("Invalid source streams.");
-    return { video, audio, label };
-  })
+  .inputValidator(
+    (input: {
+      video: string;
+      audio: string;
+      label: string;
+      apiKey?: string;
+    }) => {
+      const video = String(input?.video ?? "");
+      const audio = String(input?.audio ?? "");
+      const label = String(input?.label ?? "hq").slice(0, 20);
+      const apiKey = String(input?.apiKey ?? "").trim().slice(0, 600);
+      if (!isAllowed(video) || !isAllowed(audio))
+        throw new Error("Invalid source streams.");
+      return { video, audio, label, apiKey };
+    },
+  )
   .handler(async ({ data }): Promise<RenderStart> => {
-    const key = process.env["CLOUDCONVERT_API_KEY"];
+    const key = data.apiKey || process.env["CLOUDCONVERT_API_KEY"];
     if (!key)
       return {
         ok: false,
+        code: "config",
         error:
-          "High quality render abhi set nahi hai. Site owner ko CloudConvert key add karni hogi.",
+          "High quality render abhi set nahi hai. Apni free CloudConvert API key add karein.",
       };
 
     const body = {
@@ -59,7 +74,7 @@ export const startRender = createServerFn({ method: "POST" })
           engine: "ffmpeg",
           command: "ffmpeg",
           arguments:
-            "-i video.mp4 -i audio.m4a -c copy -movflags +faststart output/fb-video.mp4",
+            "-i /input/in-video/video.mp4 -i /input/in-audio/audio.m4a -c copy -movflags +faststart /output/fb-video.mp4",
           capture_output: false,
         },
         export: { operation: "export/url", input: ["merge"], inline: false },
@@ -78,25 +93,33 @@ export const startRender = createServerFn({ method: "POST" })
     const json = (await res.json()) as {
       data?: { id?: string };
       message?: string;
+      code?: string;
     };
-    if (!res.ok || !json?.data?.id)
+    if (!res.ok || !json?.data?.id) {
+      const credits =
+        json?.code === "CREDITS_EXCEEDED" ||
+        /credit/i.test(json?.message ?? "");
       return {
         ok: false,
-        error:
-          json?.message ??
-          "Render service ne request accept nahi ki. Thodi der baad koshish karein.",
+        code: credits ? "credits" : "other",
+        error: credits
+          ? "Render ke free credits khatam ho gaye hain. Apni free CloudConvert API key add karein (roz 25 free render) ya kal dobara koshish karein."
+          : (json?.message ??
+            "Render service ne request accept nahi ki. Thodi der baad koshish karein."),
       };
+    }
     return { ok: true, jobId: json.data.id };
   });
 
 export const renderStatus = createServerFn({ method: "POST" })
-  .inputValidator((input: { jobId: string }) => {
+  .inputValidator((input: { jobId: string; apiKey?: string }) => {
     const jobId = String(input?.jobId ?? "");
+    const apiKey = String(input?.apiKey ?? "").trim().slice(0, 600);
     if (!/^[\w-]{10,64}$/.test(jobId)) throw new Error("Invalid job id.");
-    return { jobId };
+    return { jobId, apiKey };
   })
   .handler(async ({ data }): Promise<RenderStatus> => {
-    const key = process.env["CLOUDCONVERT_API_KEY"];
+    const key = data.apiKey || process.env["CLOUDCONVERT_API_KEY"];
     if (!key)
       return { status: "error", progress: 0, error: "Render not configured." };
 
@@ -128,12 +151,16 @@ export const renderStatus = createServerFn({ method: "POST" })
 
     if (job.status === "error") {
       const failed = tasks.find((t) => t.status === "error");
+      const msg = failed?.message ?? "";
+      const credits = /credit/i.test(msg);
       return {
         status: "error",
         progress,
-        error:
-          failed?.message ??
-          "Render fail ho gaya. Ho sakta hai ye video merge support na karti ho.",
+        code: credits ? "credits" : "other",
+        error: credits
+          ? "Render ke free credits khatam ho gaye hain. Apni free CloudConvert API key add karein ya HD/SD download karein."
+          : (msg ||
+            "Render fail ho gaya. Ho sakta hai ye video merge support na karti ho."),
       };
     }
 

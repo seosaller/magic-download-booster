@@ -60,14 +60,7 @@ type RenderUi = {
   progress: number;
   url?: string;
   error?: string;
-};
-
-type DlUi = {
-  received: number;
-  total?: number | undefined;
-  speed: number;
-  done: boolean;
-  error?: string;
+  needKey?: boolean;
 };
 
 function fmtSize(bytes?: number) {
@@ -75,12 +68,6 @@ function fmtSize(bytes?: number) {
   if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(2)} GB`;
   if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
   return `${Math.max(1, Math.round(bytes / 1e3))} KB`;
-}
-
-function fmtEta(seconds: number) {
-  if (!Number.isFinite(seconds) || seconds < 0) return "";
-  if (seconds < 60) return `~${Math.ceil(seconds)}s left`;
-  return `~${Math.floor(seconds / 60)}m ${Math.ceil(seconds % 60)}s left`;
 }
 
 function Index() {
@@ -91,7 +78,13 @@ function Index() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FbResult | null>(null);
   const [render, setRender] = useState<RenderUi>({ state: "idle", progress: 0 });
-  const [dls, setDls] = useState<Record<string, DlUi>>({});
+  const [apiKey, setApiKey] = useState("");
+  const [keyOpen, setKeyOpen] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("cc_api_key");
+    if (saved) setApiKey(saved);
+  }, []);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -104,7 +97,6 @@ function Index() {
     e.preventDefault();
     setLoading(true);
     setResult(null);
-    setDls({});
     setRender({ state: "idle", progress: 0 });
     if (timer.current) clearTimeout(timer.current);
     try {
@@ -119,7 +111,7 @@ function Index() {
 
   async function poll(jobId: string, tries = 0) {
     try {
-      const s = await check({ data: { jobId } });
+      const s = await check({ data: { jobId, apiKey } });
       if (s.status === "finished" && s.url) {
         setRender({ state: "done", progress: 100, url: s.url });
         return;
@@ -129,7 +121,9 @@ function Index() {
           state: "error",
           progress: 0,
           error: s.error ?? "Render fail ho gaya.",
+          needKey: s.code === "credits",
         });
+        if (s.code === "credits") setKeyOpen(true);
         return;
       }
       setRender({ state: "working", progress: Math.max(5, s.progress) });
@@ -153,14 +147,17 @@ function Index() {
     setRender({ state: "working", progress: 5 });
     try {
       const started = await begin({
-        data: { video: r.video, audio: r.audio, label: r.label },
+        data: { video: r.video, audio: r.audio, label: r.label, apiKey },
       });
       if (!started.ok || !started.jobId) {
         setRender({
           state: "error",
           progress: 0,
           error: started.error ?? "Render shuru nahi ho saka.",
+          needKey: started.code === "credits" || started.code === "config",
         });
+        if (started.code === "credits" || started.code === "config")
+          setKeyOpen(true);
         return;
       }
       void poll(started.jobId);
@@ -174,90 +171,6 @@ function Index() {
       "fb-video-" + quality.toLowerCase().replace(/[^a-z0-9]/g, ""),
     )}&url=${encodeURIComponent(link)}`;
 
-  async function downloadWithProgress(
-    key: string,
-    link: string,
-    filename: string,
-  ) {
-    if (dls[key] && !dls[key].error && !dls[key].done) return;
-    setDls((s) => ({ ...s, [key]: { received: 0, speed: 0, done: false } }));
-    try {
-      const res = await fetch(dl(link, "mp4", key));
-      if (!res.ok || !res.body) throw new Error("Download shuru nahi ho saka.");
-      const total = Number(res.headers.get("content-length")) || undefined;
-      const reader = res.body.getReader();
-      const chunks: BlobPart[] = [];
-      let received = 0;
-      let speed = 0;
-      let lastTick = Date.now();
-      let lastBytes = 0;
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value as BlobPart);
-        received += value.length;
-        const now = Date.now();
-        if (now - lastTick >= 300) {
-          speed = ((received - lastBytes) / (now - lastTick)) * 1000;
-          lastTick = now;
-          lastBytes = received;
-          setDls((s) => ({
-            ...s,
-            [key]: { received, total, speed, done: false },
-          }));
-        }
-      }
-      const blob = new Blob(chunks, {
-        type: res.headers.get("content-type") ?? "video/mp4",
-      });
-      const objUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = objUrl;
-      a.download = filename;
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(objUrl), 15000);
-      setDls((s) => ({
-        ...s,
-        [key]: { received, total: total ?? received, speed, done: true },
-      }));
-    } catch (err) {
-      setDls((s) => ({
-        ...s,
-        [key]: {
-          received: 0,
-          speed: 0,
-          done: false,
-          error: (err as Error).message,
-        },
-      }));
-    }
-  }
-
-  function dlBar(key: string) {
-    const d = dls[key];
-    if (!d || d.done) return null;
-    const pct = d.total
-      ? Math.min(99, Math.round((d.received / d.total) * 100))
-      : 0;
-    return (
-      <div className="rounded-lg border border-border p-3">
-        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className={`h-full rounded-full bg-primary transition-all ${d.total ? "" : "animate-pulse w-full"}`}
-            style={d.total ? { width: `${pct}%` } : undefined}
-          />
-        </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          {fmtSize(d.received)}
-          {d.total ? ` / ${fmtSize(d.total)}` : ""} ·{" "}
-          {d.speed > 0 ? `${fmtSize(d.speed)}/s` : "starting..."}
-          {d.total && d.speed > 0
-            ? ` · ${fmtEta((d.total - d.received) / d.speed)}`
-            : ""}
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -346,31 +259,17 @@ function Index() {
                   </h2>
                   <div className="flex flex-col gap-2">
                     {result.links.map((l) => (
-                      <div key={l.quality}>
-                        <button
-                          type="button"
-                          disabled={!!dls[l.quality] && !dls[l.quality]?.done}
-                          onClick={() =>
-                            void downloadWithProgress(
-                              l.quality,
-                              l.url,
-                              `fb-video-${l.quality.toLowerCase()}.mp4`,
-                            )
-                          }
-                          className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {dls[l.quality]?.done ? "Downloaded" : "Download"}{" "}
-                          {l.quality}
-                          {l.size ? ` (${fmtSize(l.size)})` : ""}
-                        </button>
-                        {dlBar(l.quality)}
-                        {dls[l.quality]?.error && (
-                          <p className="mt-1 text-xs text-destructive">
-                            {dls[l.quality]?.error}
-                          </p>
-                        )}
-                      </div>
+                      <a
+                        key={l.quality}
+                        href={dl(l.url, "mp4", l.quality)}
+                        download
+                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        Download {l.quality}
+                        {l.size ? ` (${fmtSize(l.size)})` : ""}
+                      </a>
                     ))}
+
                     {result.render && render.state === "idle" && (
                       <button
                         type="button"
@@ -404,36 +303,30 @@ function Index() {
                     )}
 
                     {render.state === "done" && render.url && (
-                      <div>
-                        <button
-                          type="button"
-                          disabled={!!dls["HQ"] && !dls["HQ"]?.done}
-                          onClick={() =>
-                            void downloadWithProgress(
-                              "HQ",
-                              render.url!,
-                              `fb-video-${(result.render?.label ?? "hq").toLowerCase()}.mp4`,
-                            )
-                          }
-                          className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          {dls["HQ"]?.done ? "Downloaded" : "Save"}{" "}
-                          {result.render?.label ?? "HQ"} file
-                        </button>
-                        {dlBar("HQ")}
-                        {dls["HQ"]?.error && (
-                          <p className="mt-1 text-xs text-destructive">
-                            {dls["HQ"].error}
-                          </p>
+                      <a
+                        href={dl(
+                          render.url,
+                          "mp4",
+                          result.render?.label ?? "hq",
                         )}
-                      </div>
+                        download
+                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        Save {result.render?.label ?? "HQ"} file
+                      </a>
                     )}
+
 
                     {render.state === "error" && (
                       <div className="rounded-lg border border-destructive/40 p-3 text-center">
                         <p className="text-sm text-destructive">
                           {render.error}
                         </p>
+                        {render.needKey && (
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            Upar wale HD/SD downloads phir bhi kaam karte hain.
+                          </p>
+                        )}
                         <button
                           type="button"
                           onClick={() => void onRender()}
@@ -441,6 +334,46 @@ function Index() {
                         >
                           Try again
                         </button>
+                      </div>
+                    )}
+
+                    {(keyOpen || apiKey) && result.render && (
+                      <div className="rounded-lg border border-border p-3 text-left">
+                        <p className="text-sm font-semibold">
+                          Apni free render key (CloudConvert)
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Free account roz 25 render deta hai. Key{" "}
+                          <a
+                            href="https://cloudconvert.com/dashboard/api/v2/keys"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="cursor-pointer font-medium text-primary underline"
+                          >
+                            yahan se lein
+                          </a>{" "}
+                          aur neeche paste karein — ye sirf aapke browser mein
+                          save hoti hai.
+                        </p>
+                        <div className="mt-2 flex gap-2">
+                          <input
+                            type="password"
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            placeholder="API key paste karein"
+                            className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              localStorage.setItem("cc_api_key", apiKey.trim());
+                              setRender({ state: "idle", progress: 0 });
+                            }}
+                            className="cursor-pointer rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                          >
+                            Save
+                          </button>
+                        </div>
                       </div>
                     )}
 
