@@ -26,21 +26,45 @@ export const Route = createFileRoute("/api/public/download")({
         )
           return new Response("Host not allowed", { status: 403 });
 
-        const upstream = await fetch(target, {
-          headers: {
-            "user-agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        const ua =
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+        const range = request.headers.get("range");
+
+        async function pull(withRange: boolean) {
+          const h: Record<string, string> = {
+            "user-agent": ua,
             referer: "https://www.facebook.com/",
-            range: request.headers.get("range") ?? "bytes=0-",
-          },
-        });
-        if (!upstream.ok && upstream.status !== 206)
-          return new Response("Upstream error", { status: 502 });
+          };
+          if (withRange && range) h["range"] = range;
+          try {
+            return await fetch(target!, { headers: h, redirect: "follow" });
+          } catch {
+            return undefined;
+          }
+        }
+
+        let upstream = await pull(true);
+        if (!upstream || (!upstream.ok && upstream.status !== 206))
+          upstream = await pull(false);
+
+        const ct = upstream?.headers.get("content-type") ?? "";
+        const bad =
+          !upstream ||
+          (!upstream.ok && upstream.status !== 206) ||
+          /text\/html/i.test(ct);
+
+        // Facebook sometimes blocks server-side fetches; in that case send the
+        // browser straight to the original file instead of a text error page.
+        if (bad || !upstream) return Response.redirect(target, 302);
 
         const headers = new Headers();
         headers.set(
           "content-type",
-          type === "jpg" ? "image/jpeg" : "video/mp4",
+          ct && !/text\//i.test(ct)
+            ? ct
+            : type === "jpg"
+              ? "image/jpeg"
+              : "video/mp4",
         );
         headers.set(
           "content-disposition",
@@ -48,7 +72,13 @@ export const Route = createFileRoute("/api/public/download")({
         );
         const len = upstream.headers.get("content-length");
         if (len) headers.set("content-length", len);
-        return new Response(upstream.body, { status: 200, headers });
+        const cr = upstream.headers.get("content-range");
+        if (cr) headers.set("content-range", cr);
+        headers.set("accept-ranges", "bytes");
+        return new Response(upstream.body, {
+          status: upstream.status === 206 ? 206 : 200,
+          headers,
+        });
       },
     },
   },
