@@ -349,7 +349,7 @@ function Index() {
                       <div key={l.quality}>
                         <button
                           type="button"
-                          disabled={!!dls[l.quality] && !dls[l.quality].done}
+                          disabled={!!dls[l.quality] && !dls[l.quality]?.done}
                           onClick={() =>
                             void downloadWithProgress(
                               l.quality,
@@ -407,7 +407,7 @@ function Index() {
                       <div>
                         <button
                           type="button"
-                          disabled={!!dls.HQ && !dls.HQ.done}
+                          disabled={!!dls["HQ"] && !dls["HQ"]?.done}
                           onClick={() =>
                             void downloadWithProgress(
                               "HQ",
@@ -417,13 +417,13 @@ function Index() {
                           }
                           className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {dls.HQ?.done ? "Downloaded" : "Save"}{" "}
+                          {dls["HQ"]?.done ? "Downloaded" : "Save"}{" "}
                           {result.render?.label ?? "HQ"} file
                         </button>
                         {dlBar("HQ")}
-                        {dls.HQ?.error && (
+                        {dls["HQ"]?.error && (
                           <p className="mt-1 text-xs text-destructive">
-                            {dls.HQ.error}
+                            {dls["HQ"].error}
                           </p>
                         )}
                       </div>
