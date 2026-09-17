@@ -60,10 +60,43 @@ function parseDash(html: string): FbResult["render"] {
   }
 
   if (!bestVideo || !bestAudio || bestVideo.height <= 0) return undefined;
-  const h = bestVideo.height;
+  return build(bestVideo, bestAudio);
+}
+
+function build(
+  v: { url: string; height: number },
+  a: { url: string },
+): FbResult["render"] {
+  const h = v.height;
   const label =
     h >= 2000 ? "4K" : h >= 1300 ? "2K" : h >= 1000 ? "1080p" : `${h}p`;
-  return { label, height: h, video: bestVideo.url, audio: bestAudio.url };
+  return { label, height: h, video: v.url, audio: a.url };
+}
+
+/** Newer Facebook pages ship the streams as JSON representations instead of DASH XML. */
+function parseRepresentations(html: string): FbResult["render"] {
+  const re =
+    /\{"base_url":"((?:\\.|[^"\\])*)"[^{}]*?"mime_type":"(video|audio)\/mp4"[^{}]*?\}/g;
+  const re2 =
+    /"mime_type":"(video|audio)\/mp4"[^{}]*?"base_url":"((?:\\.|[^"\\])*)"/g;
+  let bestVideo: { url: string; height: number } | undefined;
+  let bestAudio: { url: string } | undefined;
+
+  const consider = (chunk: string, kind: string, rawUrl: string) => {
+    const url = unescapeJson(rawUrl).replace(/&amp;/g, "&");
+    if (!url.startsWith("http")) return;
+    if (kind === "video") {
+      const height = Number(chunk.match(/"height":(\d+)/)?.[1] ?? 0);
+      if (!bestVideo || height > bestVideo.height) bestVideo = { url, height };
+    } else if (!bestAudio) bestAudio = { url };
+  };
+
+  for (const m of html.matchAll(re)) consider(m[0], m[2]!, m[1]!);
+  if (!bestVideo || !bestAudio)
+    for (const m of html.matchAll(re2)) consider(m[0], m[1]!, m[2]!);
+
+  if (!bestVideo || !bestAudio || bestVideo.height <= 0) return undefined;
+  return build(bestVideo, bestAudio);
 }
 
 const UA =
