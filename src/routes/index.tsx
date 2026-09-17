@@ -51,7 +51,7 @@ const faqs = [
   },
   {
     q: "Which quality can I get?",
-    a: "HD when Facebook provides it, otherwise SD. Both options are shown after you paste a link.",
+    a: "SD and HD download instantly. When Facebook has a higher resolution, a 2K/4K option appears that is rendered for you in about a minute.",
   },
 ];
 
