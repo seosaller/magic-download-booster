@@ -55,7 +55,7 @@ export const Route = createFileRoute("/api/public/download")({
 
         // Facebook sometimes blocks server-side fetches; in that case send the
         // browser straight to the original file instead of a text error page.
-        if (bad) return Response.redirect(target, 302);
+        if (bad || !upstream) return Response.redirect(target, 302);
 
         const headers = new Headers();
         headers.set(
