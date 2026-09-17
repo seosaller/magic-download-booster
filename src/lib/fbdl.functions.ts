@@ -6,7 +6,65 @@ export type FbResult = {
   title?: string | undefined;
   thumbnail?: string | undefined;
   links: { quality: string; url: string }[];
+  render?:
+    | { label: string; height: number; video: string; audio: string }
+    | undefined;
 };
+
+function unescapeJson(s: string) {
+  return s
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_m, h) =>
+      String.fromCharCode(parseInt(h, 16)),
+    )
+    .replace(/\\\//g, "/")
+    .replace(/\\"/g, '"')
+    .replace(/\\n/g, "\n")
+    .replace(/\\t/g, "\t")
+    .replace(/\\\\/g, "\\");
+}
+
+function xmlAttr(tag: string, name: string) {
+  const m = tag.match(new RegExp(`${name}="([^"]*)"`));
+  return m?.[1];
+}
+
+/** Pull the best video-only + audio-only DASH streams for a high-res render. */
+function parseDash(html: string): FbResult["render"] {
+  const m = html.match(
+    /"(?:dash_manifest|dash_manifest_xml_string)"\s*:\s*"((?:\\.|[^"\\])*)"/,
+  );
+  if (!m?.[1]) return undefined;
+  const xml = unescapeJson(m[1]);
+
+  const reps = xml.match(/<Representation\b[\s\S]*?<\/Representation>/g) ?? [];
+  let bestVideo: { url: string; height: number } | undefined;
+  let bestAudio: { url: string; rate: number } | undefined;
+
+  for (const rep of reps) {
+    const base = rep.match(/<BaseURL>([\s\S]*?)<\/BaseURL>/)?.[1];
+    if (!base) continue;
+    const url = base
+      .replace(/&amp;/g, "&")
+      .replace(/<!\[CDATA\[|\]\]>/g, "")
+      .trim();
+    if (!url.startsWith("http")) continue;
+    const mime = xmlAttr(rep, "mimeType") ?? "";
+    const bandwidth = Number(xmlAttr(rep, "bandwidth") ?? 0);
+    if (mime.startsWith("video")) {
+      const height = Number(xmlAttr(rep, "height") ?? 0);
+      if (!bestVideo || height > bestVideo.height) bestVideo = { url, height };
+    } else if (mime.startsWith("audio")) {
+      if (!bestAudio || bandwidth > bestAudio.rate)
+        bestAudio = { url, rate: bandwidth };
+    }
+  }
+
+  if (!bestVideo || !bestAudio || bestVideo.height <= 0) return undefined;
+  const h = bestVideo.height;
+  const label =
+    h >= 2000 ? "4K" : h >= 1300 ? "2K" : h >= 1000 ? "1080p" : `${h}p`;
+  return { label, height: h, video: bestVideo.url, audio: bestAudio.url };
+}
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
