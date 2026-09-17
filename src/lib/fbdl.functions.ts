@@ -226,6 +226,30 @@ async function headSize(url: string): Promise<number | undefined> {
   }
 }
 
+/** Reels, share and watch links all carry a numeric video id somewhere. */
+function videoId(url: string, html?: string): string | undefined {
+  const fromUrl =
+    url.match(/\/reel\/(\d{6,})/)?.[1] ??
+    url.match(/\/videos\/(?:[^/]+\/)?(\d{6,})/)?.[1] ??
+    url.match(/[?&]v=(\d{6,})/)?.[1];
+  if (fromUrl) return fromUrl;
+  if (!html) return undefined;
+  return (
+    html.match(/"video_id"\s*:\s*"(\d{6,})"/)?.[1] ??
+    html.match(/<meta[^>]+property="og:url"[^>]+content="[^"]*?(\d{8,})/)?.[1] ??
+    html.match(/\/reel\/(\d{6,})/)?.[1]
+  );
+}
+
+/** Extra page variants that usually expose the DASH streams for reels. */
+function renderVariants(id: string) {
+  return [
+    { url: `https://www.facebook.com/watch/?v=${id}`, mobile: false },
+    { url: `https://www.facebook.com/video.php?v=${id}`, mobile: false },
+    { url: `https://m.facebook.com/watch/?v=${id}`, mobile: true },
+  ];
+}
+
 export const fetchFbVideo = createServerFn({ method: "POST" })
   .inputValidator((input: { url: string }) => {
     const url = String(input?.url ?? "").trim();
@@ -234,10 +258,12 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
     return { url };
   })
   .handler(async ({ data }): Promise<FbResult> => {
+    const id = videoId(data.url);
     const variants = [
       { url: data.url, mobile: false },
       { url: data.url.replace("www.facebook.com", "m.facebook.com"), mobile: true },
       { url: data.url, mobile: true },
+      ...(id ? renderVariants(id) : []),
     ];
     let last: FbResult = { ok: false, links: [], error: "Video not found." };
     for (const v of variants) {
@@ -245,6 +271,25 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
         const html = await fetchHtml(v.url, v.mobile);
         const parsed = parse(html);
         if (parsed.ok) {
+          // Reels often render only the plain HD/SD streams; the watch page for
+          // the same video id still carries the high-res DASH representations.
+          if (!parsed.render) {
+            const rid = id ?? videoId(v.url, html);
+            if (rid) {
+              for (const rv of renderVariants(rid)) {
+                if (rv.url === v.url) continue;
+                try {
+                  const alt = parse(await fetchHtml(rv.url, rv.mobile));
+                  if (alt.render) {
+                    parsed.render = alt.render;
+                    break;
+                  }
+                } catch {
+                  /* try next variant */
+                }
+              }
+            }
+          }
           const probes: Promise<number | undefined>[] = [
             ...parsed.links.map((l) => headSize(l.url)),
             parsed.render
