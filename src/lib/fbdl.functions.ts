@@ -190,7 +190,8 @@ function parse(html: string): FbResult {
         "Is link se video nahi mili. Video public honi chahiye (private ya login-only videos support nahi).",
     };
 
-  return { ok: true, title, thumbnail, links, render: parseDash(html) };
+  const render = parseDash(html) ?? parseRepresentations(html);
+  return { ok: true, title, thumbnail, links, render };
 }
 
 export const fetchFbVideo = createServerFn({ method: "POST" })
