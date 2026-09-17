@@ -55,16 +55,35 @@ const faqs = [
   },
 ];
 
+type RenderUi = {
+  state: "idle" | "working" | "done" | "error";
+  progress: number;
+  url?: string;
+  error?: string;
+};
+
 function Index() {
   const run = useServerFn(fetchFbVideo);
+  const begin = useServerFn(startRender);
+  const check = useServerFn(renderStatus);
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FbResult | null>(null);
+  const [render, setRender] = useState<RenderUi>({ state: "idle", progress: 0 });
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setResult(null);
+    setRender({ state: "idle", progress: 0 });
+    if (timer.current) clearTimeout(timer.current);
     try {
       const res = await run({ data: { url } });
       setResult(res);
@@ -72,6 +91,58 @@ function Index() {
       setResult({ ok: false, links: [], error: (err as Error).message });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function poll(jobId: string, tries = 0) {
+    try {
+      const s = await check({ data: { jobId } });
+      if (s.status === "finished" && s.url) {
+        setRender({ state: "done", progress: 100, url: s.url });
+        return;
+      }
+      if (s.status === "error") {
+        setRender({
+          state: "error",
+          progress: 0,
+          error: s.error ?? "Render fail ho gaya.",
+        });
+        return;
+      }
+      setRender({ state: "working", progress: Math.max(5, s.progress) });
+      if (tries > 80) {
+        setRender({
+          state: "error",
+          progress: 0,
+          error: "Render mein bahut waqt lag gaya. Dobara koshish karein.",
+        });
+        return;
+      }
+      timer.current = setTimeout(() => void poll(jobId, tries + 1), 3000);
+    } catch (err) {
+      setRender({ state: "error", progress: 0, error: (err as Error).message });
+    }
+  }
+
+  async function onRender() {
+    const r = result?.render;
+    if (!r) return;
+    setRender({ state: "working", progress: 5 });
+    try {
+      const started = await begin({
+        data: { video: r.video, audio: r.audio, label: r.label },
+      });
+      if (!started.ok || !started.jobId) {
+        setRender({
+          state: "error",
+          progress: 0,
+          error: started.error ?? "Render shuru nahi ho saka.",
+        });
+        return;
+      }
+      void poll(started.jobId);
+    } catch (err) {
+      setRender({ state: "error", progress: 0, error: (err as Error).message });
     }
   }
 
