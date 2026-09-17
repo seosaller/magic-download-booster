@@ -62,6 +62,27 @@ type RenderUi = {
   error?: string;
 };
 
+type DlUi = {
+  received: number;
+  total?: number | undefined;
+  speed: number;
+  done: boolean;
+  error?: string;
+};
+
+function fmtSize(bytes?: number) {
+  if (!bytes || bytes <= 0) return "";
+  if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(2)} GB`;
+  if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
+  return `${Math.max(1, Math.round(bytes / 1e3))} KB`;
+}
+
+function fmtEta(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds < 0) return "";
+  if (seconds < 60) return `~${Math.ceil(seconds)}s left`;
+  return `~${Math.floor(seconds / 60)}m ${Math.ceil(seconds % 60)}s left`;
+}
+
 function Index() {
   const run = useServerFn(fetchFbVideo);
   const begin = useServerFn(startRender);
@@ -70,6 +91,7 @@ function Index() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FbResult | null>(null);
   const [render, setRender] = useState<RenderUi>({ state: "idle", progress: 0 });
+  const [dls, setDls] = useState<Record<string, DlUi>>({});
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -82,6 +104,7 @@ function Index() {
     e.preventDefault();
     setLoading(true);
     setResult(null);
+    setDls({});
     setRender({ state: "idle", progress: 0 });
     if (timer.current) clearTimeout(timer.current);
     try {
@@ -148,8 +171,93 @@ function Index() {
 
   const dl = (link: string, type: "mp4" | "jpg", quality: string) =>
     `/api/public/download?type=${type}&name=${encodeURIComponent(
-      "fb-video-" + quality.toLowerCase(),
+      "fb-video-" + quality.toLowerCase().replace(/[^a-z0-9]/g, ""),
     )}&url=${encodeURIComponent(link)}`;
+
+  async function downloadWithProgress(
+    key: string,
+    link: string,
+    filename: string,
+  ) {
+    if (dls[key] && !dls[key].error && !dls[key].done) return;
+    setDls((s) => ({ ...s, [key]: { received: 0, speed: 0, done: false } }));
+    try {
+      const res = await fetch(dl(link, "mp4", key));
+      if (!res.ok || !res.body) throw new Error("Download shuru nahi ho saka.");
+      const total = Number(res.headers.get("content-length")) || undefined;
+      const reader = res.body.getReader();
+      const chunks: BlobPart[] = [];
+      let received = 0;
+      let speed = 0;
+      let lastTick = Date.now();
+      let lastBytes = 0;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value as BlobPart);
+        received += value.length;
+        const now = Date.now();
+        if (now - lastTick >= 300) {
+          speed = ((received - lastBytes) / (now - lastTick)) * 1000;
+          lastTick = now;
+          lastBytes = received;
+          setDls((s) => ({
+            ...s,
+            [key]: { received, total, speed, done: false },
+          }));
+        }
+      }
+      const blob = new Blob(chunks, {
+        type: res.headers.get("content-type") ?? "video/mp4",
+      });
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objUrl;
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(objUrl), 15000);
+      setDls((s) => ({
+        ...s,
+        [key]: { received, total: total ?? received, speed, done: true },
+      }));
+    } catch (err) {
+      setDls((s) => ({
+        ...s,
+        [key]: {
+          received: 0,
+          speed: 0,
+          done: false,
+          error: (err as Error).message,
+        },
+      }));
+    }
+  }
+
+  function dlBar(key: string) {
+    const d = dls[key];
+    if (!d || d.done) return null;
+    const pct = d.total
+      ? Math.min(99, Math.round((d.received / d.total) * 100))
+      : 0;
+    return (
+      <div className="rounded-lg border border-border p-3">
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div
+            className={`h-full rounded-full bg-primary transition-all ${d.total ? "" : "animate-pulse w-full"}`}
+            style={d.total ? { width: `${pct}%` } : undefined}
+          />
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {fmtSize(d.received)}
+          {d.total ? ` / ${fmtSize(d.total)}` : ""} ·{" "}
+          {d.speed > 0 ? `${fmtSize(d.speed)}/s` : "starting..."}
+          {d.total && d.speed > 0
+            ? ` · ${fmtEta((d.total - d.received) / d.speed)}`
+            : ""}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -238,13 +346,30 @@ function Index() {
                   </h2>
                   <div className="flex flex-col gap-2">
                     {result.links.map((l) => (
-                      <a
-                        key={l.quality}
-                        href={dl(l.url, "mp4", l.quality)}
-                        className="cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                      >
-                        Download {l.quality}
-                      </a>
+                      <div key={l.quality}>
+                        <button
+                          type="button"
+                          disabled={!!dls[l.quality] && !dls[l.quality]?.done}
+                          onClick={() =>
+                            void downloadWithProgress(
+                              l.quality,
+                              l.url,
+                              `fb-video-${l.quality.toLowerCase()}.mp4`,
+                            )
+                          }
+                          className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {dls[l.quality]?.done ? "Downloaded" : "Download"}{" "}
+                          {l.quality}
+                          {l.size ? ` (${fmtSize(l.size)})` : ""}
+                        </button>
+                        {dlBar(l.quality)}
+                        {dls[l.quality]?.error && (
+                          <p className="mt-1 text-xs text-destructive">
+                            {dls[l.quality]?.error}
+                          </p>
+                        )}
+                      </div>
                     ))}
                     {result.render && render.state === "idle" && (
                       <button
@@ -253,6 +378,9 @@ function Index() {
                         className="cursor-pointer rounded-lg border-2 border-primary px-4 py-3 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                       >
                         Download {result.render.label} ({result.render.height}p
+                        {result.render.size
+                          ? ` · ~${fmtSize(result.render.size)}`
+                          : ""}
                         · render)
                       </button>
                     )}
@@ -276,12 +404,29 @@ function Index() {
                     )}
 
                     {render.state === "done" && render.url && (
-                      <a
-                        href={render.url}
-                        className="cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                      >
-                        Save {result.render?.label ?? "HQ"} file
-                      </a>
+                      <div>
+                        <button
+                          type="button"
+                          disabled={!!dls["HQ"] && !dls["HQ"]?.done}
+                          onClick={() =>
+                            void downloadWithProgress(
+                              "HQ",
+                              render.url!,
+                              `fb-video-${(result.render?.label ?? "hq").toLowerCase()}.mp4`,
+                            )
+                          }
+                          className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {dls["HQ"]?.done ? "Downloaded" : "Save"}{" "}
+                          {result.render?.label ?? "HQ"} file
+                        </button>
+                        {dlBar("HQ")}
+                        {dls["HQ"]?.error && (
+                          <p className="mt-1 text-xs text-destructive">
+                            {dls["HQ"].error}
+                          </p>
+                        )}
+                      </div>
                     )}
 
                     {render.state === "error" && (

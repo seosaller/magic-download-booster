@@ -5,9 +5,15 @@ export type FbResult = {
   error?: string | undefined;
   title?: string | undefined;
   thumbnail?: string | undefined;
-  links: { quality: string; url: string }[];
+  links: { quality: string; url: string; size?: number | undefined }[];
   render?:
-    | { label: string; height: number; video: string; audio: string }
+    | {
+        label: string;
+        height: number;
+        video: string;
+        audio: string;
+        size?: number | undefined;
+      }
     | undefined;
 };
 
@@ -194,6 +200,20 @@ function parse(html: string): FbResult {
   return { ok: true, title, thumbnail, links, render };
 }
 
+async function headSize(url: string): Promise<number | undefined> {
+  try {
+    const res = await fetch(url, {
+      method: "HEAD",
+      headers: { "user-agent": UA, referer: "https://www.facebook.com/" },
+      redirect: "follow",
+    });
+    const len = Number(res.headers.get("content-length"));
+    return Number.isFinite(len) && len > 0 ? len : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export const fetchFbVideo = createServerFn({ method: "POST" })
   .inputValidator((input: { url: string }) => {
     const url = String(input?.url ?? "").trim();
@@ -212,7 +232,24 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
       try {
         const html = await fetchHtml(v.url, v.mobile);
         const parsed = parse(html);
-        if (parsed.ok) return parsed;
+        if (parsed.ok) {
+          const probes: Promise<number | undefined>[] = [
+            ...parsed.links.map((l) => headSize(l.url)),
+            parsed.render
+              ? Promise.all([
+                  headSize(parsed.render.video),
+                  headSize(parsed.render.audio),
+                ]).then(([v, a]) => (v && a ? v + a : (v ?? a)))
+              : Promise.resolve(undefined),
+          ];
+          const sizes = await Promise.all(probes);
+          parsed.links.forEach((l, i) => {
+            l.size = sizes[i];
+          });
+          if (parsed.render)
+            parsed.render.size = sizes[sizes.length - 1] ?? undefined;
+          return parsed;
+        }
         last = parsed;
       } catch (e) {
         last = { ok: false, links: [], error: (e as Error).message };
