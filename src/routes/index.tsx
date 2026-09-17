@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
+import { startRender, renderStatus } from "@/lib/render.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
