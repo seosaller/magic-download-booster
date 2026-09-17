@@ -62,25 +62,11 @@ type RenderUi = {
   error?: string;
 };
 
-type DlUi = {
-  received: number;
-  total?: number | undefined;
-  speed: number;
-  done: boolean;
-  error?: string;
-};
-
 function fmtSize(bytes?: number) {
   if (!bytes || bytes <= 0) return "";
   if (bytes >= 1e9) return `${(bytes / 1e9).toFixed(2)} GB`;
   if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`;
   return `${Math.max(1, Math.round(bytes / 1e3))} KB`;
-}
-
-function fmtEta(seconds: number) {
-  if (!Number.isFinite(seconds) || seconds < 0) return "";
-  if (seconds < 60) return `~${Math.ceil(seconds)}s left`;
-  return `~${Math.floor(seconds / 60)}m ${Math.ceil(seconds % 60)}s left`;
 }
 
 function Index() {
@@ -91,7 +77,6 @@ function Index() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FbResult | null>(null);
   const [render, setRender] = useState<RenderUi>({ state: "idle", progress: 0 });
-  const [dls, setDls] = useState<Record<string, DlUi>>({});
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -104,7 +89,6 @@ function Index() {
     e.preventDefault();
     setLoading(true);
     setResult(null);
-    setDls({});
     setRender({ state: "idle", progress: 0 });
     if (timer.current) clearTimeout(timer.current);
     try {
