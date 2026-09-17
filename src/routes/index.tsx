@@ -346,13 +346,30 @@ function Index() {
                   </h2>
                   <div className="flex flex-col gap-2">
                     {result.links.map((l) => (
-                      <a
-                        key={l.quality}
-                        href={dl(l.url, "mp4", l.quality)}
-                        className="cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                      >
-                        Download {l.quality}
-                      </a>
+                      <div key={l.quality}>
+                        <button
+                          type="button"
+                          disabled={!!dls[l.quality] && !dls[l.quality].done}
+                          onClick={() =>
+                            void downloadWithProgress(
+                              l.quality,
+                              l.url,
+                              `fb-video-${l.quality.toLowerCase()}.mp4`,
+                            )
+                          }
+                          className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {dls[l.quality]?.done ? "Downloaded" : "Download"}{" "}
+                          {l.quality}
+                          {l.size ? ` (${fmtSize(l.size)})` : ""}
+                        </button>
+                        {dlBar(l.quality)}
+                        {dls[l.quality]?.error && (
+                          <p className="mt-1 text-xs text-destructive">
+                            {dls[l.quality]?.error}
+                          </p>
+                        )}
+                      </div>
                     ))}
                     {result.render && render.state === "idle" && (
                       <button
@@ -361,6 +378,9 @@ function Index() {
                         className="cursor-pointer rounded-lg border-2 border-primary px-4 py-3 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                       >
                         Download {result.render.label} ({result.render.height}p
+                        {result.render.size
+                          ? ` · ~${fmtSize(result.render.size)}`
+                          : ""}
                         · render)
                       </button>
                     )}
@@ -384,12 +404,29 @@ function Index() {
                     )}
 
                     {render.state === "done" && render.url && (
-                      <a
-                        href={render.url}
-                        className="cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
-                      >
-                        Save {result.render?.label ?? "HQ"} file
-                      </a>
+                      <div>
+                        <button
+                          type="button"
+                          disabled={!!dls.HQ && !dls.HQ.done}
+                          onClick={() =>
+                            void downloadWithProgress(
+                              "HQ",
+                              render.url!,
+                              `fb-video-${(result.render?.label ?? "hq").toLowerCase()}.mp4`,
+                            )
+                          }
+                          className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {dls.HQ?.done ? "Downloaded" : "Save"}{" "}
+                          {result.render?.label ?? "HQ"} file
+                        </button>
+                        {dlBar("HQ")}
+                        {dls.HQ?.error && (
+                          <p className="mt-1 text-xs text-destructive">
+                            {dls.HQ.error}
+                          </p>
+                        )}
+                      </div>
                     )}
 
                     {render.state === "error" && (
