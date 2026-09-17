@@ -5,9 +5,15 @@ export type FbResult = {
   error?: string | undefined;
   title?: string | undefined;
   thumbnail?: string | undefined;
-  links: { quality: string; url: string }[];
+  links: { quality: string; url: string; size?: number | undefined }[];
   render?:
-    | { label: string; height: number; video: string; audio: string }
+    | {
+        label: string;
+        height: number;
+        video: string;
+        audio: string;
+        size?: number | undefined;
+      }
     | undefined;
 };
 

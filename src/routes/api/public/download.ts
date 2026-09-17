@@ -19,7 +19,11 @@ export const Route = createFileRoute("/api/public/download")({
         } catch {
           return new Response("Bad url", { status: 400 });
         }
-        if (!/(^|\.)(fbcdn\.net|facebook\.com|fbsbx\.com)$/i.test(host))
+        if (
+          !/(^|\.)(fbcdn\.net|facebook\.com|fbsbx\.com|cloudconvert\.com)$/i.test(
+            host,
+          )
+        )
           return new Response("Host not allowed", { status: 403 });
 
         const upstream = await fetch(target, {
