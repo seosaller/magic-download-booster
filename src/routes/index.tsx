@@ -246,6 +246,59 @@ function Index() {
                         Download {l.quality}
                       </a>
                     ))}
+                    {result.render && render.state === "idle" && (
+                      <button
+                        type="button"
+                        onClick={() => void onRender()}
+                        className="cursor-pointer rounded-lg border-2 border-primary px-4 py-3 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                      >
+                        Download {result.render.label} ({result.render.height}p
+                        · render)
+                      </button>
+                    )}
+
+                    {render.state === "working" && (
+                      <div className="rounded-lg border border-border p-4">
+                        <p className="text-sm font-semibold">
+                          Rendering high quality video...
+                        </p>
+                        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary transition-all"
+                            style={{ width: `${render.progress}%` }}
+                          />
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Video aur audio ko jodne mein 1-3 minute lag sakte
+                          hain. Page khula rakhein.
+                        </p>
+                      </div>
+                    )}
+
+                    {render.state === "done" && render.url && (
+                      <a
+                        href={render.url}
+                        className="cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        Save {result.render?.label ?? "HQ"} file
+                      </a>
+                    )}
+
+                    {render.state === "error" && (
+                      <div className="rounded-lg border border-destructive/40 p-3 text-center">
+                        <p className="text-sm text-destructive">
+                          {render.error}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => void onRender()}
+                          className="mt-2 cursor-pointer text-sm font-semibold text-primary underline"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    )}
+
                     {result.thumbnail && (
                       <a
                         href={dl(result.thumbnail, "jpg", "thumb")}
