@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
+import { startRender, renderStatus } from "@/lib/render.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -32,7 +33,7 @@ const steps = [
   { n: "1", t: "Open Facebook", d: "Find the video or reel you want to save." },
   { n: "2", t: "Copy the link", d: "Use the Share menu and tap Copy link." },
   { n: "3", t: "Paste it here", d: "Drop the link in the box above." },
-  { n: "4", t: "Download", d: "Pick HD or SD and save the file." },
+  { n: "4", t: "Download", d: "Pick SD, HD or 2K/4K render and save it." },
 ];
 
 const faqs = [
@@ -50,20 +51,39 @@ const faqs = [
   },
   {
     q: "Which quality can I get?",
-    a: "HD when Facebook provides it, otherwise SD. Both options are shown after you paste a link.",
+    a: "SD and HD download instantly. When Facebook has a higher resolution, a 2K/4K option appears that is rendered for you in about a minute.",
   },
 ];
 
+type RenderUi = {
+  state: "idle" | "working" | "done" | "error";
+  progress: number;
+  url?: string;
+  error?: string;
+};
+
 function Index() {
   const run = useServerFn(fetchFbVideo);
+  const begin = useServerFn(startRender);
+  const check = useServerFn(renderStatus);
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FbResult | null>(null);
+  const [render, setRender] = useState<RenderUi>({ state: "idle", progress: 0 });
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setResult(null);
+    setRender({ state: "idle", progress: 0 });
+    if (timer.current) clearTimeout(timer.current);
     try {
       const res = await run({ data: { url } });
       setResult(res);
@@ -71,6 +91,58 @@ function Index() {
       setResult({ ok: false, links: [], error: (err as Error).message });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function poll(jobId: string, tries = 0) {
+    try {
+      const s = await check({ data: { jobId } });
+      if (s.status === "finished" && s.url) {
+        setRender({ state: "done", progress: 100, url: s.url });
+        return;
+      }
+      if (s.status === "error") {
+        setRender({
+          state: "error",
+          progress: 0,
+          error: s.error ?? "Render fail ho gaya.",
+        });
+        return;
+      }
+      setRender({ state: "working", progress: Math.max(5, s.progress) });
+      if (tries > 80) {
+        setRender({
+          state: "error",
+          progress: 0,
+          error: "Render mein bahut waqt lag gaya. Dobara koshish karein.",
+        });
+        return;
+      }
+      timer.current = setTimeout(() => void poll(jobId, tries + 1), 3000);
+    } catch (err) {
+      setRender({ state: "error", progress: 0, error: (err as Error).message });
+    }
+  }
+
+  async function onRender() {
+    const r = result?.render;
+    if (!r) return;
+    setRender({ state: "working", progress: 5 });
+    try {
+      const started = await begin({
+        data: { video: r.video, audio: r.audio, label: r.label },
+      });
+      if (!started.ok || !started.jobId) {
+        setRender({
+          state: "error",
+          progress: 0,
+          error: started.error ?? "Render shuru nahi ho saka.",
+        });
+        return;
+      }
+      void poll(started.jobId);
+    } catch (err) {
+      setRender({ state: "error", progress: 0, error: (err as Error).message });
     }
   }
 
@@ -174,6 +246,59 @@ function Index() {
                         Download {l.quality}
                       </a>
                     ))}
+                    {result.render && render.state === "idle" && (
+                      <button
+                        type="button"
+                        onClick={() => void onRender()}
+                        className="cursor-pointer rounded-lg border-2 border-primary px-4 py-3 text-center text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+                      >
+                        Download {result.render.label} ({result.render.height}p
+                        · render)
+                      </button>
+                    )}
+
+                    {render.state === "working" && (
+                      <div className="rounded-lg border border-border p-4">
+                        <p className="text-sm font-semibold">
+                          Rendering high quality video...
+                        </p>
+                        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary transition-all"
+                            style={{ width: `${render.progress}%` }}
+                          />
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Video aur audio ko jodne mein 1-3 minute lag sakte
+                          hain. Page khula rakhein.
+                        </p>
+                      </div>
+                    )}
+
+                    {render.state === "done" && render.url && (
+                      <a
+                        href={render.url}
+                        className="cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        Save {result.render?.label ?? "HQ"} file
+                      </a>
+                    )}
+
+                    {render.state === "error" && (
+                      <div className="rounded-lg border border-destructive/40 p-3 text-center">
+                        <p className="text-sm text-destructive">
+                          {render.error}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => void onRender()}
+                          className="mt-2 cursor-pointer text-sm font-semibold text-primary underline"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    )}
+
                     {result.thumbnail && (
                       <a
                         href={dl(result.thumbnail, "jpg", "thumb")}
