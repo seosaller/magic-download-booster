@@ -91,7 +91,7 @@ function Index() {
           </a>
           <a
             href="#faq"
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Help
           </a>
@@ -123,7 +123,7 @@ function Index() {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-60"
+              className="cursor-pointer rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {loading ? "Please wait..." : "Download"}
             </button>
@@ -169,7 +169,7 @@ function Index() {
                       <a
                         key={l.quality}
                         href={dl(l.url, "mp4", l.quality)}
-                        className="rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                        className="cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
                       >
                         Download {l.quality}
                       </a>
@@ -177,7 +177,7 @@ function Index() {
                     {result.thumbnail && (
                       <a
                         href={dl(result.thumbnail, "jpg", "thumb")}
-                        className="rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold transition-colors hover:bg-accent"
+                        className="cursor-pointer rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold transition-colors hover:bg-accent"
                       >
                         Download Image
                       </a>
