@@ -74,8 +74,11 @@ function parse(html: string): FbResult {
   ]);
   const thumbnail = firstMatch(html, [
     /"preferred_thumbnail":\{"image":\{"uri":"([^"]+)"/,
-    /<meta property="og:image" content="([^"]+)"/,
+    /<meta[^>]+property="og:image"[^>]+content="([^"]+)"/,
+    /<meta[^>]+content="([^"]+)"[^>]+property="og:image"/,
     /"thumbnailUrl":"([^"]+)"/,
+    /"thumbnailImage":\{"uri":"([^"]+)"/,
+    /"image":\{"uri":"([^"]+)"/,
   ]);
   const title =
     firstMatch(html, [
