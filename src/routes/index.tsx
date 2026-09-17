@@ -130,9 +130,15 @@ function Index() {
             <button
               type="submit"
               disabled={loading}
-              className="cursor-pointer rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex min-w-[140px] cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-80"
             >
-              {loading ? "Please wait..." : "Download"}
+              {loading && (
+                <span
+                  aria-hidden="true"
+                  className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground"
+                />
+              )}
+              {loading ? "Processing..." : "Download"}
             </button>
           </form>
           <p className="mt-3 text-xs text-primary-foreground/80">
