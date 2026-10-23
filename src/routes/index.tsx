@@ -2,24 +2,25 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
+import { Mp3Download } from "@/components/mp3-download";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Facebook Video Downloader - Save FB Videos & Reels in HD" },
+      { title: "FB Download Hub - Facebook Videos & MP3 Audio" },
       {
         name: "description",
         content:
-          "Free Facebook video downloader. Paste any public Facebook video or reel link and download it in HD or SD, no signup and no software needed.",
+           "Download public Facebook videos and reels in HD or SD, or convert their audio to MP3. No signup needed.",
       },
       {
         property: "og:title",
-        content: "Facebook Video Downloader - Save FB Videos & Reels in HD",
+        content: "FB Download Hub - Facebook Videos & MP3 Audio",
       },
       {
         property: "og:description",
         content:
-          "Paste a Facebook video or reel URL and download it instantly in HD or SD. Free, fast and works on any device.",
+           "Save public Facebook videos in HD or SD and download their audio as MP3.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -189,6 +190,13 @@ function Index() {
                         {l.size ? ` (${fmtSize(l.size)})` : ""}
                       </a>
                     ))}
+
+                    {result.links[0] && (
+                      <Mp3Download
+                        key={result.links[0].url}
+                        source={dl((result.links.find((l) => l.quality === "SD") ?? result.links[0]).url, "mp4", "audio-source")}
+                      />
+                    )}
 
                     {result.thumbnail && (
                       <a
