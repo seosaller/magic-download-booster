@@ -7,6 +7,24 @@ type Mp3Module = {
   saveMp3: (blob: Blob) => void;
 };
 
+declare global {
+  interface Window { fbMp3?: Mp3Module; }
+}
+
+async function loadAudio(): Promise<Mp3Module> {
+  if (window.fbMp3) return window.fbMp3;
+  await new Promise<void>((resolve, reject) => {
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = '/mp3/bridge.js';
+    script.onload = () => { script.remove(); resolve(); };
+    script.onerror = () => { script.remove(); reject(new Error('Audio engine could not load. Please try again.')); };
+    document.head.appendChild(script);
+  });
+  if (!window.fbMp3) throw new Error('Audio engine could not load. Please try again.');
+  return window.fbMp3;
+}
+
 export function Mp3Download({ source }: { source: string }) {
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
@@ -14,8 +32,7 @@ export function Mp3Download({ source }: { source: string }) {
     setStatus('Preparing...');
     setError('');
     try {
-      const moduleUrl = '/mp3/download.js';
-      const audio = await import(/* @vite-ignore */ moduleUrl) as Mp3Module;
+      const audio = await loadAudio();
       const blob = await audio.createMp3(source, setStatus);
       audio.saveMp3(blob);
     } catch (error) {
