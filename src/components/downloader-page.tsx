@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { startRender, startMp3, renderStatus } from "@/lib/render.functions";
 import { mp3Source } from "@/lib/mp3";
+import { assertLocalVideoSize } from "@/lib/video-merge";
 import { Button } from "@/components/ui/button";
 import { HomeContent } from "@/components/home-content";
 import { ReelsContent } from "@/components/reels-content";
@@ -39,6 +40,14 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
   const [pasteError, setPasteError] = useState("");
   const urlInput = useRef<HTMLInputElement>(null);
   const resultsPanel = useRef<HTMLElement>(null);
+  const localController = useRef<AbortController | null>(null);
+  const localFile = useRef<string | null>(null);
+  function clearLocalVideo() {
+    localController.current?.abort();
+    localController.current = null;
+    if (localFile.current) URL.revokeObjectURL(localFile.current);
+    localFile.current = null;
+  }
 
   useEffect(() => {
     if (loading || !result?.ok) return;
@@ -62,6 +71,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
 
   useEffect(() => {
     return () => {
+      clearLocalVideo();
       if (timer.current) clearTimeout(timer.current);
       if (mp3Timer.current) clearTimeout(mp3Timer.current);
       requestVersion.current += 1;
@@ -70,6 +80,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    clearLocalVideo();
     setLoading(true);
     setResult(null);
     setRender({ state: "idle", progress: 0 });
@@ -127,6 +138,28 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
       timer.current = setTimeout(() => void poll(jobId, tries + 1), 3000);
     } catch (err) {
       setRender({ state: "error", progress: 0, error: "Unable to complete the request. Please check your connection and try again." });
+    }
+  }
+
+  async function onFreeRender() {
+    const source = result?.render;
+    if (!source || render.state === "working") return;
+    clearLocalVideo();
+    const controller = new AbortController();
+    localController.current = controller;
+    const version = requestVersion.current;
+    setRender({ state: "working", progress: 5 });
+    try {
+      assertLocalVideoSize(source.size ?? 0);
+      const { mergeBrowserVideo } = await import("@/lib/browser-video");
+      const output = await mergeBrowserVideo(source.video, source.audio, controller.signal, (progress) => {
+        if (requestVersion.current === version && !controller.signal.aborted) setRender({ state: "working", progress });
+      });
+      if (requestVersion.current !== version || controller.signal.aborted) { URL.revokeObjectURL(output); return; }
+      localFile.current = output;
+      setRender({ state: "done", progress: 100, url: output });
+    } catch (error) {
+      if (requestVersion.current === version && !controller.signal.aborted) setRender({ state: "error", progress: 0, error: error instanceof Error ? error.message : "Free video processing failed. Please try again." });
     }
   }
 
@@ -299,23 +332,25 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                     ))}
 
                     {result.render && render.state === "idle" && (
-                      <button
+                      <Button
                         type="button"
-                        onClick={() => void onRender()}
-                        className="cursor-pointer rounded-lg border-2 border-primary px-4 py-3 text-center text-sm font-semibold text-primary transition active:scale-[0.96] hover:bg-primary hover:text-primary-foreground"
+                        variant="outline"
+                        onClick={() => void onFreeRender()}
+                        className="h-auto whitespace-normal border-primary px-4 py-3 text-primary transition active:scale-[0.96]"
                       >
+                        <Download />
                         Download {result.render.label} ({result.render.height}p
                         {result.render.size
                           ? ` · ~${fmtSize(result.render.size)}`
                           : ""}
-                        · render)
-                      </button>
+                        · free)
+                      </Button>
                     )}
 
                     {render.state === "working" && (
                       <div className="rounded-lg border border-border p-4">
                         <p className="text-sm font-semibold">
-                          Rendering high quality video...
+                          Processing high quality video... {Math.round(render.progress)}%
                         </p>
                         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
                           <div
@@ -324,14 +359,16 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                           />
                         </div>
                         <p className="mt-2 text-xs text-muted-foreground">
-                          Combining video and audio may take 1–3 minutes. Keep this page open.
+                          Combining the original video and audio. Keep this page open. Free processing uses your device; large files may need CloudConvert.
                         </p>
                       </div>
                     )}
 
                     {render.state === "done" && render.url && (
+                      <Button asChild className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96]">
                       <a
-                        href={dl(
+                        download={render.url.startsWith("blob:") ? `fb-video-${result.render?.label ?? "hq"}.mp4` : undefined}
+                        href={render.url.startsWith("blob:") ? render.url : dl(
                           render.url,
                           "mp4",
                           result.render?.label ?? "hq",
@@ -340,6 +377,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                       >
                         Save {result.render?.label ?? "HQ"} file
                       </a>
+                      </Button>
                     )}
 
 
@@ -353,13 +391,15 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                             The HD/SD downloads above are still available.
                           </p>
                         )}
-                        <button
+                        <Button
                           type="button"
-                          onClick={() => void onRender()}
-                          className="mt-2 cursor-pointer text-sm font-semibold text-primary underline"
+                          variant="ghost"
+                          onClick={() => void onFreeRender()}
+                          className="mt-2 text-primary"
                         >
-                          Try again
-                        </button>
+                          Retry free processing
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => void onRender()} className="mt-2 whitespace-normal">Use CloudConvert instead</Button>
                       </div>
                     )}
 
