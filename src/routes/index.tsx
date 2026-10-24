@@ -1,28 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
-import { Mp3Download } from "@/components/mp3-download";
-import { VideoDownload } from '@/components/video-download';
-import { FileDownload } from '@/components/file-download';
+import { startRender, renderStatus } from "@/lib/render.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FB Download Hub - HD, 2K, 4K & MP3" },
+      { title: "Facebook Video Downloader - Save FB Videos & Reels in HD" },
       {
         name: "description",
         content:
-            "Download public Facebook videos and reels in SD, HD, native 2K or 4K when available, and MP3 audio. No signup needed.",
+          "Free Facebook video downloader. Paste any public Facebook video or reel link and download it in HD or SD, no signup and no software needed.",
       },
       {
         property: "og:title",
-         content: "FB Download Hub - HD, 2K, 4K & MP3",
+        content: "Facebook Video Downloader - Save FB Videos & Reels in HD",
       },
       {
         property: "og:description",
         content:
-            "Save public Facebook videos in SD, HD, available native 2K or 4K, and MP3 audio.",
+          "Paste a Facebook video or reel URL and download it instantly in HD or SD. Free, fast and works on any device.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -35,7 +33,7 @@ const steps = [
   { n: "1", t: "Open Facebook", d: "Find the video or reel you want to save." },
   { n: "2", t: "Copy the link", d: "Use the Share menu and tap Copy link." },
   { n: "3", t: "Paste it here", d: "Drop the link in the box above." },
-  { n: "4", t: "Download", d: "Pick SD or HD and save it to your device." },
+  { n: "4", t: "Download", d: "Pick SD, HD or 2K/4K render and save it." },
 ];
 
 const faqs = [
@@ -53,9 +51,17 @@ const faqs = [
   },
   {
     q: "Which quality can I get?",
-    a: "SD, HD, and native 2K or 4K when Facebook provides them, plus MP3 audio.",
+    a: "SD and HD download instantly. When Facebook has a higher resolution, a 2K/4K option appears that is rendered for you in about a minute.",
   },
 ];
+
+type RenderUi = {
+  state: "idle" | "working" | "done" | "error";
+  progress: number;
+  url?: string;
+  error?: string;
+  needKey?: boolean;
+};
 
 function fmtSize(bytes?: number) {
   if (!bytes || bytes <= 0) return "";
@@ -66,14 +72,33 @@ function fmtSize(bytes?: number) {
 
 function Index() {
   const run = useServerFn(fetchFbVideo);
+  const begin = useServerFn(startRender);
+  const check = useServerFn(renderStatus);
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FbResult | null>(null);
+  const [render, setRender] = useState<RenderUi>({ state: "idle", progress: 0 });
+  const [apiKey, setApiKey] = useState("");
+  const [keyOpen, setKeyOpen] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("cc_api_key");
+    if (saved) setApiKey(saved);
+  }, []);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setResult(null);
+    setRender({ state: "idle", progress: 0 });
+    if (timer.current) clearTimeout(timer.current);
     try {
       const res = await run({ data: { url } });
       setResult(res);
@@ -84,10 +109,68 @@ function Index() {
     }
   }
 
+  async function poll(jobId: string, tries = 0) {
+    try {
+      const s = await check({ data: { jobId, apiKey } });
+      if (s.status === "finished" && s.url) {
+        setRender({ state: "done", progress: 100, url: s.url });
+        return;
+      }
+      if (s.status === "error") {
+        setRender({
+          state: "error",
+          progress: 0,
+          error: s.error ?? "Render fail ho gaya.",
+          needKey: s.code === "credits",
+        });
+        if (s.code === "credits") setKeyOpen(true);
+        return;
+      }
+      setRender({ state: "working", progress: Math.max(5, s.progress) });
+      if (tries > 80) {
+        setRender({
+          state: "error",
+          progress: 0,
+          error: "Render mein bahut waqt lag gaya. Dobara koshish karein.",
+        });
+        return;
+      }
+      timer.current = setTimeout(() => void poll(jobId, tries + 1), 3000);
+    } catch (err) {
+      setRender({ state: "error", progress: 0, error: (err as Error).message });
+    }
+  }
+
+  async function onRender() {
+    const r = result?.render;
+    if (!r) return;
+    setRender({ state: "working", progress: 5 });
+    try {
+      const started = await begin({
+        data: { video: r.video, audio: r.audio, label: r.label, apiKey },
+      });
+      if (!started.ok || !started.jobId) {
+        setRender({
+          state: "error",
+          progress: 0,
+          error: started.error ?? "Render shuru nahi ho saka.",
+          needKey: started.code === "credits" || started.code === "config",
+        });
+        if (started.code === "credits" || started.code === "config")
+          setKeyOpen(true);
+        return;
+      }
+      void poll(started.jobId);
+    } catch (err) {
+      setRender({ state: "error", progress: 0, error: (err as Error).message });
+    }
+  }
+
   const dl = (link: string, type: "mp4" | "jpg", quality: string) =>
     `/api/public/download?type=${type}&name=${encodeURIComponent(
       "fb-video-" + quality.toLowerCase().replace(/[^a-z0-9]/g, ""),
     )}&url=${encodeURIComponent(link)}`;
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,15 +216,9 @@ function Index() {
             <button
               type="submit"
               disabled={loading}
-              className="flex min-w-[140px] cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-80"
+              className="cursor-pointer rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {loading && (
-                <span
-                  aria-hidden="true"
-                  className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground"
-                />
-              )}
-              {loading ? "Processing..." : "Download"}
+              {loading ? "Please wait..." : "Download"}
             </button>
           </form>
           <p className="mt-3 text-xs text-primary-foreground/80">
@@ -181,21 +258,132 @@ function Index() {
                     {result.title}
                   </h2>
                   <div className="flex flex-col gap-2">
-                    {result.links.map((l) => l.audioUrl ? (
-                      <VideoDownload key={l.quality} quality={l.quality} video={dl(l.url, 'mp4', l.quality)} audio={dl(l.audioUrl, 'mp4', 'audio-source')} />
-                    ) : (
-                      <FileDownload key={l.quality} source={dl(l.url, 'mp4', l.quality)} filename={`fb-video-${l.quality.toLowerCase()}.mp4`} kind="mp4" label={`Download ${l.quality}${l.size ? ` (${fmtSize(l.size)})` : ''}`} />
+                    {result.links.map((l) => (
+                      <a
+                        key={l.quality}
+                        href={dl(l.url, "mp4", l.quality)}
+                        download
+                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
+                      >
+                        Download {l.quality}
+                        {l.size ? ` (${fmtSize(l.size)})` : ""}
+                      </a>
                     ))}
 
-                    {result.links[0] && (
-                      <Mp3Download
-                        key={result.links[0].url}
-                         source={(result.audioSources?.length ? result.audioSources : [ (result.links.find((l) => l.quality === 'SD') ?? result.links[0]).url ]).map(source => dl(source, 'mp4', 'audio-source')).join('|')}
-                      />
+                    {result.render && render.state === "idle" && (
+                      <button
+                        type="button"
+                        onClick={() => void onRender()}
+                        className="cursor-pointer rounded-lg border-2 border-primary px-4 py-3 text-center text-sm font-semibold text-primary transition active:scale-[0.96] hover:bg-primary hover:text-primary-foreground"
+                      >
+                        Download {result.render.label} ({result.render.height}p
+                        {result.render.size
+                          ? ` · ~${fmtSize(result.render.size)}`
+                          : ""}
+                        · render)
+                      </button>
+                    )}
+
+                    {render.state === "working" && (
+                      <div className="rounded-lg border border-border p-4">
+                        <p className="text-sm font-semibold">
+                          Rendering high quality video...
+                        </p>
+                        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary transition-all"
+                            style={{ width: `${render.progress}%` }}
+                          />
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                          Video aur audio ko jodne mein 1-3 minute lag sakte
+                          hain. Page khula rakhein.
+                        </p>
+                      </div>
+                    )}
+
+                    {render.state === "done" && render.url && (
+                      <a
+                        href={dl(
+                          render.url,
+                          "mp4",
+                          result.render?.label ?? "hq",
+                        )}
+                        download
+                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
+                      >
+                        Save {result.render?.label ?? "HQ"} file
+                      </a>
+                    )}
+
+
+                    {render.state === "error" && (
+                      <div className="rounded-lg border border-destructive/40 p-3 text-center">
+                        <p className="text-sm text-destructive">
+                          {render.error}
+                        </p>
+                        {render.needKey && (
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            Upar wale HD/SD downloads phir bhi kaam karte hain.
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => void onRender()}
+                          className="mt-2 cursor-pointer text-sm font-semibold text-primary underline"
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    )}
+
+                    {(keyOpen || apiKey) && result.render && (
+                      <div className="rounded-lg border border-border p-3 text-left">
+                        <p className="text-sm font-semibold">
+                          Apni free render key (CloudConvert)
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Free account roz 25 render deta hai. Key{" "}
+                          <a
+                            href="https://cloudconvert.com/dashboard/api/v2/keys"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="cursor-pointer font-medium text-primary underline"
+                          >
+                            yahan se lein
+                          </a>{" "}
+                          aur neeche paste karein — ye sirf aapke browser mein
+                          save hoti hai.
+                        </p>
+                        <div className="mt-2 flex gap-2">
+                          <input
+                            type="password"
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            placeholder="API key paste karein"
+                            className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              localStorage.setItem("cc_api_key", apiKey.trim());
+                              setRender({ state: "idle", progress: 0 });
+                            }}
+                            className="cursor-pointer rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </div>
                     )}
 
                     {result.thumbnail && (
-                      <FileDownload source={dl(result.thumbnail, 'jpg', 'thumb')} filename="fb-video-thumb.jpg" kind="jpg" label="Download Image" />
+                      <a
+                        href={dl(result.thumbnail, "jpg", "thumb")}
+                        className="cursor-pointer rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold transition active:scale-[0.96] active:brightness-95 hover:bg-accent"
+                      >
+                        Download Image
+                      </a>
                     )}
                   </div>
                 </div>

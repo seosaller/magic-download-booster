@@ -1,11 +1,7 @@
 
-- [x] Add true MP3 conversion and device download to the website.
-- [x] Add MP3 to the PHP script and deliver an updated ZIP.
-- [x] Verify MP3 output and preserve SD/HD downloads.
-- [x] Add available native 2K/4K and MP3 to the uploaded PHP script without other changes.
-- [x] Verify format selection, real Facebook MP3, fixture 2K/4K mux and revised PHP ZIP.
-- [x] PHP hosting verification cancelled when the user left the PHP script.
-- [x] Add native 2K/4K and MP3 audio-source fallback to the current Lovable website without changing the design.
-- [x] Test quality availability, real Facebook MP3, fallback MP3 and fixture-based native 2K/4K browser downloads with audio.
-- [x] Preserve signed media URLs, inspect all page variants for native qualities, and block empty/invalid device downloads; real HD/SD and fallback MP3 tests pass.
-- [ ] Verify Edinburgh screenshot video 2K/4K and reported empty files (requires that video's Facebook link).
+- [x] Downloads direct device par (no in-page progress buffering)
+- [ ] Render fail fix (CloudConvert merge input path)
+- [ ] Render fail hone par saaf fallback message + credits khatam hone ka guidance
+
+- [x] Render merge path fix (/input/{task}/file, /output/)
+- [x] Credits-exceeded fallback message + user apna CloudConvert key add kar sakta hai (localStorage)
