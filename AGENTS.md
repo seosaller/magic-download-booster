@@ -17,3 +17,4 @@
 - Home-page informational content is isolated in HomeContent so copy and presentation changes do not modify the downloader's processing or conversion states.
 - Video and Reels content routes use the shared DownloaderPage with page-specific copy and supporting content, so downloads and conversion behavior stay consistent without duplicated processing logic.
 - Completed conversion downloads use the shared success Button variant and semantic success tokens so ready states remain consistent across themes and pages.
+- Native 1080p is selected independently from the highest-resolution stream and processed in a separate FullHdDownload control so the third quality option remains available without replacing higher qualities.

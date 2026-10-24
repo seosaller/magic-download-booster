@@ -7,6 +7,7 @@ import { assertLocalVideoSize } from "@/lib/video-merge";
 import { Button } from "@/components/ui/button";
 import { HomeContent } from "@/components/home-content";
 import { ReelsContent } from "@/components/reels-content";
+import { FullHdDownload } from "@/components/full-hd-download";
 import { Download, Music, LoaderCircle, Clipboard, X } from "lucide-react";
 
 type RenderUi = {
@@ -332,7 +333,9 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                       </div>
                     ))}
 
-                    {result.render && render.state === "idle" && (
+                    <FullHdDownload key={result.fullHd?.video ?? "unavailable"} source={result.fullHd} />
+
+                    {result.render && result.render.height !== 1080 && render.state === "idle" && (
                       <Button
                         type="button"
                         variant="outline"
