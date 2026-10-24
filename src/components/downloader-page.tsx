@@ -13,7 +13,7 @@ type RenderUi = {
   state: "idle" | "working" | "done" | "error";
   progress: number;
   url?: string;
-  size?: number;
+  size?: number | undefined;
   error?: string;
   needKey?: boolean;
 };
