@@ -10,9 +10,10 @@ export function mediaUrl(value: unknown): string | undefined {
     const url = new URL(value.replace(/&amp;/g, '&'));
     if (url.protocol === 'https:' && /(^|\.)(fbcdn\.net|facebook\.com|fbsbx\.com)$/i.test(url.hostname)) return url.href;
   } catch { /* Invalid media URL. */ }
+  return undefined;
 }
 
-export function nativeFormats(html: string): { links: NativeVideo[]; audio?: string } {
+export function nativeFormats(html: string): { links: NativeVideo[]; audio: string | undefined } {
   const videos: Stream[] = [];
   const audios: Stream[] = [];
   const seen = new Set<string>();
