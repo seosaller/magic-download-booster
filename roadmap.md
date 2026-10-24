@@ -7,3 +7,6 @@
 - [x] Credits-exceeded fallback message + user apna CloudConvert key add kar sakta hai (localStorage)
 - [x] Add fourth MP3 option with real audio conversion and direct device download
 - [x] Test MP3 conversion, fallback errors and direct download (real 21-second MP3 verified)
+- [ ] Translate all visible errors and messages to English
+- [ ] Add About, Privacy, Terms and Help pages with shared navigation
+- [ ] Verify page navigation and English error messages
