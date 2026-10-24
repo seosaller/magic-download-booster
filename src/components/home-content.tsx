@@ -1,11 +1,11 @@
-import { ArrowUp, Video, Clapperboard, Gem, Rocket, FileVideo, Smartphone, CircleDollarSign, MousePointerClick, MonitorSmartphone, Globe, Zap, ShieldCheck, Link as LinkIcon, Clipboard, Download, CircleHelp, ChevronDown, Check } from "lucide-react";
+import { ArrowUp, Video, Clapperboard, Gem, Rocket, FileVideo, Smartphone, ShieldCheck, Download, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const steps = [
-  { icon: Video, title: "Open Facebook", text: "Open Facebook and find the video or Reel you want to download." },
-  { icon: LinkIcon, title: "Copy the link", text: "Tap Share and copy the video link." },
-  { icon: Clipboard, title: "Paste it here", text: "Paste the link into our Facebook Video Downloader." },
-  { icon: Download, title: "Choose & download", text: "Choose the available video quality and download your video." },
+  { emoji: "📹", title: "Open Facebook", text: "Open Facebook and find the video or Reel you want to download." },
+  { emoji: "🔗", title: "Copy the link", text: "Tap Share and copy the video link." },
+  { emoji: "📋", title: "Paste it here", text: "Paste the link into our Facebook Video Downloader." },
+  { emoji: "📥", title: "Choose & download", text: "Choose the available video quality and download your video." },
 ];
 const tools = [
   { icon: Video, title: "Facebook Video Downloader", text: "Save public videos using a Facebook link.", tone: "bg-primary/10 text-primary" },
@@ -16,12 +16,10 @@ const tools = [
   { icon: Smartphone, title: "Online Video Downloader", text: "Download in your browser. No app required.", tone: "bg-chart-2/10 text-chart-2" },
 ];
 const benefits = [
-  { icon: CircleDollarSign, title: "Free to use", text: "Download supported videos without a paid subscription." },
-  { icon: MousePointerClick, title: "Easy to use", text: "Copy, paste, and download in a few simple steps." },
-  { icon: Gem, title: "HD to 4K options", text: "Choose from the available video qualities." },
-  { icon: MonitorSmartphone, title: "Works on mobile and PC", text: "Use the tool on phones, tablets, and computers." },
-  { icon: Globe, title: "No app required", text: "Open the downloader in your web browser." },
-  { icon: Zap, title: "Fast process", text: "Get your download link without unnecessary steps." },
+  { emoji: "🔓", title: "No Sign-Up Needed", text: "Paste a link and get your file. No account, no email, no app install." },
+  { emoji: "🎞️", title: "HD & SD Options", text: "Download in the same High Definition or Standard Definition stream Facebook serves the video in." },
+  { emoji: "📱", title: "Works On Any Device", text: "Runs in the browser on Android, iPhone, Windows, and Mac — nothing to install." },
+  { emoji: "♾️", title: "100% Free, No Limits", text: "Save as many public videos and reels as you want, at no cost." },
 ];
 const faqs = [
   { q: "How can I download Facebook Reels?", a: "Open the Reel on Facebook, copy its link, and paste it into our Facebook Reels Downloader. Select an available quality and download the video." },
@@ -40,7 +38,7 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
       <h3 className="mt-10 text-center text-lg font-semibold">How to Download Facebook Videos</h3>
       <ol className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {steps.map((step, i) => <li key={step.title} className="relative border-t-2 border-primary/20 pt-6">
-          <div className="flex items-center justify-between"><step.icon aria-hidden="true" className="size-6 text-primary" /><span className="text-sm font-semibold text-muted-foreground">0{i + 1}</span></div>
+          <div className="flex items-center justify-between"><span aria-hidden="true" className="grid size-10 place-items-center text-3xl">{step.emoji}</span><span className="text-sm font-semibold text-muted-foreground">0{i + 1}</span></div>
           <h4 className="mt-4 text-base font-semibold">{step.title}</h4><p className="mt-2 text-sm leading-6 text-muted-foreground">{step.text}</p>
         </li>)}
       </ol>
@@ -54,9 +52,9 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
     <section className="py-12 sm:py-16" aria-labelledby="tools-title">
       <h2 id="tools-title" className="text-2xl font-bold">Our Download Tools</h2>
       <div className="mt-7 grid gap-4 sm:grid-cols-2">
-        {tools.map(tool => <article key={tool.title} className="group relative overflow-hidden rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5 sm:p-6">
+        {tools.map((tool, i) => <article key={tool.title} className="group relative overflow-hidden rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5 sm:p-6">
           <div className="flex items-center justify-between gap-4">
-            <div className={`grid size-10 shrink-0 place-items-center rounded-lg ${tool.tone}`}><tool.icon aria-hidden="true" className="size-5" /></div>
+            <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center text-3xl">{["📹", "🎬", "💎", "🚀", "🎵", "📱"][i]}</span>
             <Download aria-hidden="true" className="size-4 text-muted-foreground/40 transition-colors group-hover:text-primary" />
           </div>
           <h3 className="mt-4 text-base font-semibold leading-6">{tool.title}</h3><p className="mt-1.5 text-sm leading-6 text-muted-foreground">{tool.text}</p>
@@ -64,14 +62,15 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
       </div>
     </section>
 
-    <section className="border-y border-border py-12" aria-labelledby="benefits-title">
-      <h2 id="benefits-title" className="text-2xl font-bold">Why Use Our Facebook Downloader?</h2>
-      <div className="mt-8 grid gap-x-8 gap-y-7 sm:grid-cols-2 lg:grid-cols-3">{benefits.map(item => <div key={item.title} className="flex gap-3"><item.icon aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" /><div><h3 className="text-sm font-semibold">{item.title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{item.text}</p></div></div>)}</div>
-      <p className="mt-7 flex items-start gap-2 text-xs leading-5 text-muted-foreground"><Check aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-chart-2" />MP3 and high-quality conversions depend on CloudConvert availability and conversion credits.</p>
+    <section className="relative py-12 text-center before:absolute before:inset-y-0 before:left-1/2 before:-z-10 before:w-screen before:-translate-x-1/2 before:bg-muted/50 isolate" aria-labelledby="benefits-title">
+      <h2 id="benefits-title" className="text-2xl font-bold">Why people use FB Download Hub</h2>
+      <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">A straightforward tool built around three things: speed, video quality, and not asking for anything you don't need to give.</p>
+      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{benefits.map(item => <article key={item.title} className="rounded-lg border border-border bg-card px-5 py-7"><span aria-hidden="true" className="mx-auto grid size-10 place-items-center text-3xl">{item.emoji}</span><h3 className="mt-4 text-base font-semibold">{item.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p></article>)}</div>
+      <p className="mt-6 text-xs leading-5 text-muted-foreground">MP3 and high-quality conversions depend on CloudConvert availability and conversion credits.</p>
     </section>
 
     <section className="mx-auto max-w-3xl py-12 sm:py-16" aria-labelledby="faq">
-      <div className="flex items-center gap-3"><CircleHelp aria-hidden="true" className="size-7 shrink-0 text-primary" /><h2 id="faq" className="text-2xl font-bold">Frequently Asked Questions</h2></div>
+      <div className="flex items-center gap-3"><span aria-hidden="true" className="grid size-9 shrink-0 place-items-center text-3xl">💬</span><h2 id="faq" className="text-2xl font-bold">Frequently Asked Questions</h2></div>
       <div className="mt-6 divide-y divide-border border-y border-border">{faqs.map(f => <details key={f.q} className="group py-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold [&::-webkit-details-marker]:hidden">{f.q}<ChevronDown aria-hidden="true" className="size-5 shrink-0 text-primary transition-transform group-open:rotate-180 motion-reduce:transition-none" /></summary><p className="mt-3 pr-6 text-sm leading-7 text-muted-foreground">{f.a}</p></details>)}</div>
     </section>
 
