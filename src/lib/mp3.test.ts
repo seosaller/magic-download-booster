@@ -1,3 +1,4 @@
+/// <reference types="bun" />
 import { describe, expect, test } from "bun:test";
 import { isFacebookMediaUrl, mp3Job, mp3Source } from "./mp3";
 
