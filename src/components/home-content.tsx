@@ -53,18 +53,18 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
       ].map(q => <div key={q.label} className={`flex min-w-0 flex-col items-center rounded-lg border px-3 py-4 text-center lg:w-28 ${q.tone}`}><span aria-hidden="true" className="grid size-9 place-items-center text-3xl">{q.emoji}</span><span className="mt-2 text-2xl font-bold">{q.label}</span><span className="mt-1 text-xs leading-5 text-muted-foreground">{q.description}</span></div>)}</div>
     </section>
 
-    <section className="grid gap-7 py-10 sm:grid-cols-[auto_minmax(0,1fr)]" aria-labelledby="mp3-title">
-      <div aria-hidden="true" className="flex items-center gap-3 sm:flex-col"><span className="grid size-16 place-items-center rounded-lg bg-chart-2/10 text-4xl">🎵</span><span className="text-lg font-bold text-chart-2">MP3</span></div>
-      <div><h2 id="mp3-title" className="text-xl font-bold sm:text-2xl">Facebook Video & Reels to MP3</h2>
-        <p className="mt-3 text-sm leading-7 text-muted-foreground">Save the original sound from a public Facebook video or Reel as an MP3 file. Speech, music, or both stay together exactly as they are in the source—without downloading the full video.</p>
-        <div className="mt-5 grid gap-4 sm:grid-cols-3">{[
-          { emoji: "🎙️", title: "Speech & voice", text: "Keep the original spoken audio." },
-          { emoji: "🎶", title: "Music & sound", text: "Save the music available in the source." },
-          { emoji: "📥", title: "Save to your device", text: "Get a genuine, playable MP3 file." },
-        ].map(item => <div key={item.title} className="flex items-start gap-2"><span aria-hidden="true" className="text-xl">{item.emoji}</span><div><h3 className="text-sm font-semibold">{item.title}</h3><p className="mt-1 text-xs leading-5 text-muted-foreground">{item.text}</p></div></div>)}</div>
-        <p className="mt-5 text-sm leading-7 text-muted-foreground">Paste your link above, press Download, then choose Download MP3. Keep the page open while the sound is converted, and save the file when it is ready.</p>
-        <p className="mt-2 text-xs leading-6 text-muted-foreground">MP3 conversion uses CloudConvert and depends on available credits. It does not separate speech from music or add sound to a silent video.</p>
+    <section className="py-10" aria-labelledby="mp3-title">
+      <div className="mx-auto max-w-2xl text-center">
+        <div className="flex items-center justify-center gap-3"><span aria-hidden="true" className="grid size-12 place-items-center rounded-lg bg-chart-2/10 text-3xl">🎶</span><span className="text-sm font-semibold text-chart-2">MP3 · 320 kbps</span></div>
+        <h2 id="mp3-title" className="mt-4 text-xl font-bold sm:text-2xl">Facebook Video & Reels to MP3</h2>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">Save the original speech and music together as a playable 320 kbps MP3.</p>
       </div>
+      <ol className="mt-7 grid gap-4 sm:grid-cols-3">{[
+        { emoji: "🔗", title: "Paste your link", text: "Copy a public video or Reel link and press Download.", tone: "bg-primary/5" },
+        { emoji: "🎧", title: "Choose MP3", text: "Select Download MP3 · 320 kbps and wait for conversion.", tone: "bg-chart-2/5" },
+        { emoji: "📥", title: "Save your audio", text: "Download the finished MP3 straight to your device.", tone: "bg-chart-1/5" },
+      ].map((item, i) => <li key={item.title} className={`rounded-lg p-5 ${item.tone}`}><div className="flex items-center justify-between"><span aria-hidden="true" className="text-3xl">{item.emoji}</span><span className="text-xs font-semibold text-muted-foreground">0{i + 1}</span></div><h3 className="mt-3 text-base font-semibold">{item.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p></li>)}</ol>
+      <div className="mx-auto mt-5 flex max-w-2xl items-start justify-center gap-2 text-xs leading-5 text-muted-foreground"><ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-chart-2" /><p>Conversion requires available CloudConvert credits. Original audio only—no sound separation or audio added to silent videos.</p></div>
     </section>
 
     <section className="py-12 sm:py-16" aria-labelledby="tools-title">
