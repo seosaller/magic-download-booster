@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { isFacebookMediaUrl, mp3Job } from "./mp3";
 
 export type RenderStart = {
   ok: boolean;
@@ -16,17 +17,35 @@ export type RenderStatus = {
 
 const API = "https://api.cloudconvert.com/v2";
 
+export const startMp3 = createServerFn({ method: "POST" })
+  .inputValidator((input: { source: string; apiKey?: string }) => {
+    const source = String(input?.source ?? "");
+    if (!isFacebookMediaUrl(source)) throw new Error("Invalid audio source.");
+    return { source, apiKey: String(input?.apiKey ?? "").trim().slice(0, 600) };
+  })
+  .handler(async ({ data }): Promise<RenderStart> => {
+    const key = data.apiKey || process.env["CLOUDCONVERT_API_KEY"];
+    if (!key) return { ok: false, code: "config", error: "MP3 conversion ke liye CloudConvert key add karein. HD/SD downloads available hain." };
+    try {
+      const response = await fetch(`${API}/jobs`, {
+        method: "POST",
+        headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+        body: JSON.stringify(mp3Job(data.source)),
+      });
+      const json = await response.json() as { data?: { id?: string }; code?: string; message?: string };
+      if (!response.ok || !json.data?.id) {
+        const credits = json.code === "CREDITS_EXCEEDED" || /credit/i.test(json.message ?? "");
+        const config = response.status === 401 || response.status === 403;
+        return { ok: false, code: credits ? "credits" : config ? "config" : "other", error: credits ? "MP3 conversion credits khatam hain. Apni CloudConvert key add karein ya credits renew hone par retry karein. HD/SD ab bhi available hain." : config ? "CloudConvert key valid nahi hai ya conversion ki permission nahi hai. Apni key check karein." : "MP3 conversion shuru nahi hui. Thodi der baad retry karein; HD/SD available hain." };
+      }
+      return { ok: true, jobId: json.data.id };
+    } catch {
+      return { ok: false, code: "other", error: "MP3 service se connection nahi hua. Dobara koshish karein." };
+    }
+  });
+
 function isAllowed(u: string) {
-  try {
-    const h = new URL(u).hostname;
-    return (
-      h.endsWith("fbcdn.net") ||
-      h.endsWith("facebook.com") ||
-      h.endsWith("fbsbx.com")
-    );
-  } catch {
-    return false;
-  }
+  return isFacebookMediaUrl(u);
 }
 
 export const startRender = createServerFn({ method: "POST" })

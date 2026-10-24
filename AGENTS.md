@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- MP3 jobs use CloudConvert's native conversion task with the original audio stream or playable video as fallback, never an extension rename, so speech and music remain together.
+- Audio and high-quality video conversions keep independent UI states and share the existing job status endpoint, so neither blocks direct video downloads.
