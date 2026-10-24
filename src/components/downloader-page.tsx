@@ -365,7 +365,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                     )}
 
                     {render.state === "done" && render.url && (
-                      <Button asChild className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96]">
+                      <Button asChild variant="success" className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96]">
                       <a
                         download={render.url.startsWith("blob:") ? `fb-video-${result.render?.label ?? "hq"}.mp4` : undefined}
                         href={render.url.startsWith("blob:") ? render.url : dl(
@@ -373,7 +373,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                           "mp4",
                           result.render?.label ?? "hq",
                         )}
-                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
+                        className="w-full cursor-pointer rounded-lg px-4 py-3 text-center text-sm font-semibold transition active:scale-[0.96] active:brightness-90"
                       >
                         Save {result.render?.label ?? "HQ"} file
                       </a>
@@ -404,7 +404,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                     )}
 
                     {mp3.state === "done" && mp3.url ? (
-                      <Button asChild className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96] active:brightness-90">
+                      <Button asChild variant="success" className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96] active:brightness-90">
                         <a href={dl(mp3.url, "mp3", `audio-${mp3Bitrate}kbps`)}><Download />Download MP3 · {mp3Bitrate} kbps</a>
                       </Button>
                     ) : (
