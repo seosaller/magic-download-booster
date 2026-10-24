@@ -13,13 +13,28 @@ export function isFacebookMediaUrl(value: string): boolean {
   }
 }
 
-export function mp3Job(source: string) {
+export const mp3Qualities = [
+  { bitrate: 128, label: "Standard" },
+  { bitrate: 192, label: "High" },
+  { bitrate: 320, label: "Best" },
+] as const;
+export type Mp3Bitrate = (typeof mp3Qualities)[number]["bitrate"];
+export function parseMp3Bitrate(value: unknown): Mp3Bitrate {
+  if (value === undefined) return 320;
+  if (value === 128 || value === 192 || value === 320) return value;
+  throw new Error("Choose a supported MP3 bitrate: 128, 192 or 320 kbps.");
+}
+
+export function mp3Job(source: string, bitrate: Mp3Bitrate = 320) {
   return {
     tasks: {
       "in-audio": { operation: "import/url", url: source, filename: "source.mp4" },
       "convert-audio": {
         operation: "convert", input: "in-audio", output_format: "mp3",
         filename: "fb-audio.mp3",
+        engine: "ffmpeg",
+        audio_codec: "mp3",
+        audio_bitrate: bitrate,
       },
       export: { operation: "export/url", input: "convert-audio", inline: false },
     },

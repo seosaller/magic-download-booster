@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { isFacebookMediaUrl, mp3Job } from "./mp3";
+import { isFacebookMediaUrl, mp3Job, parseMp3Bitrate } from "./mp3";
 
 export type RenderStart = {
   ok: boolean;
@@ -18,10 +18,10 @@ export type RenderStatus = {
 const API = "https://api.cloudconvert.com/v2";
 
 export const startMp3 = createServerFn({ method: "POST" })
-  .inputValidator((input: { source: string; apiKey?: string }) => {
+  .inputValidator((input: { source: string; apiKey?: string; bitrate?: number }) => {
     const source = String(input?.source ?? "");
     if (!isFacebookMediaUrl(source)) throw new Error("Invalid audio source.");
-    return { source, apiKey: String(input?.apiKey ?? "").trim().slice(0, 600) };
+    return { source, apiKey: String(input?.apiKey ?? "").trim().slice(0, 600), bitrate: parseMp3Bitrate(input?.bitrate) };
   })
   .handler(async ({ data }): Promise<RenderStart> => {
     const key = data.apiKey || process.env["CLOUDCONVERT_API_KEY"];
@@ -30,7 +30,7 @@ export const startMp3 = createServerFn({ method: "POST" })
       const response = await fetch(`${API}/jobs`, {
         method: "POST",
         headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-        body: JSON.stringify(mp3Job(data.source)),
+        body: JSON.stringify(mp3Job(data.source, data.bitrate)),
       });
       const json = await response.json() as { data?: { id?: string }; code?: string; message?: string };
       if (!response.ok || !json.data?.id) {
