@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { HomeContent } from "@/components/home-content";
 import { ReelsContent } from "@/components/reels-content";
 import { FullHdDownload } from "@/components/full-hd-download";
+import { fullHdFallback } from "@/lib/full-hd-fallback";
 import { Download, Music, LoaderCircle, Clipboard, X } from "lucide-react";
 
 type RenderUi = {
@@ -333,7 +334,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                       </div>
                     ))}
 
-                    <FullHdDownload key={result.fullHd?.video ?? "unavailable"} source={result.fullHd} />
+                    <FullHdDownload key={result.fullHd?.video ?? "unavailable"} source={result.fullHd} fallback={fullHdFallback(result.fullHd, result.links)} />
 
                     {result.render && result.render.height !== 1080 && render.state === "idle" && (
                       <Button
