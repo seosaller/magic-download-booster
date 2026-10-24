@@ -44,7 +44,8 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
     const frame = requestAnimationFrame(() => {
       const panel = resultsPanel.current;
       if (!panel) return;
-      const distance = Math.min(64, Math.max(0, panel.getBoundingClientRect().top - 24));
+      const scrollLimit = window.matchMedia("(max-width: 1023px)").matches ? 128 : 64;
+      const distance = Math.min(scrollLimit, Math.max(0, panel.getBoundingClientRect().top - 24));
       window.scrollTo({ top: window.scrollY + distance, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     });
     return () => cancelAnimationFrame(frame);
