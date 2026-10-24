@@ -87,6 +87,18 @@ function Index() {
   const [keyOpen, setKeyOpen] = useState(false);
   const [pasteError, setPasteError] = useState("");
   const urlInput = useRef<HTMLInputElement>(null);
+  const resultsPanel = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (loading || !result?.ok) return;
+    const frame = requestAnimationFrame(() => {
+      const panel = resultsPanel.current;
+      if (!panel) return;
+      const top = window.scrollY + panel.getBoundingClientRect().top - 24;
+      window.scrollTo({ top: Math.max(0, top), behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [loading, result, render.state === "done", mp3.state === "done"]);
 
   useEffect(() => {
     const saved = localStorage.getItem("cc_api_key");
@@ -310,7 +322,7 @@ function Index() {
 
       <main className="container mx-auto px-4">
         {(loading || result) && (
-          <section className="mx-auto -mt-8 max-w-3xl rounded-xl bg-card p-5 shadow-card">
+          <section ref={resultsPanel} className="mx-auto -mt-8 max-w-3xl rounded-xl bg-card p-5 shadow-card">
             {loading && (
               <p className="py-6 text-center text-sm text-muted-foreground">
                 Fetching your video...
