@@ -11,7 +11,7 @@
 
 - MP3 jobs use CloudConvert's native conversion task with the original audio stream or playable video as fallback, never an extension rename, so speech and music remain together.
 - High-quality video defaults to lazy-loaded, single-thread browser FFmpeg stream copying with bounded media size and cancellable workers; CloudConvert is an explicit fallback, keeping native resolution and sound without requiring conversion credits for local processing.
-- Keep processing WASM binaries in public/wasm and load their URLs only from browser event-driven code; source imports would include the binary in the server bundle and break deployment.
+- Keep processing WASM asset pointers in public/wasm, externalize large binaries with lovable-assets, and load pointer URLs only from browser event-driven code; binary source imports break deployment and large repository files exceed commit limits.
 - MP3 and video processing keep independent UI states; CloudConvert jobs share the existing status endpoint, while local video outputs use revocable blob URLs so neither blocks direct video downloads.
 - Shared header and footer are mounted around the root Outlet; information pages are separate content routes with their own metadata and use the shared InfoPage layout to keep navigation and typography consistent.
 - Home-page informational content is isolated in HomeContent so copy and presentation changes do not modify the downloader's processing or conversion states.

@@ -1,4 +1,5 @@
 import coreURL from "../../node_modules/@ffmpeg/core/dist/esm/ffmpeg-core.js?url";
+import wasmAsset from "../../public/wasm/ffmpeg-core.wasm.asset.json";
 import classWorkerURL from "./video-worker?worker&url";
 import { assertLocalVideoSize, videoMergeArgs } from "./video-merge";
 
@@ -35,7 +36,7 @@ export async function mergeBrowserVideo(video: string, audio: string, signal: Ab
   try {
     if (signal.aborted) throw new Error("Video processing cancelled.");
     progress(5);
-    await ffmpeg.load({ coreURL, wasmURL: "/wasm/ffmpeg-core.wasm", classWorkerURL });
+    await ffmpeg.load({ coreURL, wasmURL: wasmAsset.url, classWorkerURL });
     progress(20);
     await ffmpeg.writeFile("video.mp4", await readMedia(video));
     progress(45);
