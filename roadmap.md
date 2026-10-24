@@ -10,5 +10,5 @@
 - [x] Translate all visible errors and messages to English
 - [x] Add About, Privacy, Terms, Help and Contact pages with shared navigation
 - [x] Verify page navigation and English error messages
-- [ ] Add MP3 quality choices with default 320 kbps to both download flows
-- [ ] Verify actual MP3 output bitrate and quality switching
+- [x] Add MP3 quality choices with default 320 kbps to both download flows
+- [x] Verify actual MP3 output bitrate and quality switching (real MP3 stream: 320000 bits/s)
