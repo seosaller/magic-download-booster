@@ -268,7 +268,7 @@ function Index() {
 
           <form
             onSubmit={onSubmit}
-            className="mt-6 flex flex-wrap items-center gap-2 rounded-xl bg-card p-2 shadow-card sm:flex-nowrap"
+            className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl bg-card p-2 shadow-card lg:flex"
           >
             <input
               type="url"
@@ -277,7 +277,7 @@ function Index() {
               value={url}
               onChange={(e) => { setUrl(e.target.value); setPasteError(""); }}
               placeholder="Paste Facebook video / reel URL..."
-              className="min-w-0 basis-full rounded-lg bg-transparent px-3 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground sm:flex-1 sm:basis-auto"
+              className="min-w-0 w-full rounded-lg bg-transparent px-3 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground lg:flex-1"
             />
             <Button
               type="button"
@@ -287,7 +287,7 @@ function Index() {
                 if (url) { setUrl(""); setPasteError(""); urlInput.current?.focus(); }
                 else void pasteLink();
               }}
-              className="h-11 flex-1 gap-2 px-4 text-primary transition active:scale-[0.96] active:brightness-95 sm:flex-none"
+              className="h-11 shrink-0 gap-2 px-4 text-primary transition active:scale-[0.96] active:brightness-95"
             >
               {url ? <X /> : <Clipboard />}
               {url ? "Clear" : "Paste"}
@@ -295,7 +295,7 @@ function Index() {
             <Button
               type="submit"
               disabled={loading}
-              className="h-11 flex-1 rounded-lg px-6 text-sm font-semibold transition active:scale-[0.96] active:brightness-90 sm:flex-none"
+              className="col-span-2 h-11 w-full rounded-lg px-6 text-sm font-semibold transition active:scale-[0.96] active:brightness-90 lg:w-auto lg:shrink-0"
             >
               {loading ? "Processing..." : "Download"}
             </Button>
@@ -324,29 +324,32 @@ function Index() {
             )}
 
             {result?.ok && (
-              <div className="grid gap-5 sm:grid-cols-[220px_1fr]">
+              <div className="grid grid-cols-[56px_minmax(0,1fr)] gap-x-3 gap-y-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
                 {result.thumbnail && (
                   <img
                     src={result.thumbnail}
                     alt={result.title ?? "Facebook video thumbnail"}
-                    className="w-full rounded-lg border border-border object-cover"
+                    className="h-14 w-14 rounded-lg border border-border object-cover lg:h-auto lg:w-full"
                     loading="lazy"
                   />
                 )}
-                <div>
-                  <h2 className="mb-3 line-clamp-2 text-base font-semibold">
+                <div className="min-w-0 max-lg:contents">
+                  <h2 className="col-start-2 mb-0 line-clamp-2 text-sm font-semibold lg:mb-3 lg:text-base">
                     {result.title}
                   </h2>
-                  <div className="flex flex-col gap-2">
+                  <div className="col-span-2 flex min-w-0 flex-col gap-2">
                     {result.links.map((l) => (
+                      <div key={l.quality} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border py-3 lg:block lg:border-0 lg:py-0">
+                        <span className="min-w-0 text-sm lg:hidden">Quality: {l.quality}{l.size ? ` (${fmtSize(l.size)})` : ""}</span>
+                      <Button asChild className="h-auto shrink-0 px-4 py-2 transition active:scale-[0.96] active:brightness-90 lg:w-full lg:py-3">
                       <a
-                        key={l.quality}
                         href={dl(l.url, "mp4", l.quality)}
-                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
                       >
-                        Download {l.quality}
-                        {l.size ? ` (${fmtSize(l.size)})` : ""}
+                        <span className="lg:hidden">Download</span>
+                        <span className="hidden lg:inline">Download {l.quality}{l.size ? ` (${fmtSize(l.size)})` : ""}</span>
                       </a>
+                      </Button>
+                      </div>
                     ))}
 
                     {result.render && render.state === "idle" && (
@@ -470,12 +473,16 @@ function Index() {
                     )}
 
                     {result.thumbnail && (
+                      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border py-3 lg:block lg:border-0 lg:py-0">
+                        <span className="min-w-0 text-sm lg:hidden">Thumbnail image</span>
+                        <Button asChild variant="outline" className="h-auto shrink-0 px-4 py-2 transition active:scale-[0.96] active:brightness-95 lg:w-full lg:py-3">
                       <a
                         href={dl(result.thumbnail, "jpg", "thumb")}
-                        className="cursor-pointer rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold transition active:scale-[0.96] active:brightness-95 hover:bg-accent"
                       >
-                        Download Image
+                        <span className="lg:hidden">Download</span><span className="hidden lg:inline">Download Image</span>
                       </a>
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
