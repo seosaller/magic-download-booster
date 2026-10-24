@@ -2,25 +2,28 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
-import { startRender, renderStatus } from "@/lib/render.functions";
+import { startRender, startMp3, renderStatus } from "@/lib/render.functions";
+import { mp3Source } from "@/lib/mp3";
+import { Button } from "@/components/ui/button";
+import { Download, Music, LoaderCircle } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Facebook Video Downloader - Save FB Videos & Reels in HD" },
+      { title: "FB Download Hub — Facebook Videos, Reels & MP3" },
       {
         name: "description",
         content:
-          "Free Facebook video downloader. Paste any public Facebook video or reel link and download it in HD or SD, no signup and no software needed.",
+          "Save public Facebook videos and reels in SD, HD, available high resolution, or convert their original audio and music to MP3.",
       },
       {
         property: "og:title",
-        content: "Facebook Video Downloader - Save FB Videos & Reels in HD",
+        content: "FB Download Hub — Facebook Videos, Reels & MP3",
       },
       {
         property: "og:description",
         content:
-          "Paste a Facebook video or reel URL and download it instantly in HD or SD. Free, fast and works on any device.",
+          "Download public Facebook videos and reels, or save their original sound as MP3 with audio conversion.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -73,11 +76,13 @@ function fmtSize(bytes?: number) {
 function Index() {
   const run = useServerFn(fetchFbVideo);
   const begin = useServerFn(startRender);
+  const beginMp3 = useServerFn(startMp3);
   const check = useServerFn(renderStatus);
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<FbResult | null>(null);
   const [render, setRender] = useState<RenderUi>({ state: "idle", progress: 0 });
+  const [mp3, setMp3] = useState<RenderUi>({ state: "idle", progress: 0 });
   const [apiKey, setApiKey] = useState("");
   const [keyOpen, setKeyOpen] = useState(false);
 
@@ -86,10 +91,14 @@ function Index() {
     if (saved) setApiKey(saved);
   }, []);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mp3Timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const requestVersion = useRef(0);
 
   useEffect(() => {
     return () => {
       if (timer.current) clearTimeout(timer.current);
+      if (mp3Timer.current) clearTimeout(mp3Timer.current);
+      requestVersion.current += 1;
     };
   }, []);
 
@@ -98,6 +107,9 @@ function Index() {
     setLoading(true);
     setResult(null);
     setRender({ state: "idle", progress: 0 });
+    setMp3({ state: "idle", progress: 0 });
+    requestVersion.current += 1;
+    if (mp3Timer.current) clearTimeout(mp3Timer.current);
     if (timer.current) clearTimeout(timer.current);
     try {
       const res = await run({ data: { url } });
@@ -166,7 +178,47 @@ function Index() {
     }
   }
 
-  const dl = (link: string, type: "mp4" | "jpg", quality: string) =>
+  async function pollMp3(jobId: string, key: string, version: number, tries = 0) {
+    try {
+      const status = await check({ data: { jobId, apiKey: key } });
+      if (requestVersion.current !== version) return;
+      if (status.status === "finished" && status.url) {
+        setMp3({ state: "done", progress: 100, url: status.url });
+        return;
+      }
+      if (status.status === "error" || tries >= 120) {
+        setMp3({ state: "error", progress: 0, error: status.status === "error" ? "MP3 nahi ban saki. Video mein audio na ho, link expire ho ya service unavailable ho sakti hai. HD/SD available hain." : "MP3 conversion mein zyada waqt lag raha hai. Dobara koshish karein.", needKey: status.code === "credits" });
+        if (status.code === "credits") setKeyOpen(true);
+        return;
+      }
+      setMp3({ state: "working", progress: Math.max(5, status.progress) });
+      mp3Timer.current = setTimeout(() => void pollMp3(jobId, key, version, tries + 1), 3000);
+    } catch {
+      if (requestVersion.current === version) setMp3({ state: "error", progress: 0, error: "MP3 status check nahi hui. Dobara koshish karein." });
+    }
+  }
+
+  async function onMp3() {
+    const source = result ? mp3Source(result) : undefined;
+    if (!source) return;
+    const version = requestVersion.current;
+    setMp3({ state: "working", progress: 5 });
+    try {
+      const started = await beginMp3({ data: { source, apiKey } });
+      if (requestVersion.current !== version) return;
+      if (!started.ok || !started.jobId) {
+        const needKey = started.code === "credits" || started.code === "config";
+        setMp3({ state: "error", progress: 0, error: started.error ?? "MP3 conversion nahi hui.", needKey });
+        if (needKey) setKeyOpen(true);
+        return;
+      }
+      void pollMp3(started.jobId, apiKey, version);
+    } catch {
+      if (requestVersion.current === version) setMp3({ state: "error", progress: 0, error: "MP3 conversion nahi hui. Dobara koshish karein." });
+    }
+  }
+
+  const dl = (link: string, type: "mp4" | "jpg" | "mp3", quality: string) =>
     `/api/public/download?type=${type}&name=${encodeURIComponent(
       "fb-video-" + quality.toLowerCase().replace(/[^a-z0-9]/g, ""),
     )}&url=${encodeURIComponent(link)}`;
@@ -335,7 +387,20 @@ function Index() {
                       </div>
                     )}
 
-                    {(keyOpen || apiKey) && result.render && (
+                    {mp3.state === "done" && mp3.url ? (
+                      <Button asChild className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96] active:brightness-90">
+                        <a href={dl(mp3.url, "mp3", "audio")}><Download />Download MP3</a>
+                      </Button>
+                    ) : (
+                      <Button type="button" variant="outline" onClick={() => void onMp3()} disabled={mp3.state === "working"} className="h-auto w-full whitespace-normal border-primary py-3 text-primary transition active:scale-[0.96] active:brightness-90">
+                        {mp3.state === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Music />}
+                        {mp3.state === "working" ? `Rendering MP3… ${mp3.progress}%` : mp3.state === "error" ? "Retry MP3" : "Download MP3 (render)"}
+                      </Button>
+                    )}
+                    {mp3.state === "working" && <div role="progressbar" aria-label="MP3 conversion" aria-valuenow={mp3.progress} aria-valuemin={0} aria-valuemax={100} className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary transition-all" style={{ width: `${mp3.progress}%` }} /></div>}
+                    {mp3.state === "error" && <p role="alert" className="text-sm text-destructive">{mp3.error}</p>}
+
+                    {(keyOpen || apiKey) && (
                       <div className="rounded-lg border border-border p-3 text-left">
                         <p className="text-sm font-semibold">
                           Apni free render key (CloudConvert)
@@ -366,6 +431,7 @@ function Index() {
                             onClick={() => {
                               localStorage.setItem("cc_api_key", apiKey.trim());
                               setRender({ state: "idle", progress: 0 });
+                              setMp3({ state: "idle", progress: 0 });
                             }}
                             className="cursor-pointer rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
                           >

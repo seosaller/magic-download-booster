@@ -10,8 +10,10 @@ export const Route = createFileRoute("/api/public/download")({
           /[^a-z0-9_\-.]/gi,
           "_",
         );
-        const type = u.searchParams.get("type") === "jpg" ? "jpg" : "mp4";
+        const requestedType = u.searchParams.get("type");
+        const type = requestedType === "jpg" ? "jpg" : requestedType === "mp3" ? "mp3" : "mp4";
         if (!target) return new Response("Missing url", { status: 400 });
+        const sourceUrl = target;
 
         let host = "";
         try {
@@ -37,7 +39,7 @@ export const Route = createFileRoute("/api/public/download")({
           };
           if (withRange && range) h["range"] = range;
           try {
-            return await fetch(target!, { headers: h, redirect: "follow" });
+            return await fetch(sourceUrl, { headers: h, redirect: "follow" });
           } catch {
             return undefined;
           }
@@ -51,7 +53,7 @@ export const Route = createFileRoute("/api/public/download")({
         const bad =
           !upstream ||
           (!upstream.ok && upstream.status !== 206) ||
-          /text\/html/i.test(ct);
+          /text\/|application\/json/i.test(ct);
 
         // Facebook sometimes blocks server-side fetches; in that case send the
         // browser straight to the original file instead of a text error page.
@@ -60,7 +62,7 @@ export const Route = createFileRoute("/api/public/download")({
         const headers = new Headers();
         headers.set(
           "content-type",
-          ct && !/text\//i.test(ct)
+          type === "mp3" ? "audio/mpeg" : ct && !/text\//i.test(ct)
             ? ct
             : type === "jpg"
               ? "image/jpeg"
