@@ -1,4 +1,4 @@
-import { ArrowUp, Video, Clapperboard, Gem, Rocket, FileVideo, Smartphone, CircleDollarSign, MousePointerClick, MonitorSmartphone, Globe, Zap, ShieldCheck, Link as LinkIcon, Clipboard, Download, CircleHelp, ChevronDown, Check } from "lucide-react";
+import { ArrowUp, Video, Clapperboard, Gem, Rocket, FileVideo, Smartphone, ShieldCheck, Download, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const steps = [
