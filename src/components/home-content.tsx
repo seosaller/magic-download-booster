@@ -44,9 +44,27 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
       </ol>
     </section>
 
-    <section className="grid items-center gap-6 border-y border-border py-10 sm:grid-cols-[minmax(0,1fr)_auto]" aria-labelledby="quality-title">
+    <section className="grid items-center gap-8 border-y border-border py-10 lg:grid-cols-[minmax(0,1fr)_auto]" aria-labelledby="quality-title">
       <div><h2 id="quality-title" className="text-xl font-bold sm:text-2xl">Download Facebook Videos in HD, 2K, and 4K</h2><p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">Save your favorite Facebook videos in the best quality available. Our tool helps you download videos in HD, Full HD, 2K, or 4K when the original video and source link support these options.</p></div>
-      <div className="flex gap-3" aria-label="Available source resolutions">{["HD", "2K", "4K"].map(q => <div key={q} className="grid size-16 place-items-center rounded-lg border border-primary/20 bg-primary/5 text-xl font-bold text-primary">{q}</div>)}</div>
+      <div className="grid grid-cols-3 gap-3" aria-label="Available source resolutions">{[
+        { label: "HD", description: "High definition", emoji: "🎞️", tone: "border-primary/20 bg-primary/5 text-primary" },
+        { label: "2K", description: "Sharper detail", emoji: "💎", tone: "border-chart-2/20 bg-chart-2/5 text-chart-2" },
+        { label: "4K", description: "Ultra HD", emoji: "🚀", tone: "border-chart-1/20 bg-chart-1/5 text-chart-1" },
+      ].map(q => <div key={q.label} className={`flex min-w-0 flex-col items-center rounded-lg border px-3 py-4 text-center lg:w-28 ${q.tone}`}><span aria-hidden="true" className="grid size-9 place-items-center text-3xl">{q.emoji}</span><span className="mt-2 text-2xl font-bold">{q.label}</span><span className="mt-1 text-xs leading-5 text-muted-foreground">{q.description}</span></div>)}</div>
+    </section>
+
+    <section className="grid gap-7 border-b border-border py-10 sm:grid-cols-[auto_minmax(0,1fr)]" aria-labelledby="mp3-title">
+      <div aria-hidden="true" className="flex items-center gap-3 sm:flex-col"><span className="grid size-16 place-items-center rounded-lg bg-chart-2/10 text-4xl">🎵</span><span className="text-lg font-bold text-chart-2">MP3</span></div>
+      <div><h2 id="mp3-title" className="text-xl font-bold sm:text-2xl">Facebook Video & Reels to MP3</h2>
+        <p className="mt-3 text-sm leading-7 text-muted-foreground">Save the original sound from a public Facebook video or Reel as an MP3 file. Speech, music, or both stay together exactly as they are in the source—without downloading the full video.</p>
+        <div className="mt-5 grid gap-4 sm:grid-cols-3">{[
+          { emoji: "🎙️", title: "Speech & voice", text: "Keep the original spoken audio." },
+          { emoji: "🎶", title: "Music & sound", text: "Save the music available in the source." },
+          { emoji: "📥", title: "Save to your device", text: "Get a genuine, playable MP3 file." },
+        ].map(item => <div key={item.title} className="flex items-start gap-2"><span aria-hidden="true" className="text-xl">{item.emoji}</span><div><h3 className="text-sm font-semibold">{item.title}</h3><p className="mt-1 text-xs leading-5 text-muted-foreground">{item.text}</p></div></div>)}</div>
+        <p className="mt-5 text-sm leading-7 text-muted-foreground">Paste your link above, press Download, then choose Download MP3. Keep the page open while the sound is converted, and save the file when it is ready.</p>
+        <p className="mt-2 text-xs leading-6 text-muted-foreground">MP3 conversion uses CloudConvert and depends on available credits. It does not separate speech from music or add sound to a silent video.</p>
+      </div>
     </section>
 
     <section className="py-12 sm:py-16" aria-labelledby="tools-title">
