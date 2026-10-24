@@ -21,10 +21,12 @@ async def main():
             await page.goto('http://localhost:8080', wait_until='networkidle')
             await page.route('**/test-audio-source', lambda route: route.fulfill(
                 path=str(fixture), content_type='video/mp4'))
+            await page.route('**/missing-audio-source', lambda route: route.fulfill(
+                status=404, body='Unavailable', content_type='text/plain'))
             async with page.expect_download(timeout=180000) as event:
                 await page.evaluate('''async () => {
                     const m = await import('/mp3/download.js');
-                    m.saveMp3(await m.createMp3('/test-audio-source'));
+                    m.saveMp3(await m.createMp3('/missing-audio-source|/test-audio-source'));
                 }''')
             download = await event.value
             assert download.suggested_filename == 'fb-audio.mp3'
@@ -33,7 +35,7 @@ async def main():
         info = json.loads(subprocess.check_output(['ffprobe', '-v', 'error',
             '-show_entries', 'stream=codec_name,codec_type', '-of', 'json', str(output)]))
         assert info['streams'] == [{'codec_name': 'mp3', 'codec_type': 'audio'}], info
-        print('PASS: device download contains MP3 audio only, not a renamed MP4.')
+        print('PASS: unavailable audio falls back to video and downloads real MP3 audio only.')
 
 
 asyncio.run(main())
