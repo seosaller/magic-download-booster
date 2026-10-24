@@ -1,11 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
+import { nativeFormats } from './fb-formats';
 
 export type FbResult = {
   ok: boolean;
   error?: string | undefined;
   title?: string | undefined;
   thumbnail?: string | undefined;
-  links: { quality: string; url: string; size?: number | undefined }[];
+  audioSources?: string[];
+  links: { quality: string; url: string; size?: number | undefined; audioUrl?: string; width?: number; height?: number }[];
 };
 
 const UA =
@@ -55,6 +57,7 @@ async function fetchHtml(url: string, mobile: boolean) {
       "upgrade-insecure-requests": "1",
     },
     redirect: "follow",
+    signal: AbortSignal.timeout(20000),
   });
   return await res.text();
 }
@@ -92,6 +95,9 @@ function parse(html: string): FbResult {
   if (hd?.startsWith("http")) links.push({ quality: "HD", url: hd });
   if (sd?.startsWith("http") && sd !== hd)
     links.push({ quality: "SD", url: sd });
+  const native = nativeFormats(html);
+  links.push(...native.links);
+  const audioSources = [...new Set([native.audio, sd, hd].filter((url): url is string => Boolean(url)))];
 
   if (!links.length)
     return {
@@ -101,7 +107,7 @@ function parse(html: string): FbResult {
         "Is link se video nahi mili. Video public honi chahiye (private ya login-only videos support nahi).",
     };
 
-  return { ok: true, title, thumbnail, links };
+  return { ok: true, title, thumbnail, links, audioSources };
 }
 
 async function headSize(url: string): Promise<number | undefined> {
@@ -110,6 +116,7 @@ async function headSize(url: string): Promise<number | undefined> {
       method: "HEAD",
       headers: { "user-agent": UA, referer: "https://www.facebook.com/" },
       redirect: "follow",
+      signal: AbortSignal.timeout(8000),
     });
     const len = Number(res.headers.get("content-length"));
     return Number.isFinite(len) && len > 0 ? len : undefined;
