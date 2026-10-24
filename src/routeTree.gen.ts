@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FacebookReelsDownloaderRouteImport } from './routes/facebook-reels-downloader'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -30,6 +31,11 @@ const AboutRoute = AboutRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FacebookReelsDownloaderRoute = FacebookReelsDownloaderRouteImport.update({
+  id: '/facebook-reels-downloader',
+  path: '/facebook-reels-downloader',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpRoute = HelpRouteImport.update({
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/facebook-reels-downloader': typeof FacebookReelsDownloaderRoute
   '/help': typeof HelpRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/facebook-reels-downloader': typeof FacebookReelsDownloaderRoute
   '/help': typeof HelpRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/facebook-reels-downloader': typeof FacebookReelsDownloaderRoute
   '/help': typeof HelpRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
@@ -87,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/facebook-reels-downloader'
     | '/help'
     | '/privacy'
     | '/terms'
@@ -96,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/facebook-reels-downloader'
     | '/help'
     | '/privacy'
     | '/terms'
@@ -105,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/facebook-reels-downloader'
     | '/help'
     | '/privacy'
     | '/terms'
@@ -115,6 +127,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  FacebookReelsDownloaderRoute: typeof FacebookReelsDownloaderRoute
   HelpRoute: typeof HelpRoute
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/facebook-reels-downloader': {
+      id: '/facebook-reels-downloader'
+      path: '/facebook-reels-downloader'
+      fullPath: '/facebook-reels-downloader'
+      preLoaderRoute: typeof FacebookReelsDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help': {
@@ -179,6 +199,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  FacebookReelsDownloaderRoute: FacebookReelsDownloaderRoute,
   HelpRoute: HelpRoute,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
