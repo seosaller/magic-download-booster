@@ -4,6 +4,7 @@ import { useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { Mp3Download } from "@/components/mp3-download";
 import { VideoDownload } from '@/components/video-download';
+import { FileDownload } from '@/components/file-download';
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -183,15 +184,7 @@ function Index() {
                     {result.links.map((l) => l.audioUrl ? (
                       <VideoDownload key={l.quality} quality={l.quality} video={dl(l.url, 'mp4', l.quality)} audio={dl(l.audioUrl, 'mp4', 'audio-source')} />
                     ) : (
-                      <a
-                        key={l.quality}
-                        href={dl(l.url, "mp4", l.quality)}
-                        download
-                        className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
-                      >
-                        Download {l.quality}
-                        {l.size ? ` (${fmtSize(l.size)})` : ""}
-                      </a>
+                      <FileDownload key={l.quality} source={dl(l.url, 'mp4', l.quality)} filename={`fb-video-${l.quality.toLowerCase()}.mp4`} kind="mp4" label={`Download ${l.quality}${l.size ? ` (${fmtSize(l.size)})` : ''}`} />
                     ))}
 
                     {result.links[0] && (
@@ -202,12 +195,7 @@ function Index() {
                     )}
 
                     {result.thumbnail && (
-                      <a
-                        href={dl(result.thumbnail, "jpg", "thumb")}
-                        className="cursor-pointer rounded-lg border border-border px-4 py-3 text-center text-sm font-semibold transition active:scale-[0.96] active:brightness-95 hover:bg-accent"
-                      >
-                        Download Image
-                      </a>
+                      <FileDownload source={dl(result.thumbnail, 'jpg', 'thumb')} filename="fb-video-thumb.jpg" kind="jpg" label="Download Image" />
                     )}
                   </div>
                 </div>
