@@ -8,12 +8,12 @@ const steps = [
   { icon: Download, title: "Choose & download", text: "Choose the available video quality and download your video." },
 ];
 const tools = [
-  { icon: Video, title: "Facebook Video Downloader", text: "Download Facebook videos with a simple link. Save useful videos, funny clips, and your favorite moments for offline viewing.", tone: "bg-primary/10 text-primary" },
-  { icon: Clapperboard, title: "Facebook Reels Downloader", text: "Save Facebook Reels to your device with just a few clicks. Copy the Reel link, paste it into the tool, and choose an available download option.", tone: "bg-chart-2/10 text-chart-2" },
-  { icon: Gem, title: "HD Video Downloader", text: "Get Facebook videos in HD or Full HD quality when available. Enjoy clear video without needing a separate downloader app.", tone: "bg-primary/10 text-primary" },
-  { icon: Rocket, title: "2K & 4K Video Downloader", text: "Want sharper video quality? Choose 2K or 4K if the original video is available in that resolution. Available quality depends on the source video.", tone: "bg-chart-2/10 text-chart-2" },
-  { icon: FileVideo, title: "Facebook Video to MP4", text: "Save supported Facebook videos as MP4 files for easy playback on most phones, tablets, and computers.", tone: "bg-primary/10 text-primary" },
-  { icon: Smartphone, title: "Online Video Downloader", text: "Download supported Facebook videos directly through your browser. No extra software is needed, making the process simple for everyday users.", tone: "bg-chart-2/10 text-chart-2" },
+  { icon: Video, title: "Facebook Video Downloader", text: "Save public videos using a Facebook link.", tone: "bg-primary/10 text-primary" },
+  { icon: Clapperboard, title: "Reels Downloader", text: "Save supported Facebook Reels to your device.", tone: "bg-chart-2/10 text-chart-2" },
+  { icon: Gem, title: "HD & Full HD", text: "Choose clearer video quality when available.", tone: "bg-primary/10 text-primary" },
+  { icon: Rocket, title: "2K & 4K Downloader", text: "Get high-resolution videos when supported.", tone: "bg-chart-2/10 text-chart-2" },
+  { icon: FileVideo, title: "Facebook Video to MP4", text: "Save MP4 files for easy playback anywhere.", tone: "bg-primary/10 text-primary" },
+  { icon: Smartphone, title: "Online Video Downloader", text: "Download in your browser. No app required.", tone: "bg-chart-2/10 text-chart-2" },
 ];
 const benefits = [
   { icon: CircleDollarSign, title: "Free to use", text: "Download supported videos without a paid subscription." },
@@ -53,10 +53,13 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
 
     <section className="py-12 sm:py-16" aria-labelledby="tools-title">
       <h2 id="tools-title" className="text-2xl font-bold">Our Download Tools</h2>
-      <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {tools.map(tool => <article key={tool.title} className="rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary/40">
-          <div className={`grid size-11 place-items-center rounded-lg ${tool.tone}`}><tool.icon aria-hidden="true" className="size-6" /></div>
-          <h3 className="mt-5 text-base font-semibold">{tool.title}</h3><p className="mt-3 text-sm leading-6 text-muted-foreground">{tool.text}</p>
+      <div className="mt-7 grid gap-4 sm:grid-cols-2">
+        {tools.map(tool => <article key={tool.title} className="group relative overflow-hidden rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5 sm:p-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className={`grid size-10 shrink-0 place-items-center rounded-lg ${tool.tone}`}><tool.icon aria-hidden="true" className="size-5" /></div>
+            <Download aria-hidden="true" className="size-4 text-muted-foreground/40 transition-colors group-hover:text-primary" />
+          </div>
+          <h3 className="mt-4 text-base font-semibold leading-6">{tool.title}</h3><p className="mt-1.5 text-sm leading-6 text-muted-foreground">{tool.text}</p>
         </article>)}
       </div>
     </section>
