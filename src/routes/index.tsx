@@ -262,7 +262,6 @@ function Index() {
                       <a
                         key={l.quality}
                         href={dl(l.url, "mp4", l.quality)}
-                        download
                         className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
                       >
                         Download {l.quality}
@@ -309,7 +308,6 @@ function Index() {
                           "mp4",
                           result.render?.label ?? "hq",
                         )}
-                        download
                         className="w-full cursor-pointer rounded-lg bg-primary px-4 py-3 text-center text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
                       >
                         Save {result.render?.label ?? "HQ"} file
