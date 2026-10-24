@@ -14,5 +14,5 @@
 - [x] Verify actual MP3 output bitrate and quality switching (real MP3 stream: 320000 bits/s)
 - [x] Keep only 320 kbps MP3 in both download flows; remove other quality choices
 - [x] Add useful SEO-focused Reels page content and verify its presentation and metadata
-- [ ] Add free 2K/4K video-and-audio processing without CloudConvert
-- [ ] Verify free processing and preserve existing direct video and MP3 downloads
+- [x] Add free 2K/4K video-and-audio processing without CloudConvert
+- [x] Verify free processing and preserve existing direct video and MP3 downloads
