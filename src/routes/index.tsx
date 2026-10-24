@@ -5,7 +5,7 @@ import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { startRender, startMp3, renderStatus } from "@/lib/render.functions";
 import { mp3Source } from "@/lib/mp3";
 import { Button } from "@/components/ui/button";
-import { Download, Music, LoaderCircle } from "lucide-react";
+import { Download, Music, LoaderCircle, Clipboard, X } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -85,6 +85,8 @@ function Index() {
   const [mp3, setMp3] = useState<RenderUi>({ state: "idle", progress: 0 });
   const [apiKey, setApiKey] = useState("");
   const [keyOpen, setKeyOpen] = useState(false);
+  const [pasteError, setPasteError] = useState("");
+  const urlInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("cc_api_key");
@@ -119,6 +121,17 @@ function Index() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function pasteLink() {
+    setPasteError("");
+    try {
+      const text = await navigator.clipboard.readText();
+      setUrl(text.trim());
+    } catch {
+      setPasteError("Clipboard access nahi mili. Link box mein paste karein.");
+    }
+    urlInput.current?.focus();
   }
 
   async function poll(jobId: string, tries = 0) {
@@ -255,24 +268,39 @@ function Index() {
 
           <form
             onSubmit={onSubmit}
-            className="mt-6 flex gap-2 rounded-xl bg-card p-2 shadow-card"
+            className="mt-6 flex flex-wrap items-center gap-2 rounded-xl bg-card p-2 shadow-card sm:flex-nowrap"
           >
             <input
               type="url"
+              ref={urlInput}
               required
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={(e) => { setUrl(e.target.value); setPasteError(""); }}
               placeholder="Paste Facebook video / reel URL..."
-              className="w-full rounded-lg bg-transparent px-3 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              className="min-w-0 basis-full rounded-lg bg-transparent px-3 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground sm:flex-1 sm:basis-auto"
             />
-            <button
+            <Button
+              type="button"
+              variant="outline"
+              disabled={loading}
+              onClick={() => {
+                if (url) { setUrl(""); setPasteError(""); urlInput.current?.focus(); }
+                else void pasteLink();
+              }}
+              className="h-11 flex-1 gap-2 px-4 text-primary transition active:scale-[0.96] active:brightness-95 sm:flex-none"
+            >
+              {url ? <X /> : <Clipboard />}
+              {url ? "Clear" : "Paste"}
+            </Button>
+            <Button
               type="submit"
               disabled={loading}
-              className="cursor-pointer rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+              className="h-11 flex-1 rounded-lg px-6 text-sm font-semibold transition active:scale-[0.96] active:brightness-90 sm:flex-none"
             >
-              {loading ? "Please wait..." : "Download"}
-            </button>
+              {loading ? "Processing..." : "Download"}
+            </Button>
           </form>
+          {pasteError && <p role="alert" className="mt-2 text-sm text-primary-foreground">{pasteError}</p>}
           <p className="mt-3 text-xs text-primary-foreground/80">
             Ex. https://www.facebook.com/watch?v=554413541934974 or
             https://fb.watch/lMDZjV1O0t/
