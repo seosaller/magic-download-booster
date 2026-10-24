@@ -32,6 +32,8 @@ export function mp3Job(source: string, bitrate: Mp3Bitrate = 320) {
       "convert-audio": {
         operation: "convert", input: "in-audio", output_format: "mp3",
         filename: "fb-audio.mp3",
+        engine: "ffmpeg",
+        audio_codec: "mp3",
         audio_bitrate: bitrate,
       },
       export: { operation: "export/url", input: "convert-audio", inline: false },
