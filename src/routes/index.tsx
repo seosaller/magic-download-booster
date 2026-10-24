@@ -141,7 +141,7 @@ function Index() {
       const text = await navigator.clipboard.readText();
       setUrl(text.trim());
     } catch {
-      setPasteError("Clipboard access nahi mili. Link box mein paste karein.");
+      setPasteError("Clipboard access was denied. Please paste the link into the box manually.");
     }
     urlInput.current?.focus();
   }
@@ -157,7 +157,7 @@ function Index() {
         setRender({
           state: "error",
           progress: 0,
-          error: s.error ?? "Render fail ho gaya.",
+          error: s.error ?? "Video processing failed. Please try again.",
           needKey: s.code === "credits",
         });
         if (s.code === "credits") setKeyOpen(true);
@@ -168,7 +168,7 @@ function Index() {
         setRender({
           state: "error",
           progress: 0,
-          error: "Render mein bahut waqt lag gaya. Dobara koshish karein.",
+          error: "Video processing took too long. Please try again.",
         });
         return;
       }
@@ -190,7 +190,7 @@ function Index() {
         setRender({
           state: "error",
           progress: 0,
-          error: started.error ?? "Render shuru nahi ho saka.",
+          error: started.error ?? "Video processing could not start. Please try again.",
           needKey: started.code === "credits" || started.code === "config",
         });
         if (started.code === "credits" || started.code === "config")
@@ -212,14 +212,14 @@ function Index() {
         return;
       }
       if (status.status === "error" || tries >= 120) {
-        setMp3({ state: "error", progress: 0, error: status.status === "error" ? "MP3 nahi ban saki. Video mein audio na ho, link expire ho ya service unavailable ho sakti hai. HD/SD available hain." : "MP3 conversion mein zyada waqt lag raha hai. Dobara koshish karein.", needKey: status.code === "credits" });
+        setMp3({ state: "error", progress: 0, error: status.status === "error" ? "MP3 conversion failed. The video may have no audio, the link may have expired, or the service may be unavailable. HD/SD downloads are still available." : "MP3 conversion took too long. Please try again.", needKey: status.code === "credits" });
         if (status.code === "credits") setKeyOpen(true);
         return;
       }
       setMp3({ state: "working", progress: Math.max(5, status.progress) });
       mp3Timer.current = setTimeout(() => void pollMp3(jobId, key, version, tries + 1), 3000);
     } catch {
-      if (requestVersion.current === version) setMp3({ state: "error", progress: 0, error: "MP3 status check nahi hui. Dobara koshish karein." });
+      if (requestVersion.current === version) setMp3({ state: "error", progress: 0, error: "Unable to check MP3 conversion status. Please try again." });
     }
   }
 
@@ -233,13 +233,13 @@ function Index() {
       if (requestVersion.current !== version) return;
       if (!started.ok || !started.jobId) {
         const needKey = started.code === "credits" || started.code === "config";
-        setMp3({ state: "error", progress: 0, error: started.error ?? "MP3 conversion nahi hui.", needKey });
+        setMp3({ state: "error", progress: 0, error: started.error ?? "MP3 conversion could not start. Please try again.", needKey });
         if (needKey) setKeyOpen(true);
         return;
       }
       void pollMp3(started.jobId, apiKey, version);
     } catch {
-      if (requestVersion.current === version) setMp3({ state: "error", progress: 0, error: "MP3 conversion nahi hui. Dobara koshish karein." });
+      if (requestVersion.current === version) setMp3({ state: "error", progress: 0, error: "MP3 conversion failed. Please try again." });
     }
   }
 
@@ -251,22 +251,6 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-t-4 border-primary bg-card shadow-sm">
-        <nav className="container mx-auto flex items-center justify-between px-4 py-4">
-          <a href="/" className="flex items-center gap-2 font-bold text-lg">
-            <span className="grid h-9 w-9 place-items-center rounded-lg hero-gradient text-primary-foreground">
-              FB
-            </span>
-            <span>Download Hub</span>
-          </a>
-          <a
-            href="#faq"
-            className="cursor-pointer rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
-          >
-            Help
-          </a>
-        </nav>
-      </header>
 
       <section className="hero-gradient px-4 py-16">
         <div className="mx-auto max-w-3xl text-center">
@@ -390,8 +374,7 @@ function Index() {
                           />
                         </div>
                         <p className="mt-2 text-xs text-muted-foreground">
-                          Video aur audio ko jodne mein 1-3 minute lag sakte
-                          hain. Page khula rakhein.
+                          Combining video and audio may take 1–3 minutes. Keep this page open.
                         </p>
                       </div>
                     )}
@@ -417,7 +400,7 @@ function Index() {
                         </p>
                         {render.needKey && (
                           <p className="mt-2 text-xs text-muted-foreground">
-                            Upar wale HD/SD downloads phir bhi kaam karte hain.
+                            The HD/SD downloads above are still available.
                           </p>
                         )}
                         <button
@@ -446,27 +429,26 @@ function Index() {
                     {(keyOpen || apiKey) && (
                       <div className="rounded-lg border border-border p-3 text-left">
                         <p className="text-sm font-semibold">
-                          Apni free render key (CloudConvert)
+                          Your CloudConvert API key
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Free account roz 25 render deta hai. Key{" "}
+                          Conversion credits depend on your CloudConvert plan. Get a key{" "}
                           <a
                             href="https://cloudconvert.com/dashboard/api/v2/keys"
                             target="_blank"
                             rel="noreferrer"
                             className="cursor-pointer font-medium text-primary underline"
                           >
-                            yahan se lein
+                            from CloudConvert
                           </a>{" "}
-                          aur neeche paste karein — ye sirf aapke browser mein
-                          save hoti hai.
+                          and paste it below. Your saved key is stored in this browser and sent securely when you request a conversion.
                         </p>
                         <div className="mt-2 flex gap-2">
                           <input
                             type="password"
                             value={apiKey}
                             onChange={(e) => setApiKey(e.target.value)}
-                            placeholder="API key paste karein"
+                            placeholder="Paste your API key"
                             className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
                           />
                           <button
@@ -548,12 +530,7 @@ function Index() {
         </section>
       </main>
 
-      <footer className="bg-foreground px-4 py-8 text-center text-sm text-background">
-        <p>© {new Date().getFullYear()} FB Download Hub</p>
-        <p className="mt-2 text-background/70">
-          Download only content you own or have permission to save.
-        </p>
-      </footer>
+
     </div>
   );
 }

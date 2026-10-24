@@ -25,7 +25,7 @@ export const startMp3 = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }): Promise<RenderStart> => {
     const key = data.apiKey || process.env["CLOUDCONVERT_API_KEY"];
-    if (!key) return { ok: false, code: "config", error: "MP3 conversion ke liye CloudConvert key add karein. HD/SD downloads available hain." };
+    if (!key) return { ok: false, code: "config", error: "Add your CloudConvert API key to convert to MP3. HD/SD downloads are still available." };
     try {
       const response = await fetch(`${API}/jobs`, {
         method: "POST",
@@ -36,11 +36,11 @@ export const startMp3 = createServerFn({ method: "POST" })
       if (!response.ok || !json.data?.id) {
         const credits = json.code === "CREDITS_EXCEEDED" || /credit/i.test(json.message ?? "");
         const config = response.status === 401 || response.status === 403;
-        return { ok: false, code: credits ? "credits" : config ? "config" : "other", error: credits ? "MP3 conversion credits khatam hain. Apni CloudConvert key add karein ya credits renew hone par retry karein. HD/SD ab bhi available hain." : config ? "CloudConvert key valid nahi hai ya conversion ki permission nahi hai. Apni key check karein." : "MP3 conversion shuru nahi hui. Thodi der baad retry karein; HD/SD available hain." };
+        return { ok: false, code: credits ? "credits" : config ? "config" : "other", error: credits ? "MP3 conversion credits have run out. Add your CloudConvert API key or try again when credits renew. HD/SD downloads are still available." : config ? "Your CloudConvert API key is invalid or does not allow conversions. Please check your key." : "MP3 conversion could not start. Please try again later. HD/SD downloads are still available." };
       }
       return { ok: true, jobId: json.data.id };
     } catch {
-      return { ok: false, code: "other", error: "MP3 service se connection nahi hua. Dobara koshish karein." };
+      return { ok: false, code: "other", error: "Unable to connect to the MP3 conversion service. Please try again." };
     }
   });
 
@@ -72,7 +72,7 @@ export const startRender = createServerFn({ method: "POST" })
         ok: false,
         code: "config",
         error:
-          "High quality render abhi set nahi hai. Apni free CloudConvert API key add karein.",
+          "High-quality video processing is not configured. Add your CloudConvert API key.",
       };
 
     const body = {
@@ -122,9 +122,9 @@ export const startRender = createServerFn({ method: "POST" })
         ok: false,
         code: credits ? "credits" : "other",
         error: credits
-          ? "Render ke free credits khatam ho gaye hain. Apni free CloudConvert API key add karein (roz 25 free render) ya kal dobara koshish karein."
+          ? "Video conversion credits have run out. Add your CloudConvert API key or try again when credits renew."
           : (json?.message ??
-            "Render service ne request accept nahi ki. Thodi der baad koshish karein."),
+            "The video conversion service could not accept the request. Please try again later."),
       };
     }
     return { ok: true, jobId: json.data.id };
@@ -177,9 +177,9 @@ export const renderStatus = createServerFn({ method: "POST" })
         progress,
         code: credits ? "credits" : "other",
         error: credits
-          ? "Render ke free credits khatam ho gaye hain. Apni free CloudConvert API key add karein ya HD/SD download karein."
+          ? "Video conversion credits have run out. Add your CloudConvert API key or use the HD/SD downloads."
           : (msg ||
-            "Render fail ho gaya. Ho sakta hai ye video merge support na karti ho."),
+            "Video processing failed. Please try again. Ho sakta hai ye video merge support na karti ho."),
       };
     }
 

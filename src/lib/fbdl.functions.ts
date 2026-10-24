@@ -201,7 +201,7 @@ function parse(html: string): FbResult {
       ok: false,
       links: [],
       error:
-        "Is link se video nahi mili. Video public honi chahiye (private ya login-only videos support nahi).",
+        "No video was found at this link. The video must be public; private or login-only videos are not supported.",
     };
 
   const render =
