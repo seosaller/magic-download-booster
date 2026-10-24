@@ -7,4 +7,5 @@
 - [x] PHP hosting verification cancelled when the user left the PHP script.
 - [x] Add native 2K/4K and MP3 audio-source fallback to the current Lovable website without changing the design.
 - [x] Test quality availability, real Facebook MP3, fallback MP3 and fixture-based native 2K/4K browser downloads with audio.
-- [ ] Investigate screenshot video missing qualities and empty downloads; validate actual files and error handling.
+- [x] Preserve signed media URLs, inspect all page variants for native qualities, and block empty/invalid device downloads; real HD/SD and fallback MP3 tests pass.
+- [ ] Verify Edinburgh screenshot video 2K/4K and reported empty files (requires that video's Facebook link).
