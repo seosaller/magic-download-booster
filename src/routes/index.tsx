@@ -3,24 +3,25 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { Mp3Download } from "@/components/mp3-download";
+import { VideoDownload } from '@/components/video-download';
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FB Download Hub - Facebook Videos & MP3 Audio" },
+      { title: "FB Download Hub - HD, 2K, 4K & MP3" },
       {
         name: "description",
         content:
-           "Download public Facebook videos and reels in HD or SD, or convert their audio to MP3. No signup needed.",
+            "Download public Facebook videos and reels in SD, HD, native 2K or 4K when available, and MP3 audio. No signup needed.",
       },
       {
         property: "og:title",
-        content: "FB Download Hub - Facebook Videos & MP3 Audio",
+         content: "FB Download Hub - HD, 2K, 4K & MP3",
       },
       {
         property: "og:description",
         content:
-           "Save public Facebook videos in HD or SD and download their audio as MP3.",
+            "Save public Facebook videos in SD, HD, available native 2K or 4K, and MP3 audio.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -51,7 +52,7 @@ const faqs = [
   },
   {
     q: "Which quality can I get?",
-    a: "HD and SD, exactly as Facebook serves the video.",
+    a: "SD, HD, and native 2K or 4K when Facebook provides them, plus MP3 audio.",
   },
 ];
 
@@ -179,7 +180,9 @@ function Index() {
                     {result.title}
                   </h2>
                   <div className="flex flex-col gap-2">
-                    {result.links.map((l) => (
+                    {result.links.map((l) => l.audioUrl ? (
+                      <VideoDownload key={l.quality} quality={l.quality} video={dl(l.url, 'mp4', l.quality)} audio={dl(l.audioUrl, 'mp4', 'audio-source')} />
+                    ) : (
                       <a
                         key={l.quality}
                         href={dl(l.url, "mp4", l.quality)}
@@ -194,7 +197,7 @@ function Index() {
                     {result.links[0] && (
                       <Mp3Download
                         key={result.links[0].url}
-                        source={dl((result.links.find((l) => l.quality === "SD") ?? result.links[0]).url, "mp4", "audio-source")}
+                         source={(result.audioSources?.length ? result.audioSources : [ (result.links.find((l) => l.quality === 'SD') ?? result.links[0]).url ]).map(source => dl(source, 'mp4', 'audio-source')).join('|')}
                       />
                     )}
 
