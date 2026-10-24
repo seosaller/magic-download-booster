@@ -37,14 +37,14 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
       </div>
       <h3 className="mt-10 text-center text-lg font-semibold">How to Download Facebook Videos</h3>
       <ol className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {steps.map((step, i) => <li key={step.title} className="relative border-t-2 border-primary/20 pt-6">
+        {steps.map((step, i) => <li key={step.title} className="relative pt-6">
           <div className="flex items-center justify-between"><span aria-hidden="true" className="grid size-10 place-items-center text-3xl">{step.emoji}</span><span className="text-sm font-semibold text-muted-foreground">0{i + 1}</span></div>
           <h4 className="mt-4 text-base font-semibold">{step.title}</h4><p className="mt-2 text-sm leading-6 text-muted-foreground">{step.text}</p>
         </li>)}
       </ol>
     </section>
 
-    <section className="grid items-center gap-8 border-y border-border py-10 lg:grid-cols-[minmax(0,1fr)_auto]" aria-labelledby="quality-title">
+    <section className="grid items-center gap-8 py-10 lg:grid-cols-[minmax(0,1fr)_auto]" aria-labelledby="quality-title">
       <div><h2 id="quality-title" className="text-xl font-bold sm:text-2xl">Download Facebook Videos in HD, 2K, and 4K</h2><p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">Save your favorite Facebook videos in the best quality available. Our tool helps you download videos in HD, Full HD, 2K, or 4K when the original video and source link support these options.</p></div>
       <div className="grid grid-cols-3 gap-3" aria-label="Available source resolutions">{[
         { label: "HD", description: "High definition", emoji: "🎞️", tone: "border-primary/20 bg-primary/5 text-primary" },
@@ -53,7 +53,7 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
       ].map(q => <div key={q.label} className={`flex min-w-0 flex-col items-center rounded-lg border px-3 py-4 text-center lg:w-28 ${q.tone}`}><span aria-hidden="true" className="grid size-9 place-items-center text-3xl">{q.emoji}</span><span className="mt-2 text-2xl font-bold">{q.label}</span><span className="mt-1 text-xs leading-5 text-muted-foreground">{q.description}</span></div>)}</div>
     </section>
 
-    <section className="grid gap-7 border-b border-border py-10 sm:grid-cols-[auto_minmax(0,1fr)]" aria-labelledby="mp3-title">
+    <section className="grid gap-7 py-10 sm:grid-cols-[auto_minmax(0,1fr)]" aria-labelledby="mp3-title">
       <div aria-hidden="true" className="flex items-center gap-3 sm:flex-col"><span className="grid size-16 place-items-center rounded-lg bg-chart-2/10 text-4xl">🎵</span><span className="text-lg font-bold text-chart-2">MP3</span></div>
       <div><h2 id="mp3-title" className="text-xl font-bold sm:text-2xl">Facebook Video & Reels to MP3</h2>
         <p className="mt-3 text-sm leading-7 text-muted-foreground">Save the original sound from a public Facebook video or Reel as an MP3 file. Speech, music, or both stay together exactly as they are in the source—without downloading the full video.</p>
@@ -89,10 +89,10 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
 
     <section className="mx-auto max-w-3xl py-12 sm:py-16" aria-labelledby="faq">
       <div className="flex items-center gap-3"><span aria-hidden="true" className="grid size-9 shrink-0 place-items-center text-3xl">💬</span><h2 id="faq" className="text-2xl font-bold">Frequently Asked Questions</h2></div>
-      <div className="mt-6 divide-y divide-border border-y border-border">{faqs.map(f => <details key={f.q} className="group py-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold [&::-webkit-details-marker]:hidden">{f.q}<ChevronDown aria-hidden="true" className="size-5 shrink-0 text-primary transition-transform group-open:rotate-180 motion-reduce:transition-none" /></summary><p className="mt-3 pr-6 text-sm leading-7 text-muted-foreground">{f.a}</p></details>)}</div>
+      <div className="mt-6">{faqs.map(f => <details key={f.q} className="group py-5"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold [&::-webkit-details-marker]:hidden">{f.q}<ChevronDown aria-hidden="true" className="size-5 shrink-0 text-primary transition-transform group-open:rotate-180 motion-reduce:transition-none" /></summary><p className="mt-3 pr-6 text-sm leading-7 text-muted-foreground">{f.a}</p></details>)}</div>
     </section>
 
-    <section className="border-t border-border pb-12 pt-10 text-center" aria-labelledby="start-title">
+    <section className="pb-12 pt-10 text-center" aria-labelledby="start-title">
       <h2 id="start-title" className="text-2xl font-bold">Start Downloading Facebook Videos</h2>
       <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-muted-foreground">Ready to save a video or Reel? Copy its Facebook link, paste it into the box above, and check the available download options. Enjoy an easy way to save videos for offline viewing.</p>
       <Button onClick={onStart} className="mt-6 gap-2 transition active:scale-[0.96]"><ArrowUp />Back to downloader</Button>
