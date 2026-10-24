@@ -123,8 +123,7 @@ export const startRender = createServerFn({ method: "POST" })
         code: credits ? "credits" : "other",
         error: credits
           ? "Video conversion credits have run out. Add your CloudConvert API key or try again when credits renew."
-          : (json?.message ??
-            "The video conversion service could not accept the request. Please try again later."),
+          : "The video conversion service could not accept the request. Please try again later.",
       };
     }
     return { ok: true, jobId: json.data.id };
@@ -178,8 +177,7 @@ export const renderStatus = createServerFn({ method: "POST" })
         code: credits ? "credits" : "other",
         error: credits
           ? "Video conversion credits have run out. Add your CloudConvert API key or use the HD/SD downloads."
-          : (msg ||
-            "Video processing failed. Please try again. Ho sakta hai ye video merge support na karti ho."),
+          : "Video processing failed. This video may not support combining its audio and video streams.",
       };
     }
 

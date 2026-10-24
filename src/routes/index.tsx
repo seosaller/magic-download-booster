@@ -129,7 +129,7 @@ function Index() {
       const res = await run({ data: { url } });
       setResult(res);
     } catch (err) {
-      setResult({ ok: false, links: [], error: (err as Error).message });
+      setResult({ ok: false, links: [], error: "Unable to complete the request. Please check your connection and try again." });
     } finally {
       setLoading(false);
     }
@@ -174,7 +174,7 @@ function Index() {
       }
       timer.current = setTimeout(() => void poll(jobId, tries + 1), 3000);
     } catch (err) {
-      setRender({ state: "error", progress: 0, error: (err as Error).message });
+      setRender({ state: "error", progress: 0, error: "Unable to complete the request. Please check your connection and try again." });
     }
   }
 
@@ -199,7 +199,7 @@ function Index() {
       }
       void poll(started.jobId);
     } catch (err) {
-      setRender({ state: "error", progress: 0, error: (err as Error).message });
+      setRender({ state: "error", progress: 0, error: "Unable to complete the request. Please check your connection and try again." });
     }
   }
 

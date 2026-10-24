@@ -304,7 +304,7 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
         }
         last = parsed;
       } catch (e) {
-        last = { ok: false, links: [], error: (e as Error).message };
+        last = { ok: false, links: [], error: "Unable to retrieve the video. Please check the public Facebook link and try again." };
       }
     }
     return last;
