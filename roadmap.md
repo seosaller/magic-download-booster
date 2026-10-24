@@ -17,3 +17,4 @@
 - [x] Add free 2K/4K video-and-audio processing without CloudConvert
 - [x] Verify free processing and preserve existing direct video and MP3 downloads
 - [x] Add 1080p Full HD to home and Reels quality content, preserving existing source-based downloads
+- [ ] Add a separate third 1080p download option and verify native source selection, processing, and ready state
