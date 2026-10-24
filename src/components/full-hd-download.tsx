@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { Download, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { FullHdSource } from "@/lib/full-hd";
+import type { VideoLink } from "@/lib/full-hd-fallback";
 
-export function FullHdDownload({ source }: { source?: FullHdSource | undefined }) {
+export function FullHdDownload({ source, fallback }: { source?: FullHdSource | undefined; fallback?: VideoLink | undefined }) {
   const [state, setState] = useState<"idle" | "working" | "done" | "error">("idle");
   const [progress, setProgress] = useState(0);
   const [output, setOutput] = useState<{ url: string; size: number } | null>(null);
@@ -35,6 +36,7 @@ export function FullHdDownload({ source }: { source?: FullHdSource | undefined }
   }
   const size = output?.size ?? source?.size;
   const sizeLabel = size ? ` · ${state === "done" ? "" : "~"}${(size / 1e6).toFixed(1)} MB` : "";
+  if (!source && fallback) return <Button asChild variant="success" className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96] active:brightness-90"><a href={`/api/public/download?type=mp4&name=fb-video-hd&url=${encodeURIComponent(fallback.url)}`}><Download />Download 1080p option · HD fallback{fallback.size ? ` · ${(fallback.size / 1e6).toFixed(1)} MB` : ""}</a></Button>;
   return <>
     {output && state === "done" ? <Button asChild variant="success" className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96] active:brightness-90"><a href={output.url} download="fb-video-1080p.mp4"><Download />Save 1080p file{sizeLabel}</a></Button> : <Button type="button" variant="outline" disabled={!source || state === "working"} onClick={() => void process()} className="h-auto w-full whitespace-normal border-primary py-3 text-primary transition active:scale-[0.96] active:brightness-90">
       {state === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Download />}
