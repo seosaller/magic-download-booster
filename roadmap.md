@@ -12,3 +12,4 @@
 - [x] Verify page navigation and English error messages
 - [x] Add MP3 quality choices with default 320 kbps to both download flows
 - [x] Verify actual MP3 output bitrate and quality switching (real MP3 stream: 320000 bits/s)
+- [x] Keep only 320 kbps MP3 in both download flows; remove other quality choices

@@ -2,7 +2,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { startRender, startMp3, renderStatus } from "@/lib/render.functions";
-import { mp3Source, mp3Qualities, type Mp3Bitrate } from "@/lib/mp3";
+import { mp3Source } from "@/lib/mp3";
 import { Button } from "@/components/ui/button";
 import { HomeContent } from "@/components/home-content";
 import { ReelsContent } from "@/components/reels-content";
@@ -33,7 +33,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
   const [result, setResult] = useState<FbResult | null>(null);
   const [render, setRender] = useState<RenderUi>({ state: "idle", progress: 0 });
   const [mp3, setMp3] = useState<RenderUi>({ state: "idle", progress: 0 });
-  const [mp3Bitrate, setMp3Bitrate] = useState<Mp3Bitrate>(320);
+  const mp3Bitrate = 320;
   const [apiKey, setApiKey] = useState("");
   const [keyOpen, setKeyOpen] = useState(false);
   const [pasteError, setPasteError] = useState("");
@@ -363,18 +363,6 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                       </div>
                     )}
 
-                    <fieldset className="mt-2 min-w-0 border-t border-border pt-3" disabled={mp3.state === "working"}>
-                      <legend className="px-1 text-sm font-semibold">MP3 audio quality</legend>
-                      <div className="grid grid-cols-3 gap-2" role="group" aria-label="MP3 audio quality">
-                        {mp3Qualities.map(quality => <Button key={quality.bitrate} type="button" variant={mp3Bitrate === quality.bitrate ? "default" : "outline"} aria-pressed={mp3Bitrate === quality.bitrate} disabled={mp3.state === "working"} onClick={() => {
-                          if (mp3Bitrate === quality.bitrate) return;
-                          setMp3Bitrate(quality.bitrate);
-                          setMp3({ state: "idle", progress: 0 });
-                        }} className="h-auto min-w-0 flex-col gap-0.5 px-1 py-2 transition active:scale-[0.96]">
-                          <span className="text-sm font-semibold">{quality.bitrate} kbps</span><span className="text-xs opacity-80">{quality.label}</span>
-                        </Button>)}
-                      </div>
-                    </fieldset>
                     {mp3.state === "done" && mp3.url ? (
                       <Button asChild className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96] active:brightness-90">
                         <a href={dl(mp3.url, "mp3", `audio-${mp3Bitrate}kbps`)}><Download />Download MP3 · {mp3Bitrate} kbps</a>

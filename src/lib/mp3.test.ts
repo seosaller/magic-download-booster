@@ -7,12 +7,10 @@ describe("MP3 downloads", () => {
     expect(parseMp3Bitrate(undefined)).toBe(320);
     expect(mp3Job("https://video.fbcdn.net/audio").tasks["convert-audio"].audio_bitrate).toBe(320);
   });
-  test("passes each supported quality to the encoder", () => {
-    for (const bitrate of [128, 192, 320] as const) {
-      expect(parseMp3Bitrate(bitrate)).toBe(bitrate);
-      expect(mp3Job("https://video.fbcdn.net/audio", bitrate).tasks["convert-audio"].audio_bitrate).toBe(bitrate);
-    }
-    expect(() => parseMp3Bitrate(999)).toThrow();
+  test("supports only 320 kbps and rejects other qualities", () => {
+    expect(parseMp3Bitrate(320)).toBe(320);
+    expect(mp3Job("https://video.fbcdn.net/audio", 320).tasks["convert-audio"].audio_bitrate).toBe(320);
+    for (const bitrate of [128, 192, 999]) expect(() => parseMp3Bitrate(bitrate)).toThrow();
   });
   test("keeps the original audio stream including speech and music", () => {
     expect(mp3Source({ ok: true, links: [{ quality: "SD", url: "video" }], render: { label: "2K", height: 1440, video: "hq", audio: "original-audio" } })).toBe("original-audio");
