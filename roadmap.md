@@ -5,5 +5,5 @@
 
 - [x] Render merge path fix (/input/{task}/file, /output/)
 - [x] Credits-exceeded fallback message + user apna CloudConvert key add kar sakta hai (localStorage)
-- [ ] Add fourth MP3 option with real audio conversion and direct device download
-- [ ] Test MP3 conversion, fallback errors and direct download
+- [x] Add fourth MP3 option with real audio conversion and direct device download
+- [x] Test MP3 conversion, fallback errors and direct download (real 21-second MP3 verified)
