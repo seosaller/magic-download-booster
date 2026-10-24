@@ -1,12 +1,12 @@
 {
   "scope": "Focused downloadable PHP archive revision; no website or backend migration requested",
   "capabilities": [
-    {"capability":"PHP code and existing pages", "source":"public_html-2.zip", "outcome":"preserve", "status":"inspected", "next_action":"Add formats only"},
+    {"capability":"PHP code and existing pages", "source":"public_html-2.zip", "outcome":"preserved; only four original files changed for format integration", "status":"verified", "next_action":null},
     {"capability":"schema, records, auth identities, authorization", "source":"PHP call sites", "outcome":"absent", "status":"inspected", "next_action":null},
-    {"capability":"assets and conversion engine", "source":"public/mp3", "outcome":"copy shared browser engine into PHP ZIP", "status":"pending", "next_action":"Package engine"},
+    {"capability":"assets and conversion engine", "source":"public/mp3", "outcome":"shared engine included in inspected ZIP", "status":"verified", "next_action":null},
     {"capability":"external providers and secrets", "source":"PHP call sites", "outcome":"Facebook public extraction retained; no paid conversion service", "status":"inspected", "next_action":null},
     {"capability":"public endpoints and cutover", "source":"ajax.php, download.php, render.php, .htaccess", "outcome":"preserve; user uploads revised files", "status":"pending", "next_action":"Verify archive locally; production host test remains user-side"},
     {"capability":"callbacks, webhooks, schedules", "source":"archive", "outcome":"absent", "status":"inspected", "next_action":null},
-    {"capability":"native 2K/4K and MP3", "source":"requested formats", "outcome":"add availability-based browser processing", "status":"pending", "next_action":"Implement and test"}
+    {"capability":"native 2K/4K and MP3", "source":"requested formats", "outcome":"availability tests passed; real Facebook MP3 passed; 2560x1440 and 3840x2160 fixture mux preserves dimensions and audio", "status":"partially_verified", "next_action":"Real Facebook 2K/4K verification requires an available high-resolution link on deployed PHP hosting"}
   ]
 }
