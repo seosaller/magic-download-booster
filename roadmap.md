@@ -13,4 +13,4 @@
 - [x] Add MP3 quality choices with default 320 kbps to both download flows
 - [x] Verify actual MP3 output bitrate and quality switching (real MP3 stream: 320000 bits/s)
 - [x] Keep only 320 kbps MP3 in both download flows; remove other quality choices
-- [ ] Add useful SEO-focused Reels page content and verify its presentation and metadata
+- [x] Add useful SEO-focused Reels page content and verify its presentation and metadata
