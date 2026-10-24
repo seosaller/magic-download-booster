@@ -11,6 +11,7 @@ export type RenderStatus = {
   status: "waiting" | "processing" | "finished" | "error";
   progress: number;
   url?: string | undefined;
+  size?: number | undefined;
   error?: string | undefined;
   code?: "credits" | "other" | undefined;
 };
@@ -153,7 +154,7 @@ export const renderStatus = createServerFn({ method: "POST" })
           status: string;
           percent?: number;
           message?: string;
-          result?: { files?: { url?: string }[] };
+          result?: { files?: { url?: string; size?: number; filename?: string }[] };
         }[];
       };
     };
@@ -186,7 +187,11 @@ export const renderStatus = createServerFn({ method: "POST" })
       const url = exp?.result?.files?.[0]?.url;
       if (!url)
         return { status: "error", progress: 100, error: "Output file missing." };
-      return { status: "finished", progress: 100, url };
+      const file = exp?.result?.files?.[0];
+      const outputFile = tasks.find((t) => t.operation === "convert" || t.operation === "command")?.result?.files?.find((f) => !file?.filename || f.filename === file.filename);
+      const bytes = file?.size ?? outputFile?.size;
+      const size = typeof bytes === "number" && Number.isFinite(bytes) && bytes > 0 ? bytes : undefined;
+      return { status: "finished", progress: 100, url, size };
     }
 
     return {

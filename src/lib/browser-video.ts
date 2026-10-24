@@ -3,7 +3,7 @@ import wasmAsset from "../../public/wasm/ffmpeg-core.wasm.asset.json";
 import classWorkerURL from "./video-worker?worker&url";
 import { assertLocalVideoSize, videoMergeArgs } from "./video-merge";
 
-export async function mergeBrowserVideo(video: string, audio: string, signal: AbortSignal, progress: (value: number) => void): Promise<string> {
+export async function mergeBrowserVideo(video: string, audio: string, signal: AbortSignal, progress: (value: number) => void): Promise<{ url: string; size: number }> {
   const { FFmpeg } = await import("@ffmpeg/ffmpeg");
   const ffmpeg = new FFmpeg();
   const controller = new AbortController();
@@ -49,7 +49,7 @@ export async function mergeBrowserVideo(video: string, audio: string, signal: Ab
     if (typeof output === "string" || !output.byteLength) throw new Error("The processed video is empty. Please try again.");
     const blob = new Blob([new Uint8Array(output)], { type: "video/mp4" });
     progress(100);
-    return URL.createObjectURL(blob);
+    return { url: URL.createObjectURL(blob), size: blob.size };
   } catch (error) {
     if (controller.signal.aborted) throw new Error("Free video processing stopped or took too long. Try CloudConvert or download HD/SD instead.");
     if (error instanceof Error && /too large|source is unavailable|processing failed|processed video is empty/.test(error.message)) throw error;

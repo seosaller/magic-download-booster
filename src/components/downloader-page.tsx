@@ -13,6 +13,7 @@ type RenderUi = {
   state: "idle" | "working" | "done" | "error";
   progress: number;
   url?: string;
+  size?: number | undefined;
   error?: string;
   needKey?: boolean;
 };
@@ -113,7 +114,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
     try {
       const s = await check({ data: { jobId, apiKey } });
       if (s.status === "finished" && s.url) {
-        setRender({ state: "done", progress: 100, url: s.url });
+        setRender({ state: "done", progress: 100, url: s.url, size: s.size });
         return;
       }
       if (s.status === "error") {
@@ -155,9 +156,9 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
       const output = await mergeBrowserVideo(source.video, source.audio, controller.signal, (progress) => {
         if (requestVersion.current === version && !controller.signal.aborted) setRender({ state: "working", progress });
       });
-      if (requestVersion.current !== version || controller.signal.aborted) { URL.revokeObjectURL(output); return; }
-      localFile.current = output;
-      setRender({ state: "done", progress: 100, url: output });
+      if (requestVersion.current !== version || controller.signal.aborted) { URL.revokeObjectURL(output.url); return; }
+      localFile.current = output.url;
+      setRender({ state: "done", progress: 100, url: output.url, size: output.size });
     } catch (error) {
       if (requestVersion.current === version && !controller.signal.aborted) setRender({ state: "error", progress: 0, error: error instanceof Error ? error.message : "Free video processing failed. Please try again." });
     }
@@ -193,7 +194,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
       const status = await check({ data: { jobId, apiKey: key } });
       if (requestVersion.current !== version) return;
       if (status.status === "finished" && status.url) {
-        setMp3({ state: "done", progress: 100, url: status.url });
+        setMp3({ state: "done", progress: 100, url: status.url, size: status.size });
         return;
       }
       if (status.status === "error" || tries >= 120) {
@@ -375,7 +376,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                         )}
                         className="w-full cursor-pointer rounded-lg px-4 py-3 text-center text-sm font-semibold transition active:scale-[0.96] active:brightness-90"
                       >
-                        Save {result.render?.label ?? "HQ"} file
+                        Save {result.render?.label ?? "HQ"} file{render.size ? ` · ${fmtSize(render.size)}` : ""}
                       </a>
                       </Button>
                     )}
@@ -405,7 +406,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
 
                     {mp3.state === "done" && mp3.url ? (
                       <Button asChild variant="success" className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96] active:brightness-90">
-                        <a href={dl(mp3.url, "mp3", `audio-${mp3Bitrate}kbps`)}><Download />Download MP3 · {mp3Bitrate} kbps</a>
+                        <a href={dl(mp3.url, "mp3", `audio-${mp3Bitrate}kbps`)}><Download />Download MP3 · {mp3Bitrate} kbps{mp3.size ? ` · ${fmtSize(mp3.size)}` : ""}</a>
                       </Button>
                     ) : (
                       <Button type="button" variant="outline" onClick={() => void onMp3()} disabled={mp3.state === "working"} className="h-auto w-full whitespace-normal border-primary py-3 text-primary transition active:scale-[0.96] active:brightness-90">
