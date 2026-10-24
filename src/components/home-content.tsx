@@ -33,7 +33,7 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
     <section className="py-12 sm:py-16" aria-labelledby="home-intro">
       <div className="mx-auto max-w-3xl text-center">
         <h2 id="home-intro" className="text-2xl font-bold sm:text-3xl">Facebook Video Downloader</h2>
-        <p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">Download Facebook videos and Reels in HD, 2K, and 4K quality with ease. Just copy the video link from Facebook, paste it into the downloader, and get your video in a few clicks. No app installation or account login is needed.</p>
+        <p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">Download Facebook videos and Reels in HD, 1080p, 2K, and 4K quality when available. Just copy the video link from Facebook, paste it into the downloader, and get your video in a few clicks. No app installation or account login is needed.</p>
       </div>
       <h3 className="mt-10 text-center text-lg font-semibold">How to Download Facebook Videos</h3>
       <ol className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -45,9 +45,10 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
     </section>
 
     <section className="grid items-center gap-8 py-10 lg:grid-cols-[minmax(0,1fr)_auto]" aria-labelledby="quality-title">
-      <div><h2 id="quality-title" className="text-xl font-bold sm:text-2xl">Download Facebook Videos in HD, 2K, and 4K</h2><p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">Save your favorite Facebook videos in the best quality available. Our tool helps you download videos in HD, Full HD, 2K, or 4K when the original video and source link support these options.</p></div>
-      <div className="grid grid-cols-3 gap-3" aria-label="Available source resolutions">{[
+      <div><h2 id="quality-title" className="text-xl font-bold sm:text-2xl">Download Facebook Videos in HD, 1080p, 2K, and 4K</h2><p className="mt-3 max-w-2xl text-sm leading-7 text-muted-foreground">Save your favorite Facebook videos in the best quality available. Our tool helps you download videos in HD, 1080p Full HD, 2K, or 4K when the original video and source link support these options.</p></div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2" aria-label="Available source resolutions">{[
         { label: "HD", description: "High definition", emoji: "🎞️", tone: "border-primary/20 bg-primary/5 text-primary" },
+        { label: "1080p", description: "Full HD", emoji: "📺", tone: "border-chart-3/20 bg-chart-3/5 text-chart-3" },
         { label: "2K", description: "Sharper detail", emoji: "💎", tone: "border-chart-2/20 bg-chart-2/5 text-chart-2" },
         { label: "4K", description: "Ultra HD", emoji: "🚀", tone: "border-chart-1/20 bg-chart-1/5 text-chart-1" },
       ].map(q => <div key={q.label} className={`flex min-w-0 flex-col items-center rounded-lg border px-3 py-4 text-center lg:w-28 ${q.tone}`}><span aria-hidden="true" className="grid size-9 place-items-center text-3xl">{q.emoji}</span><span className="mt-2 text-2xl font-bold">{q.label}</span><span className="mt-1 text-xs leading-5 text-muted-foreground">{q.description}</span></div>)}</div>
