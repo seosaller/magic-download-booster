@@ -5,5 +5,5 @@
 - [x] Add available native 2K/4K and MP3 to the uploaded PHP script without other changes.
 - [x] Verify format selection, real Facebook MP3, fixture 2K/4K mux and revised PHP ZIP.
 - [x] PHP hosting verification cancelled when the user left the PHP script.
-- [ ] Add native 2K/4K and MP3 audio-source fallback to the current Lovable website without changing the design.
-- [ ] Test quality availability and browser downloads on the website.
+- [x] Add native 2K/4K and MP3 audio-source fallback to the current Lovable website without changing the design.
+- [x] Test quality availability, real Facebook MP3, fallback MP3 and fixture-based native 2K/4K browser downloads with audio.
