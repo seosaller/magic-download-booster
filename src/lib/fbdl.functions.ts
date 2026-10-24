@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { nativeFormats } from './fb-formats';
+import { decodeMedia } from './media-download';
 
 export type FbResult = {
   ok: boolean;
@@ -38,7 +39,7 @@ function decode(raw: string) {
 function firstMatch(html: string, patterns: RegExp[]) {
   for (const re of patterns) {
     const m = html.match(re);
-    if (m?.[1]) return decode(m[1]);
+    if (m?.[1]) return /^(?:https?:|https?\\)/.test(m[1]) ? decodeMedia(m[1]) : decode(m[1]);
   }
   return undefined;
 }
@@ -158,23 +159,26 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
         : []),
     ];
     let last: FbResult = { ok: false, links: [], error: "Video not found." };
+    let best: FbResult | undefined;
     for (const v of variants) {
       try {
         const html = await fetchHtml(v.url, v.mobile);
         const parsed = parse(html);
         if (parsed.ok) {
-          const sizes = await Promise.all(
-            parsed.links.map((l) => headSize(l.url)),
-          );
-          parsed.links.forEach((l, i) => {
-            l.size = sizes[i];
-          });
-          return parsed;
+          if (!best) best = parsed;
+          else {
+            for (const link of parsed.links) if (!best.links.some(existing => existing.quality === link.quality)) best.links.push(link);
+            best.audioSources = [...new Set([...(best.audioSources ?? []), ...(parsed.audioSources ?? [])])];
+          }
+          if (best.links.some(l => l.quality === '4K') && best.links.some(l => l.quality === '2K')) break;
         }
         last = parsed;
       } catch (e) {
         last = { ok: false, links: [], error: (e as Error).message };
       }
     }
-    return last;
+    if (!best) return last;
+    const sizes = await Promise.all(best.links.map(l => headSize(l.url)));
+    best.links.forEach((l, i) => { l.size = sizes[i]; });
+    return best;
   });
