@@ -348,7 +348,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                         {result.render.size
                           ? ` · ~${fmtSize(result.render.size)}`
                           : ""}
-                        · free)
+                        )
                       </Button>
                     )}
 
@@ -402,7 +402,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                           onClick={() => void onFreeRender()}
                           className="mt-2 text-primary"
                         >
-                          Retry free processing
+                          Retry processing
                         </Button>
                         <Button type="button" variant="outline" onClick={() => void onRender()} className="mt-2 whitespace-normal">Use CloudConvert instead</Button>
                       </div>
