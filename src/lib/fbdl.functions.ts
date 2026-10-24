@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { findFullHdSource, type FullHdSource } from "./full-hd";
 
 export type FbResult = {
   ok: boolean;
@@ -6,6 +7,7 @@ export type FbResult = {
   title?: string | undefined;
   thumbnail?: string | undefined;
   links: { quality: string; url: string; size?: number | undefined }[];
+  fullHd?: FullHdSource | undefined;
   render?:
     | {
         label: string;
@@ -209,7 +211,7 @@ function parse(html: string): FbResult {
     parseDash(html.replace(/\\"/g, '"').replace(/\\\//g, "/")) ??
     parseRepresentations(html);
 
-  return { ok: true, title, thumbnail, links, render };
+  return { ok: true, title, thumbnail, links, render, fullHd: findFullHdSource(html) };
 }
 
 async function headSize(url: string): Promise<number | undefined> {
@@ -273,13 +275,14 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
         if (parsed.ok) {
           // Reels often render only the plain HD/SD streams; the watch page for
           // the same video id still carries the high-res DASH representations.
-          if (!parsed.render) {
+          if (!parsed.render || !parsed.fullHd) {
             const rid = id ?? videoId(v.url, html);
             const rv = rid ? renderVariants(rid)[0] : undefined;
             if (rv && rv.url !== v.url) {
               try {
                 const alt = parse(await fetchHtml(rv.url, rv.mobile));
                 if (alt.render) parsed.render = alt.render;
+                if (alt.fullHd) parsed.fullHd = alt.fullHd;
               } catch {
                 /* keep the plain HD/SD links */
               }
@@ -300,6 +303,10 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
           });
           if (parsed.render)
             parsed.render.size = sizes[sizes.length - 1] ?? undefined;
+          if (parsed.fullHd) {
+            const [videoSize, audioSize] = await Promise.all([headSize(parsed.fullHd.video), headSize(parsed.fullHd.audio)]);
+            parsed.fullHd.size = videoSize && audioSize ? videoSize + audioSize : undefined;
+          }
           return parsed;
         }
         last = parsed;
