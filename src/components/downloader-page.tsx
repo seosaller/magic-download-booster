@@ -369,7 +369,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                       </Button>
                     ) : (
                       <Button type="button" variant="outline" onClick={() => void onMp3()} disabled={mp3.state === "working"} className="h-auto w-full whitespace-normal border-primary py-3 text-primary transition active:scale-[0.96] active:brightness-90">
-                        {mp3.state === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Music />}
+                        {mp3.state === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Music className="text-chart-2 [&_path]:stroke-chart-1 [&_circle]:fill-chart-2/20" />}
                         {mp3.state === "working" ? `Rendering MP3 · ${mp3Bitrate} kbps… ${mp3.progress}%` : mp3.state === "error" ? `Retry MP3 · ${mp3Bitrate} kbps` : `Download MP3 · ${mp3Bitrate} kbps (render)`}
                       </Button>
                     )}
