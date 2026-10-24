@@ -13,16 +13,10 @@ export function isFacebookMediaUrl(value: string): boolean {
   }
 }
 
-export const mp3Qualities = [
-  { bitrate: 128, label: "Standard" },
-  { bitrate: 192, label: "High" },
-  { bitrate: 320, label: "Best" },
-] as const;
-export type Mp3Bitrate = (typeof mp3Qualities)[number]["bitrate"];
+export type Mp3Bitrate = 320;
 export function parseMp3Bitrate(value: unknown): Mp3Bitrate {
-  if (value === undefined) return 320;
-  if (value === 128 || value === 192 || value === 320) return value;
-  throw new Error("Choose a supported MP3 bitrate: 128, 192 or 320 kbps.");
+  if (value === undefined || value === 320) return 320;
+  throw new Error("MP3 downloads support only 320 kbps.");
 }
 
 export function mp3Job(source: string, bitrate: Mp3Bitrate = 320) {
