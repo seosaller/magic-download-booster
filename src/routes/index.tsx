@@ -5,6 +5,7 @@ import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { startRender, startMp3, renderStatus } from "@/lib/render.functions";
 import { mp3Source } from "@/lib/mp3";
 import { Button } from "@/components/ui/button";
+import { HomeContent } from "@/components/home-content";
 import { Download, Music, LoaderCircle, Clipboard, X } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -31,32 +32,6 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
-
-const steps = [
-  { n: "1", t: "Open Facebook", d: "Find the video or reel you want to save." },
-  { n: "2", t: "Copy the link", d: "Use the Share menu and tap Copy link." },
-  { n: "3", t: "Paste it here", d: "Drop the link in the box above." },
-  { n: "4", t: "Download", d: "Pick SD, HD or 2K/4K render and save it." },
-];
-
-const faqs = [
-  {
-    q: "Is it free?",
-    a: "Yes. Every download is completely free and there is no signup.",
-  },
-  {
-    q: "Do I need to install anything?",
-    a: "No. It works right in your browser on phone, tablet and desktop.",
-  },
-  {
-    q: "Which videos work?",
-    a: "Any public Facebook video or reel. Private or friends-only videos cannot be downloaded.",
-  },
-  {
-    q: "Which quality can I get?",
-    a: "SD and HD download instantly. When Facebook has a higher resolution, a 2K/4K option appears that is rendered for you in about a minute.",
-  },
-];
 
 type RenderUi = {
   state: "idle" | "working" | "done" | "error";
@@ -485,49 +460,10 @@ function Index() {
           </section>
         )}
 
-        <section className="py-14">
-          <div className="grid gap-6 text-center sm:grid-cols-2 lg:grid-cols-4">
-            {steps.map((s) => (
-              <div
-                key={s.n}
-                className="rounded-xl border border-border bg-card p-6"
-              >
-                <span className="mx-auto grid h-10 w-10 place-items-center rounded-full hero-gradient font-bold text-primary-foreground">
-                  {s.n}
-                </span>
-                <h2 className="mt-3 text-base font-semibold">{s.t}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{s.d}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-3xl pb-16">
-          <h2 className="text-xl font-bold">
-            Free Facebook video and reel downloader
-          </h2>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Paste the link of any public Facebook video or reel and save it to
-            your device in seconds. No account, no app install and no limits on
-            how many videos you download. Works on Android, iPhone, Windows and
-            Mac.
-          </p>
-
-          <h2 id="faq" className="mt-10 text-xl font-bold">
-            Frequently asked questions
-          </h2>
-          <div className="mt-4 space-y-3">
-            {faqs.map((f) => (
-              <div
-                key={f.q}
-                className="rounded-lg border border-border bg-card p-4"
-              >
-                <h3 className="text-sm font-semibold">{f.q}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{f.a}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        <HomeContent onStart={() => {
+          urlInput.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "center" });
+          urlInput.current?.focus({ preventScroll: true });
+        }} />
       </main>
 
 
