@@ -11,7 +11,7 @@ const steps = [
 
 const faqs = [
   { question: "How do I download Facebook Reels with a link?", answer: "Open a public Reel on Facebook, select Share and copy its link. Paste it into the box above and press Download. Once processing finishes, choose an available video download or convert the sound to MP3." },
-  { question: "Can I download Facebook Reels in HD, 2K or 4K?", answer: "HD and SD downloads appear when those streams are available. A higher-resolution conversion option may appear when supported by the source. Not every Reel has HD, 2K or 4K video, and this tool does not upscale a lower-resolution original." },
+  { question: "Can I download Facebook Reels in HD, 1080p, 2K or 4K?", answer: "HD and SD downloads appear when those streams are available. Native 1080p Full HD, 2K or 4K video can be combined with its original audio using free browser processing when available. Not every Reel offers these resolutions, and this tool does not upscale a lower-resolution original." },
   { question: "Can I convert Facebook Reels to MP3 at 320 kbps?", answer: "Yes. After processing a supported Reel, choose Download MP3 · 320 kbps. Keep the page open during conversion, then save the finished MP3. Speech and music remain together. A 320 kbps file does not restore detail missing from the original sound, and a silent Reel cannot produce meaningful audio." },
   { question: "Does the Reels downloader work on Android and iPhone?", answer: "You can use the page in a browser on Android, iPhone, tablets and computers. On phones and tablets, paste your link in the top row and press Download below it. File saving and playback depend on your browser and device." },
   { question: "Can I download private or friends-only Facebook Reels?", answer: "No. This tool supports accessible public content, not private, friends-only or login-restricted Reels. It does not bypass Facebook privacy settings. Only save content you own or have permission to download." },
@@ -34,9 +34,10 @@ export function ReelsContent() {
     <section className="py-12" aria-labelledby="reels-quality">
       <div className="flex items-center gap-3"><span aria-hidden="true" className="text-3xl">💎</span><h2 id="reels-quality" className="text-2xl font-bold">Facebook Reels video quality: HD, SD and higher resolutions</h2></div>
       <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground">Choose from the qualities actually available for your Reel. HD offers more detail when the original supports it; SD is useful when a smaller file matters more. Higher-resolution video may need processing to combine its video and audio streams before saving.</p>
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">{[
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[
         { icon: "🎞️", title: "HD video", text: "Save the available high-definition stream.", tone: "bg-primary/5 border-primary/20" },
         { icon: "📦", title: "SD video", text: "Choose the standard-definition option when available.", tone: "bg-chart-2/5 border-chart-2/20" },
+        { icon: "📺", title: "1080p Full HD", text: "Save native Full HD with original audio when the source supports it.", tone: "bg-chart-3/5 border-chart-3/20" },
         { icon: "🚀", title: "2K & 4K sources", text: "Higher resolutions depend on the original Reel—not upscaling.", tone: "bg-chart-1/5 border-chart-1/20" },
       ].map(item => <article key={item.title} className={`rounded-lg border p-5 ${item.tone}`}><span aria-hidden="true" className="text-3xl">{item.icon}</span><h3 className="mt-3 text-base font-semibold">{item.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p></article>)}</div>
     </section>

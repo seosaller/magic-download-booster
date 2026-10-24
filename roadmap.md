@@ -16,3 +16,4 @@
 - [x] Add useful SEO-focused Reels page content and verify its presentation and metadata
 - [x] Add free 2K/4K video-and-audio processing without CloudConvert
 - [x] Verify free processing and preserve existing direct video and MP3 downloads
+- [x] Add 1080p Full HD to home and Reels quality content, preserving existing source-based downloads
