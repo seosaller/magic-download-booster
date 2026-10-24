@@ -1,0 +1,1 @@
+import "../../node_modules/@ffmpeg/ffmpeg/dist/esm/worker.js";

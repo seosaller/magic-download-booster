@@ -84,7 +84,7 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
       <h2 id="benefits-title" className="text-2xl font-bold">Why people use FB Download Hub</h2>
       <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">A straightforward tool built around three things: speed, video quality, and not asking for anything you don't need to give.</p>
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{benefits.map(item => <article key={item.title} className="rounded-lg border border-border bg-card px-5 py-7"><span aria-hidden="true" className="mx-auto grid size-10 place-items-center text-3xl">{item.emoji}</span><h3 className="mt-4 text-base font-semibold">{item.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p></article>)}</div>
-      <p className="mt-6 text-xs leading-5 text-muted-foreground">MP3 and high-quality conversions depend on CloudConvert availability and conversion credits.</p>
+      <p className="mt-6 text-xs leading-5 text-muted-foreground">High-quality video can be combined free on your device when supported. Large files may need CloudConvert; MP3 conversion still requires CloudConvert credits.</p>
     </section>
 
     <section className="mx-auto max-w-3xl py-12 sm:py-16" aria-labelledby="faq">
