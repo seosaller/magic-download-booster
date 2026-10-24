@@ -3,6 +3,15 @@ const base = new URL('./', import.meta.url);
 const MAX_INPUT_BYTES = 128 * 1024 * 1024;
 
 export async function createMp3(source, onStatus = () => {}) {
+  const sources = String(source).split('|').filter(Boolean);
+  let lastError;
+  for (const one of sources) {
+    try { return await createMp3From(one, onStatus); } catch (error) { lastError = error; }
+  }
+  throw lastError || new Error('MP3 conversion failed. Please try again.');
+}
+
+async function createMp3From(source, onStatus) {
   let engine;
   let wasmUrl;
   try {
@@ -49,8 +58,9 @@ export async function createMp3(source, onStatus = () => {}) {
     let offset = 0;
     for (const chunk of chunks) { input.set(chunk, offset); offset += chunk.byteLength; }
     await engine.writeFile('source.mp4', input);
-    const code = await engine.exec(['-i', 'source.mp4', '-map', '0:a:0', '-vn', '-c:a', 'libmp3lame', '-b:a', '192k', 'audio.mp3'], 180000);
-    if (code !== 0) throw new Error('MP3 could not be created. This video may have no audio. HD/SD downloads are still available.');
+    let code = await engine.exec(['-i', 'source.mp4', '-map', '0:a:0', '-vn', '-c:a', 'libmp3lame', '-b:a', '192k', 'audio.mp3'], 180000);
+    if (code !== 0) code = await engine.exec(['-y', '-i', 'source.mp4', '-vn', '-ac', '2', '-ar', '44100', '-c:a', 'libmp3lame', '-q:a', '2', 'audio.mp3'], 180000);
+    if (code !== 0) throw new Error('MP3 could not be created from this video. HD/SD downloads are still available.');
     const output = await engine.readFile('audio.mp3');
     if (!(output instanceof Uint8Array) || output.byteLength === 0) throw new Error('MP3 conversion returned no audio.');
     return new Blob([output], { type: 'audio/mpeg' });
