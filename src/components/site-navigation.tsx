@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 
 const pages = [
+  { to: "/facebook-reels-downloader", label: "Reels Downloader" },
   { to: "/about", label: "About" },
   { to: "/help", label: "Help" },
   { to: "/privacy", label: "Privacy" },
@@ -15,7 +16,8 @@ export function SiteHeader() {
       <Button asChild variant="ghost" className="h-auto gap-2 p-0 text-lg font-bold hover:bg-transparent">
         <Link to="/"><span className="grid h-9 w-9 place-items-center rounded-lg hero-gradient text-primary-foreground">FB</span><span>Download Hub</span></Link>
       </Button>
-      <div className="flex gap-1">
+      <div className="flex flex-wrap gap-1">
+        <Button asChild variant="ghost" className="text-primary transition active:scale-[0.96]"><Link to="/facebook-reels-downloader" activeProps={{ className: "bg-accent" }}>Reels</Link></Button>
         <Button asChild variant="ghost" className="text-primary transition active:scale-[0.96]"><Link to="/about" activeProps={{ className: "bg-accent" }}>About</Link></Button>
         <Button asChild className="transition active:scale-[0.96]"><Link to="/help">Help</Link></Button>
       </div>
