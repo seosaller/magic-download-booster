@@ -1,4 +1,6 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const pages = [
@@ -11,15 +13,19 @@ const pages = [
 ] as const;
 
 export function SiteHeader() {
+  const [menuOpen, setMenuOpen] = useState(false);
   return <header className="border-t-4 border-primary bg-card shadow-sm">
-    <nav aria-label="Main navigation" className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-4 py-4">
-      <Button asChild variant="ghost" className="h-auto gap-2 p-0 text-lg font-bold hover:bg-transparent">
-        <Link to="/"><span className="grid h-9 w-9 place-items-center rounded-lg hero-gradient text-primary-foreground">FB</span><span>Download Hub</span></Link>
+    <nav aria-label="Main navigation" onKeyDown={event => { if (event.key === "Escape") setMenuOpen(false); }} className="container mx-auto grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 px-4 py-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
+      <Button asChild variant="ghost" className="h-auto min-w-0 justify-self-start gap-2 p-0 text-lg font-bold hover:bg-transparent">
+        <Link to="/" onClick={() => setMenuOpen(false)}><span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg hero-gradient text-primary-foreground">FB</span><span className="min-w-0 truncate">Download Hub</span></Link>
       </Button>
-      <div className="flex flex-wrap gap-1">
-        <Button asChild variant="ghost" className="text-primary transition active:scale-[0.96]"><Link to="/facebook-reels-downloader" activeProps={{ className: "bg-accent" }}>Reels</Link></Button>
-        <Button asChild variant="ghost" className="text-primary transition active:scale-[0.96]"><Link to="/about" activeProps={{ className: "bg-accent" }}>About</Link></Button>
-        <Button asChild className="transition active:scale-[0.96]"><Link to="/help">Help</Link></Button>
+      <Button type="button" variant="ghost" size="icon" aria-label={menuOpen ? "Close menu" : "Open menu"} title={menuOpen ? "Close menu" : "Open menu"} aria-expanded={menuOpen} aria-controls="header-menu" onClick={() => setMenuOpen(open => !open)} className="size-11 shrink-0 justify-self-end text-primary transition active:scale-[0.96] lg:hidden">
+        {menuOpen ? <X /> : <Menu />}
+      </Button>
+      <div id="header-menu" className={`${menuOpen ? "grid" : "hidden"} col-span-2 min-w-0 gap-2 pt-4 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:flex lg:items-center lg:justify-center lg:gap-1 lg:pt-0`}>
+        <Button asChild variant="ghost" className="h-11 justify-start text-primary transition active:scale-[0.96] lg:h-9 lg:justify-center"><Link to="/facebook-reels-downloader" onClick={() => setMenuOpen(false)} activeProps={{ className: "bg-accent" }}>Reels</Link></Button>
+        <Button asChild variant="ghost" className="h-11 justify-start text-primary transition active:scale-[0.96] lg:h-9 lg:justify-center"><Link to="/about" onClick={() => setMenuOpen(false)} activeProps={{ className: "bg-accent" }}>About</Link></Button>
+        <Button asChild className="h-11 justify-start transition active:scale-[0.96] lg:h-9 lg:justify-center"><Link to="/help" onClick={() => setMenuOpen(false)}>Help</Link></Button>
       </div>
     </nav>
   </header>;
@@ -27,8 +33,8 @@ export function SiteHeader() {
 
 export function SiteFooter() {
   return <footer className="mt-auto bg-foreground px-4 py-8 text-center text-sm text-background">
-    <nav aria-label="Footer navigation" className="mb-4 flex flex-wrap justify-center gap-x-2 gap-y-1">
-      {pages.map(page => <Button asChild variant="ghost" key={page.to} className="text-background transition hover:bg-background/10 hover:text-background active:scale-[0.96]"><Link to={page.to} activeProps={{ className: "underline" }}>{page.label}</Link></Button>)}
+    <nav aria-label="Footer navigation" className="mx-auto mb-4 grid max-w-3xl grid-cols-2 gap-x-2 gap-y-1 sm:grid-cols-3 lg:flex lg:flex-wrap lg:justify-center">
+      {pages.map(page => <Button asChild variant="ghost" key={page.to} className="h-auto min-h-11 min-w-0 whitespace-normal text-background transition hover:bg-background/10 hover:text-background active:scale-[0.96]"><Link to={page.to} activeProps={{ className: "underline" }}>{page.label}</Link></Button>)}
     </nav>
     <p>© {new Date().getFullYear()} FB Download Hub</p>
     <p className="mt-2 text-background/70">Download only content you own or have permission to save.</p>
