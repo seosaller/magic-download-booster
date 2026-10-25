@@ -114,7 +114,12 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
     setPasteError("");
     setAcceptedPaste(false);
     try {
+      if (!navigator.clipboard?.readText) throw new Error("Clipboard unavailable");
       const text = await navigator.clipboard.readText();
+      if (!text.trim()) {
+        setPasteError("Your clipboard is empty. Copy the Facebook video link first, or paste it into the box manually.");
+        return;
+      }
       setUrl(text.trim());
       setLinkError(facebookLinkError(text));
       setAcceptedPaste(!facebookLinkError(text));
@@ -274,8 +279,10 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
               value={url}
               onChange={(e) => { setUrl(e.target.value); setPasteError(""); setAcceptedPaste(false); setLinkError(linkError ? facebookLinkError(e.target.value) : ""); }}
               onPaste={(e) => {
+                const text = e.clipboardData.getData("text/plain").trim();
+                // Do not suppress the browser's paste if clipboard data is unavailable.
+                if (!text) return;
                 e.preventDefault();
-                const text = e.clipboardData.getData("text").trim();
                 setUrl(text);
                 setPasteError("");
                 setLinkError(facebookLinkError(text));
