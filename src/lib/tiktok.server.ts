@@ -1,7 +1,7 @@
 import { isTikTokMediaUrl, type TikTokVideo } from "./tiktok";
 import { z } from "zod";
 
-const responseSchema = z.object({ code: z.number(), data: z.object({ id: z.string(), title: z.string().optional(), cover: z.string().optional(), play: z.string().optional(), wmplay: z.string().optional(), size: z.number().optional(), wm_size: z.number().optional(), images: z.array(z.string()).optional(), author: z.object({ nickname: z.string().optional() }).optional() }).optional() });
+const responseSchema = z.object({ code: z.number(), data: z.object({ id: z.string(), title: z.string().optional(), cover: z.string().optional(), play: z.string().optional(), wmplay: z.string().optional(), size: z.number().optional(), wm_size: z.number().optional(), images: z.array(z.string()).nullish(), author: z.object({ nickname: z.string().optional() }).optional() }).optional() });
 type ResolvedVideo = { video: TikTokVideo; play: string; wmplay: string | undefined };
 const resolvedVideos = new Map<string, { expires: number; result: ResolvedVideo }>();
 export async function getTikTokVideo(url: string) {
