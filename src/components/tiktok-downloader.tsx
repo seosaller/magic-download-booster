@@ -77,7 +77,7 @@ export function TikTokDownloader({ language }: { language: Language }) {
         const result = await checkMp3({ data: { jobId: job.jobId } });
         if (current !== version.current) return;
         if (result.status === "error") throw new Error(result.error || "MP3 conversion failed.");
-        if (result.status === "finished" && result.url) { setMp3({ status: "done", url: result.url, size: result.size }); return; }
+        if (result.status === "finished" && result.url) { setMp3({ status: "done", url: result.url, size: result.size || 0 }); return; }
         setMp3({ status: "working", progress: result.progress });
       }
       throw new Error("MP3 conversion took too long. Please try again.");
