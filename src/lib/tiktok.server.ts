@@ -2,6 +2,7 @@ import { isTikTokMediaUrl, isShortVideoMediaUrl, shortVideoLinkSchema, type TikT
 import { downloadPlatform, type DownloadPlatform } from "./douyin";
 import { z } from "zod";
 import { resolveEvil0ctalVideo } from "./evil0ctal.server";
+import { resolveKuaishouVideo } from "./kuaishou.server";
 
 const responseSchema = z.object({ code: z.number(), data: z.object({ id: z.string(), title: z.string().optional(), cover: z.string().optional(), play: z.string().optional(), wmplay: z.string().optional(), size: z.number().optional(), wm_size: z.number().optional(), images: z.array(z.string()).nullish(), author: z.object({ nickname: z.string().optional() }).optional() }).optional() });
 type ResolvedVideo = { video: TikTokVideo; play: string; wmplay: string | undefined };
@@ -9,9 +10,15 @@ const resolvedVideos = new Map<string, { expires: number; result: ResolvedVideo 
 export async function getTikTokVideo(url: string) {
   url = shortVideoLinkSchema.parse(url);
   const platform = downloadPlatform(url);
-  const id = /\/video\/(\d+)/.exec(url)?.[1];
-  const cached = resolvedVideos.get(platform === "douyin" ? `douyin:${id || url}` : id || url);
+  const id = /\/(?:video|short-video)\/([a-zA-Z0-9]+)/.exec(url)?.[1];
+  const cached = resolvedVideos.get(platform !== "tiktok" ? `${platform}:${id || url}` : id || url);
   if (cached && cached.expires > Date.now()) return cached.result;
+  if (platform === "kuaishou") {
+    const result = await resolveKuaishouVideo(url);
+    if (resolvedVideos.size >= 100) { const oldest = resolvedVideos.keys().next().value; if (oldest) resolvedVideos.delete(oldest); }
+    resolvedVideos.set(`kuaishou:${result.video.id}`, { expires: Date.now() + 240_000, result });
+    return result;
+  }
   const appKey = process.env['LOVABLE_API_KEY'];
   const connectionKey = process.env['UDC_EVIL0CTAL_DOUYIN_TIKTOK_API_API_KEY'];
   if (appKey && connectionKey) {
@@ -57,7 +64,7 @@ export async function pullTikTokMedia(target: string, range: string | null, plat
   let url = target;
   for (let redirects = 0; redirects < 5; redirects++) {
     if (!isShortVideoMediaUrl(url, platform)) return undefined;
-    const response = await fetch(url, { redirect: "manual", headers: { "User-Agent": "Mozilla/5.0", Referer: platform === "douyin" ? "https://www.douyin.com/" : "https://www.tiktok.com/", ...(range ? { Range: range } : {}) }, signal: AbortSignal.timeout(25000) });
+    const response = await fetch(url, { redirect: "manual", headers: { "User-Agent": "Mozilla/5.0", Referer: platform === "kuaishou" ? "https://www.kuaishou.com/" : platform === "douyin" ? "https://www.douyin.com/" : "https://www.tiktok.com/", ...(range ? { Range: range } : {}) }, signal: AbortSignal.timeout(25000) });
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
       if (!location) return undefined;

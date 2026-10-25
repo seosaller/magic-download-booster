@@ -19,12 +19,12 @@ export type RenderStatus = {
 const API = "https://api.cloudconvert.com/v2";
 
 export const startMp3 = createServerFn({ method: "POST" })
-  .inputValidator((input: { source?: string; tiktokId?: string; platform?: "tiktok" | "douyin"; apiKey?: string; bitrate?: number }) => {
+  .inputValidator((input: { source?: string; tiktokId?: string; platform?: "tiktok" | "douyin" | "kuaishou"; apiKey?: string; bitrate?: number }) => {
     const source = String(input?.source ?? "");
     const tiktokId = input?.tiktokId;
-    if (tiktokId ? !/^\d{10,25}$/.test(tiktokId) : !isFacebookMediaUrl(source)) throw new Error("Invalid audio source.");
     const platform = input?.platform || "tiktok";
-    if (platform !== "tiktok" && platform !== "douyin") throw new Error("Invalid download platform.");
+    if (tiktokId ? !(platform === "kuaishou" ? /^[a-zA-Z0-9]{10,32}$/ : /^\d{10,25}$/).test(tiktokId) : !isFacebookMediaUrl(source)) throw new Error("Invalid audio source.");
+    if (platform !== "tiktok" && platform !== "douyin" && platform !== "kuaishou") throw new Error("Invalid download platform.");
     return { source, tiktokId, platform, apiKey: String(input?.apiKey ?? "").trim().slice(0, 600), bitrate: parseMp3Bitrate(input?.bitrate) };
   })
   .handler(async ({ data }): Promise<RenderStart> => {
@@ -33,7 +33,7 @@ export const startMp3 = createServerFn({ method: "POST" })
     try {
       // Convert the complete playable video; music-only fields can omit speech.
       const source = data.tiktokId
-        ? (await (await import("./tiktok.server")).getTikTokVideo(data.platform === "douyin" ? `https://www.douyin.com/video/${data.tiktokId}` : `https://www.tiktok.com/@video/video/${data.tiktokId}`)).play
+        ? (await (await import("./tiktok.server")).getTikTokVideo(data.platform === "kuaishou" ? `https://www.kuaishou.com/short-video/${data.tiktokId}` : data.platform === "douyin" ? `https://www.douyin.com/video/${data.tiktokId}` : `https://www.tiktok.com/@video/video/${data.tiktokId}`)).play
         : data.source;
       const body = data.tiktokId
         ? { ...mp3Job(source, data.bitrate), tasks: { ...mp3Job(source, data.bitrate).tasks, "in-audio": { operation: "import/upload", filename: "source.mp4" } } }
