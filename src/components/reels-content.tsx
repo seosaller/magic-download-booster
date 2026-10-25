@@ -21,20 +21,20 @@ const faqs = [
 ];
 
 export function ReelsContent() {
-  return <div className="mx-auto max-w-5xl py-12 sm:py-16">
+  return <div className="download-content mx-auto min-w-0 max-w-5xl py-8 sm:py-10 lg:py-16">
     <section aria-labelledby="reels-guide">
     <div className="mx-auto max-w-3xl text-center"><span aria-hidden="true" className="text-4xl">🎬</span>
     <h2 id="reels-guide" className="mt-4 text-2xl font-bold">Download Facebook Reels online</h2>
     <p className="mt-4 text-sm leading-7 text-muted-foreground">Use FB Download Hub to save an accessible public Facebook Reel to your device or convert its original sound to a 320 kbps MP3. Copy a Reel link, paste it above and check the available files—without installing another app or creating an account here.</p>
     </div>
     <h3 className="mt-10 text-center text-lg font-semibold">How to download a Facebook Reel</h3>
-    <ol className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{steps.map(step => <li key={step.title} className="rounded-lg border border-border bg-card p-5"><span aria-hidden="true" className="text-3xl">{step.icon}</span><h3 className="mt-4 text-base font-semibold">{step.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{step.text}</p></li>)}</ol>
+    <ol className="guide-steps mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{steps.map(step => <li key={step.title} className="min-w-0 rounded-lg border border-border bg-card p-4"><span aria-hidden="true" className="text-3xl">{step.icon}</span><h3 className="mt-4 text-base font-semibold">{step.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{step.text}</p></li>)}</ol>
     </section>
 
     <section className="py-12" aria-labelledby="reels-quality">
       <div className="flex items-center gap-3"><span aria-hidden="true" className="text-3xl">💎</span><h2 id="reels-quality" className="text-2xl font-bold">Facebook Reels video quality: HD, SD and higher resolutions</h2></div>
       <p className="mt-4 max-w-3xl text-sm leading-7 text-muted-foreground">Choose from the qualities actually available for your Reel. HD offers more detail when the original supports it; SD is useful when a smaller file matters more. Higher-resolution video may need processing to combine its video and audio streams before saving.</p>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[
+      <div className="compact-cards mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">{[
         { icon: "🎞️", title: "HD video", text: "Save the available high-definition stream.", tone: "bg-primary/5 border-primary/20" },
         { icon: "📦", title: "SD video", text: "Choose the standard-definition option when available.", tone: "bg-chart-2/5 border-chart-2/20" },
         { icon: "📺", title: "1080p Full HD", text: "Save native Full HD with original audio when the source supports it.", tone: "bg-chart-3/5 border-chart-3/20" },

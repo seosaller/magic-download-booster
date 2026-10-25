@@ -243,9 +243,9 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
   return (
     <div className="min-h-screen bg-background">
 
-      <section className="hero-gradient px-4 py-16">
+      <section className="hero-gradient px-4 py-10 sm:py-12 lg:py-16">
         <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-3xl font-bold text-primary-foreground sm:text-4xl">
+          <h1 className="text-2xl font-bold text-primary-foreground sm:text-3xl lg:text-4xl">
             {reels ? t.reelsTitle : t.videoTitle}
           </h1>
           <p className="mt-3 text-sm text-primary-foreground/85">
@@ -288,7 +288,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
             </Button>
           </form>
           {pasteError && <p role="alert" className="mt-2 text-sm text-primary-foreground">{pasteError}</p>}
-          <p className="mt-3 text-xs text-primary-foreground/80">
+          <p className="mt-3 break-words text-xs leading-5 text-primary-foreground/80">
             {reels ? t.reelExample : "Ex. https://www.facebook.com/watch?v=554413541934974 or https://fb.watch/lMDZjV1O0t/"}
           </p>
         </div>

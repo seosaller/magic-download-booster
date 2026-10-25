@@ -29,15 +29,15 @@ const faqs = [
 ];
 
 export function HomeContent({ onStart }: { onStart: () => void }) {
-  return <div className="mx-auto max-w-5xl">
+  return <div className="download-content mx-auto min-w-0 max-w-5xl">
     <section className="py-12 sm:py-16" aria-labelledby="home-intro">
       <div className="mx-auto max-w-3xl text-center">
         <h2 id="home-intro" className="text-2xl font-bold sm:text-3xl">Facebook Video Downloader</h2>
         <p className="mt-4 text-sm leading-7 text-muted-foreground sm:text-base">Download Facebook videos and Reels in HD, 1080p, 2K, and 4K quality when available. Just copy the video link from Facebook, paste it into the downloader, and get your video in a few clicks. No app installation or account login is needed.</p>
       </div>
       <h3 className="mt-10 text-center text-lg font-semibold">How to Download Facebook Videos</h3>
-      <ol className="mt-7 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {steps.map((step, i) => <li key={step.title} className="relative pt-6">
+      <ol className="guide-steps mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {steps.map((step, i) => <li key={step.title} className="relative min-w-0 rounded-lg bg-muted/50 p-4">
           <div className="flex items-center justify-between"><span aria-hidden="true" className="grid size-10 place-items-center text-3xl">{step.emoji}</span><span className="text-sm font-semibold text-muted-foreground">0{i + 1}</span></div>
           <h4 className="mt-4 text-base font-semibold">{step.title}</h4><p className="mt-2 text-sm leading-6 text-muted-foreground">{step.text}</p>
         </li>)}
@@ -70,7 +70,7 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
 
     <section className="py-12 sm:py-16" aria-labelledby="tools-title">
       <h2 id="tools-title" className="text-2xl font-bold">Our Download Tools</h2>
-      <div className="mt-7 grid gap-4 sm:grid-cols-2">
+      <div className="compact-cards mt-5 grid grid-cols-2 gap-3">
         {tools.map((tool, i) => <article key={tool.title} className="group relative overflow-hidden rounded-lg border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-primary/5 sm:p-6">
           <div className="flex items-center justify-between gap-4">
             <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center text-3xl">{["📹", "🎬", "💎", "🚀", "🎵", "📱"][i]}</span>
@@ -84,7 +84,7 @@ export function HomeContent({ onStart }: { onStart: () => void }) {
     <section className="relative py-12 text-center before:absolute before:inset-y-0 before:left-1/2 before:-z-10 before:w-screen before:-translate-x-1/2 before:bg-muted/50 isolate" aria-labelledby="benefits-title">
       <h2 id="benefits-title" className="text-2xl font-bold">Why people use FB Download Hub</h2>
       <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">A straightforward tool built around three things: speed, video quality, and not asking for anything you don't need to give.</p>
-      <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">{benefits.map(item => <article key={item.title} className="rounded-lg border border-border bg-card px-5 py-7"><span aria-hidden="true" className="mx-auto grid size-10 place-items-center text-3xl">{item.emoji}</span><h3 className="mt-4 text-base font-semibold">{item.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p></article>)}</div>
+      <div className="compact-cards mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">{benefits.map(item => <article key={item.title} className="min-w-0 rounded-lg border border-border bg-card p-4 sm:p-5"><span aria-hidden="true" className="mx-auto grid size-10 place-items-center text-3xl">{item.emoji}</span><h3 className="mt-4 text-base font-semibold">{item.title}</h3><p className="mt-2 text-sm leading-6 text-muted-foreground">{item.text}</p></article>)}</div>
       <p className="mt-6 text-xs leading-5 text-muted-foreground">High-quality video can be combined free on your device when supported. Large files may need CloudConvert; MP3 conversion still requires CloudConvert credits.</p>
     </section>
 
