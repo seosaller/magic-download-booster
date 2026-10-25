@@ -53,7 +53,8 @@ export const startMp3 = createServerFn({ method: "POST" })
         const form = json.data.tasks?.find(task => task.name === "in-audio")?.result?.form;
         if (!form?.url || !form.parameters || !/^https:\/\//.test(form.url)) return { ok: false, code: "other", error: "MP3 upload could not start. Please try again." };
         const { pullTikTokMedia } = await import("./tiktok.server");
-        const media = await pullTikTokMedia(source, null);
+        let media = await pullTikTokMedia(source, null);
+        if (!media?.ok) media = await pullTikTokMedia(`https://www.tikwm.com/video/media/play/${data.tiktokId}.mp4`, null);
         if (!media?.ok || !media.body) return { ok: false, code: "other", error: "The original TikTok audio could not be retrieved. Please process the link again." };
         const limit = 64 * 1024 * 1024;
         if (Number(media.headers.get("content-length")) > limit) { await media.body.cancel(); return { ok: false, code: "other", error: "This video is too large for MP3 conversion. Video downloads remain available." }; }
