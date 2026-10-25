@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { HomeContent } from "@/components/home-content";
 import { ReelsContent } from "@/components/reels-content";
 import { FullHdDownload } from "@/components/full-hd-download";
-import { fullHdFallback } from "@/lib/full-hd-fallback";
 import { copy, type Language } from "@/lib/i18n";
 import { LocalizedContent } from "@/components/localized-content";
 import { Download, Music, LoaderCircle, Clipboard, X, CircleCheck } from "lucide-react";
@@ -367,7 +366,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
                       </div>
                     ))}
 
-                    <FullHdDownload language={language} key={result.fullHd?.video ?? "unavailable"} source={result.fullHd} fallback={fullHdFallback(result.fullHd, result.links)} />
+                    <FullHdDownload language={language} key={result.fullHd?.video ?? "unavailable"} source={result.fullHd} />
 
                     {result.render && result.render.height !== 1080 && render.state === "idle" && (
                       <Button
