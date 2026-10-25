@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Clipboard, X, Download, CircleCheck, LoaderCircle, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fetchTikTok } from "@/lib/tiktok.functions";
-import { tiktokCopy, tiktokLinkError, type TikTokVideo } from "@/lib/tiktok";
+import { tiktokCopy, tiktokLinkError, resolveTikTokInBrowser, type TikTokVideo } from "@/lib/tiktok";
 import { copy, type Language } from "@/lib/i18n";
 import { startMp3, renderStatus } from "@/lib/render.functions";
 
@@ -57,6 +57,9 @@ export function TikTokDownloader({ language }: { language: Language }) {
     setLoading(true); setVideo(null); setAccepted(false); setMp3({ status: "idle" });
     const current = ++version.current;
     try {
+      const local = await resolveTikTokInBrowser(url.trim());
+      if (current !== version.current) return;
+      if (local) { setVideo(local); return; }
       const result = await run({ data: { url } });
       if (current !== version.current) return;
       if (result.ok) setVideo(result.video); else setError(result.error);
