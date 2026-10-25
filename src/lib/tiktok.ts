@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { douyinLinkSchema, downloadPlatform, isDouyinMediaUrl, type DownloadPlatform } from "./douyin";
 
 export const tiktokLinkSchema = z.string().trim().max(4096).superRefine((value, context) => {
   let url: URL;
@@ -10,9 +11,14 @@ export const tiktokLinkSchema = z.string().trim().max(4096).superRefine((value, 
   if (!short && !/^\/@[^/]+\/video\/\d+\/?$/.test(url.pathname) && !/^\/t\/[a-zA-Z0-9]+\/?$/.test(url.pathname)) context.addIssue({ code: "custom", message: "This TikTok link is not a video. Please use a public video link, not a profile, LIVE or photo post." });
 });
 export function tiktokLinkError(value: string) {
-  const parsed = tiktokLinkSchema.safeParse(value);
+  const parsed = shortVideoLinkSchema.safeParse(value);
   return parsed.success ? "" : parsed.error.issues[0]?.message ?? "Please check your TikTok video link.";
 }
+export const shortVideoLinkSchema = z.string().trim().max(4096).superRefine((value, context) => {
+  const parsed = (downloadPlatform(value) === "douyin" || value.includes("iesdouyin.com") ? douyinLinkSchema : tiktokLinkSchema).safeParse(value);
+  if (!parsed.success) for (const issue of parsed.error.issues) context.addIssue({ code: "custom", message: issue.message });
+});
+export function isShortVideoMediaUrl(value: string, platform: DownloadPlatform = "tiktok") { return platform === "douyin" ? isDouyinMediaUrl(value) : isTikTokMediaUrl(value); }
 export const tiktokPaths = { vi: "/tiktok-downloader", en: "/en/tiktok-downloader", pt: "/pt/tiktok-downloader", id: "/id/tiktok-downloader" } as const;
 export const tiktokCopy = {
   en: { title: "TikTok Video Downloader", intro: "Save public TikTok videos with their original sound in the available quality.", placeholder: "Paste TikTok video link…", video: "Download Video", watermark: "Download with watermark", how: "Download TikTok videos", steps: ["Open a public TikTok video", "Copy its link from Share", "Paste the link above", "Choose your video download"], note: "Public video links are processed by the connected Evil0ctal API, with Tikwm available as a backup. Private, deleted, LIVE and photo posts are not supported. Only save content you own or have permission to download.", ready: "Your video is ready", faq: "TikTok download questions", question: "Is every video available in HD?", answer: "Quality depends on the original video and the available source. We do not upscale videos or label them 1080p or 4K without verification." },
@@ -23,9 +29,10 @@ export const tiktokCopy = {
 export function isTikTokMediaUrl(value: string) {
   try { const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password && !url.port && (/(^|\.)(tiktokcdn\.com|tiktokcdn-us\.com|tiktokcdn-eu\.com|tikwm\.com)$/.test(url.hostname) || /^v\d+-[a-z0-9-]+\.(?:us\.)?tiktok\.com$/.test(url.hostname)); } catch { return false; }
 }
-export type TikTokVideo = { id: string; title: string; author: string; cover: string; size: number; watermarkSize: number; watermark: boolean };// Browser-side lookup: Tikwm allows CORS, so each visitor uses their own rate limit instead of the shared server IP.
+export type TikTokVideo = { id: string; platform?: DownloadPlatform; title: string; author: string; cover: string; size: number; watermarkSize: number; watermark: boolean };// Browser-side lookup: Tikwm allows CORS, so each visitor uses their own rate limit instead of the shared server IP.
 export async function resolveTikTokInBrowser(url: string): Promise<TikTokVideo | null> {
   try {
+    if (downloadPlatform(url) === "douyin" || url.includes("iesdouyin.com")) return null;
     const response = await fetch("https://www.tikwm.com/api/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ url }), signal: AbortSignal.timeout(20000) });
     if (!response.ok) return null;
     const body = await response.json() as { code?: number; data?: { id?: unknown; title?: unknown; cover?: unknown; play?: unknown; wmplay?: unknown; size?: unknown; wm_size?: unknown; images?: unknown; author?: { nickname?: unknown } } };

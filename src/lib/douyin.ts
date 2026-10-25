@@ -1,7 +1,7 @@
 import { z } from "zod";
 export type DownloadPlatform = "tiktok" | "douyin";
 export function downloadPlatform(url: string): DownloadPlatform {
-  try { return /(^|\.)douyin\.com$/.test(new URL(url).hostname) ? "douyin" : "tiktok"; } catch { return "tiktok"; }
+  try { return /(^|\.)(douyin|iesdouyin)\.com$/.test(new URL(url).hostname) ? "douyin" : "tiktok"; } catch { return "tiktok"; }
 }
 export const douyinLinkSchema = z.string().trim().max(4096).superRefine((value, context) => {
   let url: URL;
