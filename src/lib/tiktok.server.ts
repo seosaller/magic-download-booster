@@ -16,7 +16,7 @@ export async function pullTikTokMedia(target: string, range: string | null) {
   let url = target;
   for (let redirects = 0; redirects < 5; redirects++) {
     if (!isTikTokMediaUrl(url)) return undefined;
-    const response = await fetch(url, { redirect: "manual", headers: { "User-Agent": "Mozilla/5.0", ...(range ? { Range: range } : {}) }, signal: AbortSignal.timeout(25000) });
+    const response = await fetch(url, { redirect: "manual", headers: { "User-Agent": "Mozilla/5.0", Referer: "https://www.tiktok.com/", ...(range ? { Range: range } : {}) }, signal: AbortSignal.timeout(25000) });
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
       if (!location) return undefined;
