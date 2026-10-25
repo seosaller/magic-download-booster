@@ -4,6 +4,10 @@ import { Menu, X, ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { copy, languages, languageNames, languagePaths, languageFromPath } from "@/lib/i18n";
+import vietnamFlag from "flag-icons/flags/4x3/vn.svg";
+import usaFlag from "flag-icons/flags/4x3/us.svg";
+import brazilFlag from "flag-icons/flags/4x3/br.svg";
+import indonesiaFlag from "flag-icons/flags/4x3/id.svg";
 
 const pages = [
   { to: "/facebook-reels-downloader", label: "Reels Downloader" },
@@ -14,7 +18,7 @@ const pages = [
   { to: "/contact", label: "Contact" },
 ] as const;
 
-const languageFlags = { vi: "🇻🇳", en: "🇺🇸", pt: "🇧🇷", id: "🇮🇩" };
+const languageFlags = { vi: vietnamFlag, en: usaFlag, pt: brazilFlag, id: indonesiaFlag };
 
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -42,8 +46,8 @@ export function SiteHeader() {
         {menuOpen ? <X /> : <Menu />}
       </Button>
       <div className="justify-self-end lg:col-start-3 lg:row-start-1" onPointerEnter={event => { if (event.pointerType === "mouse") { keepLanguageOpen(); setLanguageOpen(true); } }} onPointerLeave={event => { if (event.pointerType === "mouse") closeLanguageSoon(); }}>
-        <DropdownMenu modal={false} open={languageOpen} onOpenChange={open => { keepLanguageOpen(); setLanguageOpen(open); }}><DropdownMenuTrigger asChild><Button variant="outline" className="h-9 gap-1.5 px-2 text-foreground sm:px-3" aria-label={t.language} title={t.language}><span aria-hidden="true" className="text-xl leading-none">{languageFlags[language]}</span><span className="hidden sm:inline">{languageNames[language]}</span><span className="sm:hidden">{language.toUpperCase()}</span><ChevronDown className={`size-3 transition-transform motion-reduce:transition-none ${languageOpen ? "rotate-180" : ""}`} /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" sideOffset={5} className="w-52 p-1.5" onPointerEnter={keepLanguageOpen} onPointerLeave={event => { if (event.pointerType === "mouse") closeLanguageSoon(); }}>
-          {languages.map(code => <DropdownMenuItem asChild key={code}><Link to={isReels ? languagePaths[code].reels : languagePaths[code].home} onClick={() => { setMenuOpen(false); setLanguageOpen(false); }} lang={code} className={`flex min-h-11 items-center gap-2.5 px-2 text-sm ${code === language ? "font-semibold text-primary" : "text-foreground"}`}><span aria-hidden="true" className="text-xl leading-none">{languageFlags[code]}</span><span className="flex-1">{languageNames[code]}{code === "pt" ? " (Brasil)" : ""}</span>{code === language && <Check className="size-4 text-primary" />}</Link></DropdownMenuItem>)}
+        <DropdownMenu modal={false} open={languageOpen} onOpenChange={open => { keepLanguageOpen(); setLanguageOpen(open); }}><DropdownMenuTrigger asChild><Button variant="outline" className="h-9 gap-1.5 px-2 text-foreground sm:px-3" aria-label={t.language} title={t.language}><img src={languageFlags[language]} alt="" aria-hidden="true" className="h-[18px] w-6 shrink-0 rounded-sm object-cover" /><span className="hidden sm:inline">{languageNames[language]}</span><span className="sm:hidden">{language.toUpperCase()}</span><ChevronDown className={`size-3 transition-transform motion-reduce:transition-none ${languageOpen ? "rotate-180" : ""}`} /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" sideOffset={5} className="w-52 p-1.5" onPointerEnter={keepLanguageOpen} onPointerLeave={event => { if (event.pointerType === "mouse") closeLanguageSoon(); }}>
+          {languages.map(code => <DropdownMenuItem asChild key={code}><Link to={isReels ? languagePaths[code].reels : languagePaths[code].home} onClick={() => { setMenuOpen(false); setLanguageOpen(false); }} lang={code} className={`flex min-h-11 items-center gap-2.5 px-2 text-sm ${code === language ? "font-semibold text-primary" : "text-foreground"}`}><img src={languageFlags[code]} alt="" aria-hidden="true" className="h-[18px] w-6 shrink-0 rounded-sm object-cover" /><span className="flex-1">{languageNames[code]}{code === "pt" ? " (Brasil)" : ""}</span>{code === language && <Check className="size-4 text-primary" />}</Link></DropdownMenuItem>)}
         </DropdownMenuContent></DropdownMenu>
       </div>
       <div id="header-menu" className={`${menuOpen ? "grid" : "hidden"} col-span-3 min-w-0 gap-2 pt-4 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:flex lg:items-center lg:justify-center lg:gap-1 lg:pt-0`}>
