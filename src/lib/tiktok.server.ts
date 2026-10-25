@@ -9,17 +9,19 @@ export async function getTikTokVideo(url: string) {
   const cached = resolvedVideos.get(id || url);
   if (cached && cached.expires > Date.now()) return cached.result;
   let parsed: z.SafeParseReturnType<unknown, z.infer<typeof responseSchema>> | undefined;
+  let limited = false;
   for (let attempt = 0; attempt < 5; attempt++) {
     if (attempt) await new Promise(resolve => setTimeout(resolve, 1200 * attempt));
     const response = await fetch("https://www.tikwm.com/api/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ url }), signal: AbortSignal.timeout(25000) });
-    if (response.status === 429) continue;
+    limited = response.status === 429;
+    if (limited) continue;
     if (!response.ok) throw new Error("The TikTok download service is temporarily unavailable. Please try again.");
     const body: unknown = await response.json();
     parsed = responseSchema.safeParse(body);
-    const limited = typeof body === "object" && body !== null && /limit/i.test(String((body as { msg?: unknown }).msg ?? ""));
+    limited = typeof body === "object" && body !== null && /limit/i.test(String((body as { msg?: unknown }).msg ?? ""));
     if (!limited) break;
   }
-  if (!parsed) throw new Error("TikTok downloads are busy. Please wait a moment and try again.");
+  if (!parsed || limited) throw new Error("TikTok downloads are busy. Please wait a moment and try again.");
   if (!parsed.success || parsed.data.code !== 0 || !parsed.data.data) throw new Error("This video could not be retrieved. Check that it is public and still available on TikTok.");
   const data = parsed.data.data;
   if (data.images?.length || !data.play || !isTikTokMediaUrl(data.play)) throw new Error("This post is not a supported public TikTok video. Photo posts and LIVE streams cannot be downloaded.");
