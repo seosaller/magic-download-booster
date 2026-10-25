@@ -5,12 +5,16 @@ import { Button } from "@/components/ui/button";
 import { fetchTikTok } from "@/lib/tiktok.functions";
 import { tiktokCopy, tiktokLinkError, type TikTokVideo } from "@/lib/tiktok";
 import { copy, type Language } from "@/lib/i18n";
+import { startMp3, renderStatus } from "@/lib/render.functions";
 
 function sizeLabel(bytes: number) { return bytes > 0 ? ` · ${(bytes / 1e6).toFixed(1)} MB` : ""; }
 export function TikTokDownloader({ language }: { language: Language }) {
   const t = copy[language];
   const text = tiktokCopy[language];
   const run = useServerFn(fetchTikTok);
+  const convertMp3 = useServerFn(startMp3);
+  const checkMp3 = useServerFn(renderStatus);
+  const [mp3, setMp3] = useState<{ status: "idle" | "working" | "done" | "error"; progress?: number; url?: string; size?: number; error?: string }>({ status: "idle" });
   const [url, setUrl] = useState("");
   const [error, setError] = useState("");
   const [accepted, setAccepted] = useState(false);
@@ -50,7 +54,7 @@ export function TikTokDownloader({ language }: { language: Language }) {
     const message = tiktokLinkError(url);
     setError(message);
     if (message) { input.current?.focus(); return; }
-    setLoading(true); setVideo(null); setAccepted(false);
+    setLoading(true); setVideo(null); setAccepted(false); setMp3({ status: "idle" });
     const current = ++version.current;
     try {
       const result = await run({ data: { url } });
@@ -58,6 +62,28 @@ export function TikTokDownloader({ language }: { language: Language }) {
       if (result.ok) setVideo(result.video); else setError(result.error);
     } catch { if (current === version.current) setError("Unable to process this TikTok link. Please check your connection and try again."); }
     finally { if (current === version.current) setLoading(false); }
+  }
+  async function processMp3() {
+    if (!video || mp3.status === "working") return;
+    const current = version.current;
+    setMp3({ status: "working", progress: 0 });
+    try {
+      const job = await convertMp3({ data: { tiktokId: video.id, bitrate: 320 } });
+      if (current !== version.current) return;
+      if (!job.ok || !job.jobId) throw new Error(job.error || "Unable to start MP3 conversion.");
+      for (let attempt = 0; attempt < 100; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        if (current !== version.current) return;
+        const result = await checkMp3({ data: { jobId: job.jobId } });
+        if (current !== version.current) return;
+        if (result.status === "error") throw new Error(result.error || "MP3 conversion failed.");
+        if (result.status === "finished" && result.url) { setMp3({ status: "done", url: result.url, size: result.size }); return; }
+        setMp3({ status: "working", progress: result.progress });
+      }
+      throw new Error("MP3 conversion took too long. Please try again.");
+    } catch (error) {
+      if (current === version.current) setMp3({ status: "error", error: error instanceof Error ? error.message : "Unable to convert MP3. Please try again." });
+    }
   }
   return <div className="min-h-screen bg-background">
     <section className="hero-gradient px-4 py-10 sm:py-12 lg:py-16">
@@ -67,7 +93,7 @@ export function TikTokDownloader({ language }: { language: Language }) {
         <p className="mt-3 text-sm text-primary-foreground/85">{text.intro}</p>
         <form noValidate onSubmit={event => void submit(event)} className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl bg-card p-2 shadow-card lg:flex">
           <input ref={input} type="url" maxLength={4096} value={url} disabled={loading} aria-label={text.placeholder} placeholder={text.placeholder} aria-invalid={Boolean(error)} aria-describedby={error ? "tiktok-error" : undefined} onChange={event => { setUrl(event.target.value); setError(""); setAccepted(false); }} onBlur={() => { if (url) setError(tiktokLinkError(url)); }} onPaste={event => { const value = event.clipboardData.getData("text/plain"); if (value.trim()) { event.preventDefault(); accept(value); } }} className="min-w-0 w-full rounded-lg bg-transparent px-3 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground lg:flex-1" />
-          <Button type="button" variant={url ? "destructive" : "outline"} disabled={loading} aria-label={url ? t.clear : t.paste} title={url ? t.clear : t.paste} className="h-11 w-11 shrink-0 px-0 transition active:scale-[0.96] lg:w-auto lg:px-4" onClick={() => { if (url) { setUrl(""); setError(""); setAccepted(false); setVideo(null); input.current?.focus(); } else void paste(); }}>
+          <Button type="button" variant={url ? "destructive" : "outline"} disabled={loading} aria-label={url ? t.clear : t.paste} title={url ? t.clear : t.paste} className="h-11 w-11 shrink-0 px-0 transition active:scale-[0.96] lg:w-auto lg:px-4" onClick={() => { if (url) { version.current++; setUrl(""); setError(""); setAccepted(false); setVideo(null); setMp3({ status: "idle" }); input.current?.focus(); } else void paste(); }}>
             {url ? <X /> : <Clipboard />}<span className="hidden lg:inline">{url ? t.clear : t.paste}</span>
           </Button>
           <Button type="submit" disabled={loading} className="col-span-2 h-11 w-full px-6 transition active:scale-[0.96] lg:w-auto">{loading && <LoaderCircle className="motion-safe:animate-spin" />}{loading ? t.processing : t.download}</Button>
@@ -80,11 +106,13 @@ export function TikTokDownloader({ language }: { language: Language }) {
       {(loading || video) && <section ref={panel} aria-label={text.ready} className="mx-auto -mt-6 max-w-3xl rounded-lg bg-card p-4 shadow-card sm:p-5">
         {loading && <p role="status" className="flex items-center justify-center gap-2 py-5 text-sm text-muted-foreground"><LoaderCircle className="motion-safe:animate-spin" />{t.fetching}</p>}
         {video && <div className="grid grid-cols-[56px_minmax(0,1fr)] gap-3 sm:grid-cols-[110px_minmax(0,1fr)]">
-          {video.cover ? <img src={video.cover} alt={t.thumbnail} className="aspect-[3/4] w-full rounded-lg object-cover" /> : <Music2 className="size-10 text-chart-2" />}
+          <img src={`/api/public/tiktok-download?id=${video.id}&variant=thumbnail`} alt={t.thumbnail} className="aspect-[3/4] w-full rounded-lg bg-muted object-cover" />
           <div className="min-w-0"><h2 className="line-clamp-2 text-sm font-semibold">{video.title}</h2>{video.author && <p className="mt-1 text-xs text-muted-foreground">{video.author}</p>}
             <div className="mt-3 grid gap-2">
               <Button asChild variant="success" className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]"><a href={`/api/public/tiktok-download?id=${video.id}&variant=video`}><Download />{text.video}{sizeLabel(video.size)}</a></Button>
               {video.watermark && <Button asChild variant="outline" className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]"><a href={`/api/public/tiktok-download?id=${video.id}&variant=watermark`}><Download />{text.watermark}{sizeLabel(video.watermarkSize)}</a></Button>}
+               {mp3.status === "done" && mp3.url ? <Button asChild variant="success" className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]"><a href={`/api/public/download?type=mp3&name=tiktok-${video.id}&url=${encodeURIComponent(mp3.url)}`}><Download />{t.download} MP3 · 320 kbps{sizeLabel(mp3.size || 0)}</a></Button> : <Button variant="outline" disabled={mp3.status === "working"} onClick={() => void processMp3()} className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]">{mp3.status === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Music2 className="text-chart-2 [&_path]:stroke-chart-1 [&_circle]:fill-chart-2/20" />}{mp3.status === "working" ? `${t.mp3Working} · ${mp3.progress || 0}%` : mp3.status === "error" ? t.mp3Retry : `${t.download} MP3 · 320 kbps`}</Button>}
+               {mp3.error && <p role="alert" className="text-sm text-destructive">{mp3.error}</p>}
             </div>
           </div>
         </div>}

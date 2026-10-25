@@ -27,3 +27,5 @@
 - [x] Prevent 720p downloads being presented as 1080p; native merge produced 14,064 bytes and metadata checked as 1080p, while 720p source was rejected.
 - [x] Add TikTok downloader with localized pages, validation, navigation and direct video downloads.
 - [x] Verify a real TikTok download and invalid-link feedback — 2,953,029-byte MP4 with video and audio, four languages, mobile/tablet fit and language switching checked.
+- [ ] Fix missing TikTok thumbnails and verify visible image loading.
+- [ ] Add real 320 kbps TikTok MP3 conversion and verify download with original sound.
