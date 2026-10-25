@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
-import { Menu, X, Languages, ChevronDown, Check } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Menu, X, ChevronDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { copy, languages, languageNames, languagePaths, languageFromPath } from "@/lib/i18n";
@@ -14,8 +14,20 @@ const pages = [
   { to: "/contact", label: "Contact" },
 ] as const;
 
+const languageFlags = { vi: "🇻🇳", en: "🇺🇸", pt: "🇧🇷", id: "🇮🇩" };
+
 export function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function keepLanguageOpen() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  }
+  function closeLanguageSoon() {
+    keepLanguageOpen();
+    closeTimer.current = setTimeout(() => setLanguageOpen(false), 180);
+  }
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current); }, []);
   const pathname = useRouterState({ select: state => state.location.pathname });
   const language = languageFromPath(pathname);
   const t = copy[language];
@@ -29,9 +41,9 @@ export function SiteHeader() {
       <Button type="button" variant="ghost" size="icon" aria-label={menuOpen ? t.menuClose : t.menuOpen} title={menuOpen ? t.menuClose : t.menuOpen} aria-expanded={menuOpen} aria-controls="header-menu" onClick={() => setMenuOpen(open => !open)} className="size-11 shrink-0 justify-self-end text-primary transition active:scale-[0.96] lg:hidden">
         {menuOpen ? <X /> : <Menu />}
       </Button>
-      <div className="justify-self-end lg:col-start-3 lg:row-start-1">
-        <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" className="gap-1.5 text-primary" aria-label={t.language} title={t.language}><Languages /><span>{language.toUpperCase()}</span><ChevronDown className="size-3" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end">
-          {languages.map(code => <DropdownMenuItem asChild key={code}><Link to={isReels ? languagePaths[code].reels : languagePaths[code].home} onClick={() => setMenuOpen(false)} lang={code} className="flex min-h-10 items-center justify-between gap-6">{languageNames[code]}{code === language && <Check className="text-primary" />}</Link></DropdownMenuItem>)}
+      <div className="justify-self-end lg:col-start-3 lg:row-start-1" onPointerEnter={event => { if (event.pointerType === "mouse") { keepLanguageOpen(); setLanguageOpen(true); } }} onPointerLeave={event => { if (event.pointerType === "mouse") closeLanguageSoon(); }}>
+        <DropdownMenu modal={false} open={languageOpen} onOpenChange={open => { keepLanguageOpen(); setLanguageOpen(open); }}><DropdownMenuTrigger asChild><Button variant="outline" className="h-9 gap-1.5 px-2 text-foreground sm:px-3" aria-label={t.language} title={t.language}><span aria-hidden="true" className="text-xl leading-none">{languageFlags[language]}</span><span className="hidden sm:inline">{languageNames[language]}</span><span className="sm:hidden">{language.toUpperCase()}</span><ChevronDown className={`size-3 transition-transform motion-reduce:transition-none ${languageOpen ? "rotate-180" : ""}`} /></Button></DropdownMenuTrigger><DropdownMenuContent align="end" sideOffset={5} className="w-52 p-1.5" onPointerEnter={keepLanguageOpen} onPointerLeave={event => { if (event.pointerType === "mouse") closeLanguageSoon(); }}>
+          {languages.map(code => <DropdownMenuItem asChild key={code}><Link to={isReels ? languagePaths[code].reels : languagePaths[code].home} onClick={() => { setMenuOpen(false); setLanguageOpen(false); }} lang={code} className={`flex min-h-11 items-center gap-2.5 px-2 text-sm ${code === language ? "font-semibold text-primary" : "text-foreground"}`}><span aria-hidden="true" className="text-xl leading-none">{languageFlags[code]}</span><span className="flex-1">{languageNames[code]}{code === "pt" ? " (Brasil)" : ""}</span>{code === language && <Check className="size-4 text-primary" />}</Link></DropdownMenuItem>)}
         </DropdownMenuContent></DropdownMenu>
       </div>
       <div id="header-menu" className={`${menuOpen ? "grid" : "hidden"} col-span-3 min-w-0 gap-2 pt-4 lg:col-span-1 lg:col-start-2 lg:row-start-1 lg:flex lg:items-center lg:justify-center lg:gap-1 lg:pt-0`}>
