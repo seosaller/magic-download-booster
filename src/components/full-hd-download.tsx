@@ -3,9 +3,8 @@ import { Download, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { FullHdSource } from "@/lib/full-hd";
 import { copy, type Language } from "@/lib/i18n";
-import type { VideoLink } from "@/lib/full-hd-fallback";
 
-export function FullHdDownload({ source, fallback, language = "vi" }: { source?: FullHdSource | undefined; fallback?: VideoLink | undefined; language?: Language }) {
+export function FullHdDownload({ source, language = "vi" }: { source?: FullHdSource | undefined; language?: Language }) {
   const t = copy[language];
   const [state, setState] = useState<"idle" | "working" | "done" | "error">("idle");
   const [progress, setProgress] = useState(0);
@@ -25,7 +24,7 @@ export function FullHdDownload({ source, fallback, language = "vi" }: { source?:
     setError("");
     try {
       const { mergeBrowserVideo } = await import("@/lib/browser-video");
-      const result = await mergeBrowserVideo(source.video, source.audio, current.signal, setProgress);
+      const result = await mergeBrowserVideo(source.video, source.audio, current.signal, setProgress, 1080);
       if (current.signal.aborted) { URL.revokeObjectURL(result.url); return; }
       file.current = result.url;
       setOutput(result);
@@ -38,7 +37,6 @@ export function FullHdDownload({ source, fallback, language = "vi" }: { source?:
   }
   const size = output?.size ?? source?.size;
   const sizeLabel = size ? ` · ${state === "done" ? "" : "~"}${(size / 1e6).toFixed(1)} MB` : "";
-  if (!source && fallback) return <Button asChild variant="success" className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96] active:brightness-90"><a title={t.hdTooltip} href={`/api/public/download?type=mp4&name=fb-video-hd&url=${encodeURIComponent(fallback.url)}`}><Download />{t.download} 1080P{fallback.size ? ` · ${(fallback.size / 1e6).toFixed(1)} MB` : ""}</a></Button>;
   return <>
     {output && state === "done" ? <Button asChild variant="success" className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96] active:brightness-90"><a href={output.url} download="fb-video-1080p.mp4"><Download />{t.download} 1080P{sizeLabel}</a></Button> : <Button type="button" variant="outline" disabled={!source || state === "working"} onClick={() => void process()} className="h-auto w-full whitespace-normal border-primary py-3 text-primary transition active:scale-[0.96] active:brightness-90">
       {state === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Download />}

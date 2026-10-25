@@ -17,7 +17,7 @@
 - Home-page informational content is isolated in HomeContent so copy and presentation changes do not modify the downloader's processing or conversion states.
 - Video and Reels content routes use the shared DownloaderPage with page-specific copy and supporting content, so downloads and conversion behavior stay consistent without duplicated processing logic.
 - Completed conversion downloads use the shared success Button variant and semantic success tokens so ready states remain consistent across themes and pages.
-- Native 1080p is selected independently and processed in FullHdDownload; when absent, the same control links to the existing HD download with a truthful fallback label so the third option stays usable without relabeling the media.
+- Native 1080p is selected independently and processed in FullHdDownload; verify output metadata before offering the download, and show unavailable when absent rather than substituting lower-resolution HD.
 
 - Language-specific downloader routes reuse DownloaderPage and shared translation dictionaries; Vietnamese is the unprefixed default, while explicit language routes render the same processing flow without duplication.
 - Determine the document language and navigation from the current route, not browser storage, so SSR and language links remain consistent.

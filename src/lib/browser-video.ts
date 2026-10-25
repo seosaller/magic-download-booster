@@ -3,7 +3,7 @@ import wasmAsset from "../../public/wasm/ffmpeg-core.wasm.asset.json";
 import classWorkerURL from "./video-worker?worker&url";
 import { assertLocalVideoSize, videoMergeArgs } from "./video-merge";
 
-export async function mergeBrowserVideo(video: string, audio: string, signal: AbortSignal, progress: (value: number) => void): Promise<{ url: string; size: number }> {
+export async function mergeBrowserVideo(video: string, audio: string, signal: AbortSignal, progress: (value: number) => void, expectedHeight?: number): Promise<{ url: string; size: number }> {
   const { FFmpeg } = await import("@ffmpeg/ffmpeg");
   const ffmpeg = new FFmpeg();
   const controller = new AbortController();
@@ -48,11 +48,19 @@ export async function mergeBrowserVideo(video: string, audio: string, signal: Ab
     const output = await ffmpeg.readFile("output.mp4");
     if (typeof output === "string" || !output.byteLength) throw new Error("The processed video is empty. Please try again.");
     const blob = new Blob([new Uint8Array(output)], { type: "video/mp4" });
+    if (expectedHeight) {
+      await ffmpeg.ffprobe(["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height", "-of", "default=noprint_wrappers=1:nokey=1", "output.mp4", "-o", "height.txt"], 15_000);
+      const metadata = await ffmpeg.readFile("height.txt", "utf8");
+      const height = Number(typeof metadata === "string" ? metadata.trim() : "");
+      // This WASM core returns -1 even when ffprobe writes valid metadata.
+      if (!Number.isInteger(height) || height <= 0) throw new Error("Unable to verify the processed video resolution.");
+      if (height !== expectedHeight) throw new Error(`The source is ${height}p, not ${expectedHeight}p. Please use the available HD/SD download instead.`);
+    }
     progress(100);
     return { url: URL.createObjectURL(blob), size: blob.size };
   } catch (error) {
     if (controller.signal.aborted) throw new Error("Free video processing stopped or took too long. Try CloudConvert or download HD/SD instead.");
-    if (error instanceof Error && /too large|source is unavailable|processing failed|processed video is empty/.test(error.message)) throw error;
+    if (error instanceof Error && /too large|source is unavailable|processing failed|processed video is empty|not \d+p|verify the processed video resolution/.test(error.message)) throw error;
     throw new Error("Free processing is unavailable in this browser or the source could not be loaded. Try CloudConvert or download HD/SD instead.");
   } finally {
     clearTimeout(timeout);
