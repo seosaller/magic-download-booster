@@ -44,9 +44,9 @@ export function TikTokDownloader({ language }: { language: Language }) {
   async function paste() {
     try {
       const value = await navigator.clipboard.readText();
-      if (!value.trim()) { setError("Your clipboard is empty. Copy a TikTok video link first, or paste it manually."); return; }
+      if (!value.trim()) { setError("Your clipboard is empty. Copy a TikTok, Douyin or Kuaishou video link first, or paste it manually."); return; }
       accept(value);
-    } catch { setError("Clipboard access was denied. Please paste the TikTok link into the box manually."); }
+    } catch { setError("Clipboard access was denied. Please paste the video link into the box manually."); }
   }
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -65,7 +65,7 @@ export function TikTokDownloader({ language }: { language: Language }) {
         if (current !== version.current) return;
         if (local) setVideo(local); else setError(result.error);
       }
-    } catch { if (current === version.current) setError("Unable to process this TikTok link. Please check your connection and try again."); }
+    } catch { if (current === version.current) setError("Unable to process this video link. Please check your connection and try again."); }
     finally { if (current === version.current) setLoading(false); }
   }
   async function processMp3() {
@@ -118,7 +118,7 @@ export function TikTokDownloader({ language }: { language: Language }) {
                 <span className="min-w-0 break-words text-sm leading-6 lg:hidden">{option.label}{sizeLabel(option.size)}</span>
                 <Button asChild className="h-auto shrink-0 px-4 py-2 transition active:scale-[0.96] active:brightness-90 lg:w-full lg:whitespace-normal lg:py-3"><a href={`/api/public/tiktok-download?id=${video.id}&platform=${video.platform || "tiktok"}&variant=${option.variant}`}><span className="lg:hidden">{t.download}</span><span className="hidden lg:inline">{option.label}{sizeLabel(option.size)}</span></a></Button>
               </div>)}
-               {mp3.status === "done" && mp3.url ? <Button asChild variant="success" className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]"><a href={`/api/public/download?type=mp3&name=tiktok-${video.id}&url=${encodeURIComponent(mp3.url)}`}><Download />{t.download} MP3 · 320 kbps{sizeLabel(mp3.size || 0)}</a></Button> : <Button variant="outline" disabled={mp3.status === "working"} onClick={() => void processMp3()} className="h-auto min-h-11 w-full whitespace-normal border-primary py-3 text-primary transition active:scale-[0.96] active:brightness-90">{mp3.status === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Music2 className="shrink-0 text-chart-2 [&_path]:stroke-chart-1 [&_circle]:fill-chart-2/20" />}{mp3.status === "working" ? `${t.mp3Working} · ${mp3.progress || 0}%` : mp3.status === "error" ? t.mp3Retry : `${t.download} MP3 · 320 kbps (${t.render})`}</Button>}
+               {mp3.status === "done" && mp3.url ? <Button asChild variant="success" className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]"><a href={`/api/public/download?type=mp3&name=${video.platform || "tiktok"}-${video.id}&url=${encodeURIComponent(mp3.url)}`}><Download />{t.download} MP3 · 320 kbps{sizeLabel(mp3.size || 0)}</a></Button> : <Button variant="outline" disabled={mp3.status === "working"} onClick={() => void processMp3()} className="h-auto min-h-11 w-full whitespace-normal border-primary py-3 text-primary transition active:scale-[0.96] active:brightness-90">{mp3.status === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Music2 className="shrink-0 text-chart-2 [&_path]:stroke-chart-1 [&_circle]:fill-chart-2/20" />}{mp3.status === "working" ? `${t.mp3Working} · ${mp3.progress || 0}%` : mp3.status === "error" ? t.mp3Retry : `${t.download} MP3 · 320 kbps (${t.render})`}</Button>}
                {mp3.error && <p role="alert" className="break-words text-sm leading-6 text-destructive">{mp3.error}</p>}
             </div>
           </div>
