@@ -268,16 +268,18 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
             />
             <Button
               type="button"
-              variant="outline"
+              variant={url ? "destructive" : "outline"}
               disabled={loading}
+              aria-label={url ? t.clear : t.paste}
+              title={url ? t.clear : t.paste}
               onClick={() => {
                 if (url) { setUrl(""); setPasteError(""); urlInput.current?.focus(); }
                 else void pasteLink();
               }}
-              className="h-11 shrink-0 gap-2 px-4 text-primary transition active:scale-[0.96] active:brightness-95"
+              className={`h-11 w-11 shrink-0 gap-2 px-0 transition active:scale-[0.96] active:brightness-95 lg:w-auto lg:px-4 ${url ? "" : "text-primary"}`}
             >
               {url ? <X /> : <Clipboard />}
-              {url ? t.clear : t.paste}
+              <span className="hidden lg:inline">{url ? t.clear : t.paste}</span>
             </Button>
             <Button
               type="submit"
