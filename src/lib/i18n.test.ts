@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { languageFromPath, languagePaths } from './i18n';
 describe('language routes', () => {
   it('uses Vietnamese on the root home page', () => { expect(languageFromPath('/')).toBe('vi'); expect(languagePaths.vi.home).toBe('/'); });

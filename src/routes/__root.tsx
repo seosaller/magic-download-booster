@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -14,6 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader, SiteFooter } from "@/components/site-navigation";
 import { Button } from "@/components/ui/button";
+import { languageFromPath } from "@/lib/i18n";
 
 function NotFoundComponent() {
   return (
@@ -102,8 +104,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const pathname = useRouterState({ select: state => state.location.pathname });
   return (
-    <html lang="en">
+    <html lang={languageFromPath(pathname)}>
       <head>
         <HeadContent />
       </head>

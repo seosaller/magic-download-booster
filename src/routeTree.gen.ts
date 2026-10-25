@@ -12,10 +12,18 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as EnRouteImport } from './routes/en'
 import { Route as FacebookReelsDownloaderRouteImport } from './routes/facebook-reels-downloader'
 import { Route as HelpRouteImport } from './routes/help'
+import { Route as IdRouteImport } from './routes/id'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PtRouteImport } from './routes/pt'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as ViRouteImport } from './routes/vi'
+import { Route as EnFacebookReelsDownloaderRouteImport } from './routes/en.facebook-reels-downloader'
+import { Route as IdFacebookReelsDownloaderRouteImport } from './routes/id.facebook-reels-downloader'
+import { Route as PtFacebookReelsDownloaderRouteImport } from './routes/pt.facebook-reels-downloader'
+import { Route as ViFacebookReelsDownloaderRouteImport } from './routes/vi.facebook-reels-downloader'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 
 const IndexRoute = IndexRouteImport.update({
@@ -33,6 +41,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnRoute = EnRouteImport.update({
+  id: '/en',
+  path: '/en',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FacebookReelsDownloaderRoute = FacebookReelsDownloaderRouteImport.update({
   id: '/facebook-reels-downloader',
   path: '/facebook-reels-downloader',
@@ -43,9 +56,19 @@ const HelpRoute = HelpRouteImport.update({
   path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IdRoute = IdRouteImport.update({
+  id: '/id',
+  path: '/id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PtRoute = PtRouteImport.update({
+  id: '/pt',
+  path: '/pt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -53,6 +76,35 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ViRoute = ViRouteImport.update({
+  id: '/vi',
+  path: '/vi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnFacebookReelsDownloaderRoute =
+  EnFacebookReelsDownloaderRouteImport.update({
+    id: '/facebook-reels-downloader',
+    path: '/facebook-reels-downloader',
+    getParentRoute: () => EnRoute,
+  } as any)
+const IdFacebookReelsDownloaderRoute =
+  IdFacebookReelsDownloaderRouteImport.update({
+    id: '/facebook-reels-downloader',
+    path: '/facebook-reels-downloader',
+    getParentRoute: () => IdRoute,
+  } as any)
+const PtFacebookReelsDownloaderRoute =
+  PtFacebookReelsDownloaderRouteImport.update({
+    id: '/facebook-reels-downloader',
+    path: '/facebook-reels-downloader',
+    getParentRoute: () => PtRoute,
+  } as any)
+const ViFacebookReelsDownloaderRoute =
+  ViFacebookReelsDownloaderRouteImport.update({
+    id: '/facebook-reels-downloader',
+    path: '/facebook-reels-downloader',
+    getParentRoute: () => ViRoute,
+  } as any)
 const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
   id: '/api/public/download',
   path: '/api/public/download',
@@ -63,20 +115,36 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/en': typeof EnRouteWithChildren
   '/facebook-reels-downloader': typeof FacebookReelsDownloaderRoute
   '/help': typeof HelpRoute
+  '/id': typeof IdRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/pt': typeof PtRouteWithChildren
   '/terms': typeof TermsRoute
+  '/vi': typeof ViRouteWithChildren
+  '/en/facebook-reels-downloader': typeof EnFacebookReelsDownloaderRoute
+  '/id/facebook-reels-downloader': typeof IdFacebookReelsDownloaderRoute
+  '/pt/facebook-reels-downloader': typeof PtFacebookReelsDownloaderRoute
+  '/vi/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/en': typeof EnRouteWithChildren
   '/facebook-reels-downloader': typeof FacebookReelsDownloaderRoute
   '/help': typeof HelpRoute
+  '/id': typeof IdRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/pt': typeof PtRouteWithChildren
   '/terms': typeof TermsRoute
+  '/vi': typeof ViRouteWithChildren
+  '/en/facebook-reels-downloader': typeof EnFacebookReelsDownloaderRoute
+  '/id/facebook-reels-downloader': typeof IdFacebookReelsDownloaderRoute
+  '/pt/facebook-reels-downloader': typeof PtFacebookReelsDownloaderRoute
+  '/vi/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
 }
 export interface FileRoutesById {
@@ -84,10 +152,18 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/en': typeof EnRouteWithChildren
   '/facebook-reels-downloader': typeof FacebookReelsDownloaderRoute
   '/help': typeof HelpRoute
+  '/id': typeof IdRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/pt': typeof PtRouteWithChildren
   '/terms': typeof TermsRoute
+  '/vi': typeof ViRouteWithChildren
+  '/en/facebook-reels-downloader': typeof EnFacebookReelsDownloaderRoute
+  '/id/facebook-reels-downloader': typeof IdFacebookReelsDownloaderRoute
+  '/pt/facebook-reels-downloader': typeof PtFacebookReelsDownloaderRoute
+  '/vi/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
 }
 export interface FileRouteTypes {
@@ -96,30 +172,54 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/en'
     | '/facebook-reels-downloader'
     | '/help'
+    | '/id'
     | '/privacy'
+    | '/pt'
     | '/terms'
+    | '/vi'
+    | '/en/facebook-reels-downloader'
+    | '/id/facebook-reels-downloader'
+    | '/pt/facebook-reels-downloader'
+    | '/vi/facebook-reels-downloader'
     | '/api/public/download'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/contact'
+    | '/en'
     | '/facebook-reels-downloader'
     | '/help'
+    | '/id'
     | '/privacy'
+    | '/pt'
     | '/terms'
+    | '/vi'
+    | '/en/facebook-reels-downloader'
+    | '/id/facebook-reels-downloader'
+    | '/pt/facebook-reels-downloader'
+    | '/vi/facebook-reels-downloader'
     | '/api/public/download'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/contact'
+    | '/en'
     | '/facebook-reels-downloader'
     | '/help'
+    | '/id'
     | '/privacy'
+    | '/pt'
     | '/terms'
+    | '/vi'
+    | '/en/facebook-reels-downloader'
+    | '/id/facebook-reels-downloader'
+    | '/pt/facebook-reels-downloader'
+    | '/vi/facebook-reels-downloader'
     | '/api/public/download'
   fileRoutesById: FileRoutesById
 }
@@ -127,10 +227,14 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  EnRoute: typeof EnRouteWithChildren
   FacebookReelsDownloaderRoute: typeof FacebookReelsDownloaderRoute
   HelpRoute: typeof HelpRoute
+  IdRoute: typeof IdRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
+  PtRoute: typeof PtRouteWithChildren
   TermsRoute: typeof TermsRoute
+  ViRoute: typeof ViRouteWithChildren
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
 }
 
@@ -157,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en': {
+      id: '/en'
+      path: '/en'
+      fullPath: '/en'
+      preLoaderRoute: typeof EnRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/facebook-reels-downloader': {
       id: '/facebook-reels-downloader'
       path: '/facebook-reels-downloader'
@@ -171,11 +282,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/id': {
+      id: '/id'
+      path: '/id'
+      fullPath: '/id'
+      preLoaderRoute: typeof IdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pt': {
+      id: '/pt'
+      path: '/pt'
+      fullPath: '/pt'
+      preLoaderRoute: typeof PtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -184,6 +309,41 @@ declare module '@tanstack/react-router' {
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/vi': {
+      id: '/vi'
+      path: '/vi'
+      fullPath: '/vi'
+      preLoaderRoute: typeof ViRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en/facebook-reels-downloader': {
+      id: '/en/facebook-reels-downloader'
+      path: '/facebook-reels-downloader'
+      fullPath: '/en/facebook-reels-downloader'
+      preLoaderRoute: typeof EnFacebookReelsDownloaderRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/id/facebook-reels-downloader': {
+      id: '/id/facebook-reels-downloader'
+      path: '/facebook-reels-downloader'
+      fullPath: '/id/facebook-reels-downloader'
+      preLoaderRoute: typeof IdFacebookReelsDownloaderRouteImport
+      parentRoute: typeof IdRoute
+    }
+    '/pt/facebook-reels-downloader': {
+      id: '/pt/facebook-reels-downloader'
+      path: '/facebook-reels-downloader'
+      fullPath: '/pt/facebook-reels-downloader'
+      preLoaderRoute: typeof PtFacebookReelsDownloaderRouteImport
+      parentRoute: typeof PtRoute
+    }
+    '/vi/facebook-reels-downloader': {
+      id: '/vi/facebook-reels-downloader'
+      path: '/facebook-reels-downloader'
+      fullPath: '/vi/facebook-reels-downloader'
+      preLoaderRoute: typeof ViFacebookReelsDownloaderRouteImport
+      parentRoute: typeof ViRoute
     }
     '/api/public/download': {
       id: '/api/public/download'
@@ -195,14 +355,58 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface EnRouteChildren {
+  EnFacebookReelsDownloaderRoute: typeof EnFacebookReelsDownloaderRoute
+}
+
+const EnRouteChildren: EnRouteChildren = {
+  EnFacebookReelsDownloaderRoute: EnFacebookReelsDownloaderRoute,
+}
+
+const EnRouteWithChildren = EnRoute._addFileChildren(EnRouteChildren)
+
+interface IdRouteChildren {
+  IdFacebookReelsDownloaderRoute: typeof IdFacebookReelsDownloaderRoute
+}
+
+const IdRouteChildren: IdRouteChildren = {
+  IdFacebookReelsDownloaderRoute: IdFacebookReelsDownloaderRoute,
+}
+
+const IdRouteWithChildren = IdRoute._addFileChildren(IdRouteChildren)
+
+interface PtRouteChildren {
+  PtFacebookReelsDownloaderRoute: typeof PtFacebookReelsDownloaderRoute
+}
+
+const PtRouteChildren: PtRouteChildren = {
+  PtFacebookReelsDownloaderRoute: PtFacebookReelsDownloaderRoute,
+}
+
+const PtRouteWithChildren = PtRoute._addFileChildren(PtRouteChildren)
+
+interface ViRouteChildren {
+  ViFacebookReelsDownloaderRoute: typeof ViFacebookReelsDownloaderRoute
+}
+
+const ViRouteChildren: ViRouteChildren = {
+  ViFacebookReelsDownloaderRoute: ViFacebookReelsDownloaderRoute,
+}
+
+const ViRouteWithChildren = ViRoute._addFileChildren(ViRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  EnRoute: EnRouteWithChildren,
   FacebookReelsDownloaderRoute: FacebookReelsDownloaderRoute,
   HelpRoute: HelpRoute,
+  IdRoute: IdRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
+  PtRoute: PtRouteWithChildren,
   TermsRoute: TermsRoute,
+  ViRoute: ViRouteWithChildren,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
 }
 export const routeTree = rootRouteImport
