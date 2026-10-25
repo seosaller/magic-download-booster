@@ -12,7 +12,7 @@ import { FullHdDownload } from "@/components/full-hd-download";
 import { fullHdFallback } from "@/lib/full-hd-fallback";
 import { copy, type Language } from "@/lib/i18n";
 import { LocalizedContent } from "@/components/localized-content";
-import { Download, Music, LoaderCircle, Clipboard, X } from "lucide-react";
+import { Download, Music, LoaderCircle, Clipboard, X, CircleCheck } from "lucide-react";
 
 type RenderUi = {
   state: "idle" | "working" | "done" | "error";
@@ -46,6 +46,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
   const [keyOpen, setKeyOpen] = useState(false);
   const [pasteError, setPasteError] = useState("");
   const [linkError, setLinkError] = useState("");
+  const [acceptedPaste, setAcceptedPaste] = useState(false);
   const urlInput = useRef<HTMLInputElement>(null);
   const resultsPanel = useRef<HTMLElement>(null);
   const localController = useRef<AbortController | null>(null);
@@ -91,6 +92,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
     const validationError = facebookLinkError(url);
     setLinkError(validationError);
     if (validationError) { urlInput.current?.focus(); return; }
+    setAcceptedPaste(false);
     clearLocalVideo();
     setLoading(true);
     setResult(null);
@@ -111,10 +113,12 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
 
   async function pasteLink() {
     setPasteError("");
+    setAcceptedPaste(false);
     try {
       const text = await navigator.clipboard.readText();
       setUrl(text.trim());
       setLinkError(facebookLinkError(text));
+      setAcceptedPaste(!facebookLinkError(text));
     } catch {
       setPasteError("Clipboard access was denied. Please paste the link into the box manually.");
     }
@@ -269,13 +273,14 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
               required
               maxLength={MAX_FACEBOOK_LINK_LENGTH}
               value={url}
-              onChange={(e) => { setUrl(e.target.value); setPasteError(""); setLinkError(linkError ? facebookLinkError(e.target.value) : ""); }}
+              onChange={(e) => { setUrl(e.target.value); setPasteError(""); setAcceptedPaste(false); setLinkError(linkError ? facebookLinkError(e.target.value) : ""); }}
               onPaste={(e) => {
                 e.preventDefault();
                 const text = e.clipboardData.getData("text").trim();
                 setUrl(text);
                 setPasteError("");
                 setLinkError(facebookLinkError(text));
+                setAcceptedPaste(!facebookLinkError(text));
               }}
               onBlur={() => { if (url) setLinkError(facebookLinkError(url)); }}
               aria-invalid={Boolean(linkError)}
@@ -291,7 +296,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
               aria-label={url ? t.clear : t.paste}
               title={url ? t.clear : t.paste}
               onClick={() => {
-                if (url) { setUrl(""); setPasteError(""); setLinkError(""); urlInput.current?.focus(); }
+                if (url) { setUrl(""); setPasteError(""); setLinkError(""); setAcceptedPaste(false); urlInput.current?.focus(); }
                 else void pasteLink();
               }}
               className={`h-11 w-11 shrink-0 gap-2 px-0 transition active:scale-[0.96] active:brightness-95 lg:w-auto lg:px-4 ${url ? "" : "text-primary"}`}
@@ -307,6 +312,9 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
               {loading ? t.processing : t.download}
             </Button>
           </form>
+          <div role="status" aria-live="polite" aria-atomic="true" className="lg:hidden">
+            {acceptedPaste && !linkError && <p className="mt-3 flex items-center gap-2 rounded-lg bg-card px-3 py-2 text-left text-sm font-medium text-success"><CircleCheck aria-hidden="true" className="size-5 shrink-0" />{t.linkAccepted}</p>}
+          </div>
           {linkError && <p id="facebook-link-error" role="alert" className="mt-3 rounded-lg bg-card px-3 py-2 text-left text-sm leading-6 text-destructive">{linkError}</p>}
           {pasteError && <p role="alert" className="mt-2 text-sm text-primary-foreground">{pasteError}</p>}
           <p className="mt-3 break-words text-xs leading-5 text-primary-foreground/80">
