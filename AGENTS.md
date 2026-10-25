@@ -25,4 +25,5 @@
 - Validate Facebook links with the shared Zod schema in the browser and server function; restrict page-fetch redirects to approved Facebook hosts to prevent arbitrary outbound requests.
 - TikTok pages share their own localized downloader and validated server function; resolve public links through Tikwm and stream downloads by video ID with approved HTTPS media hosts and redirect checks, never arbitrary caller-provided media URLs.
 - TikTok thumbnails use the same validated ID-based media proxy; MP3 conversion resolves the complete playable video server-side and reuses CloudConvert conversion/status so original speech and music are preserved.
+- Reuse resolved public TikTok sources in a bounded, short-lived server cache to avoid duplicate provider requests during thumbnail loading and downloads; cache misses always resolve and validate again.
 - Keep Bun test files outside the application TypeScript compilation to prevent Bun's fetch declarations from overriding Worker/browser fetch types; run the tests with Bun separately.
