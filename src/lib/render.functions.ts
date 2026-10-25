@@ -19,11 +19,13 @@ export type RenderStatus = {
 const API = "https://api.cloudconvert.com/v2";
 
 export const startMp3 = createServerFn({ method: "POST" })
-  .inputValidator((input: { source?: string; tiktokId?: string; apiKey?: string; bitrate?: number }) => {
+  .inputValidator((input: { source?: string; tiktokId?: string; platform?: "tiktok" | "douyin"; apiKey?: string; bitrate?: number }) => {
     const source = String(input?.source ?? "");
     const tiktokId = input?.tiktokId;
     if (tiktokId ? !/^\d{10,25}$/.test(tiktokId) : !isFacebookMediaUrl(source)) throw new Error("Invalid audio source.");
-    return { source, tiktokId, apiKey: String(input?.apiKey ?? "").trim().slice(0, 600), bitrate: parseMp3Bitrate(input?.bitrate) };
+    const platform = input?.platform || "tiktok";
+    if (platform !== "tiktok" && platform !== "douyin") throw new Error("Invalid download platform.");
+    return { source, tiktokId, platform, apiKey: String(input?.apiKey ?? "").trim().slice(0, 600), bitrate: parseMp3Bitrate(input?.bitrate) };
   })
   .handler(async ({ data }): Promise<RenderStart> => {
     const key = data.apiKey || process.env["CLOUDCONVERT_API_KEY"];
@@ -31,7 +33,7 @@ export const startMp3 = createServerFn({ method: "POST" })
     try {
       // Convert the complete playable video; music-only fields can omit speech.
       const source = data.tiktokId
-        ? (await (await import("./tiktok.server")).getTikTokVideo(`https://www.tiktok.com/@video/video/${data.tiktokId}`)).play
+        ? (await (await import("./tiktok.server")).getTikTokVideo(data.platform === "douyin" ? `https://www.douyin.com/video/${data.tiktokId}` : `https://www.tiktok.com/@video/video/${data.tiktokId}`)).play
         : data.source;
       const body = data.tiktokId
         ? { ...mp3Job(source, data.bitrate), tasks: { ...mp3Job(source, data.bitrate).tasks, "in-audio": { operation: "import/upload", filename: "source.mp4" } } }
@@ -53,9 +55,9 @@ export const startMp3 = createServerFn({ method: "POST" })
         const form = json.data.tasks?.find(task => task.name === "in-audio")?.result?.form;
         if (!form?.url || !form.parameters || !/^https:\/\//.test(form.url)) return { ok: false, code: "other", error: "MP3 upload could not start. Please try again." };
         const { pullTikTokMedia } = await import("./tiktok.server");
-        let media = await pullTikTokMedia(source, null);
-        if (!media?.ok) media = await pullTikTokMedia(`https://www.tikwm.com/video/media/play/${data.tiktokId}.mp4`, null);
-        if (!media?.ok || !media.body) return { ok: false, code: "other", error: "The original TikTok audio could not be retrieved. Please process the link again." };
+        let media = await pullTikTokMedia(source, null, data.platform);
+        if (!media?.ok && data.platform === "tiktok") media = await pullTikTokMedia(`https://www.tikwm.com/video/media/play/${data.tiktokId}.mp4`, null);
+        if (!media?.ok || !media.body) return { ok: false, code: "other", error: "The original audio could not be retrieved. Please process the link again." };
         const limit = 64 * 1024 * 1024;
         if (Number(media.headers.get("content-length")) > limit) { await media.body.cancel(); return { ok: false, code: "other", error: "This video is too large for MP3 conversion. Video downloads remain available." }; }
         const reader = media.body.getReader();
