@@ -73,7 +73,7 @@ export function TikTokDownloader({ language }: { language: Language }) {
     const current = version.current;
     setMp3({ status: "working", progress: 0 });
     try {
-      const job = await convertMp3({ data: { tiktokId: video.id, bitrate: 320 } });
+      const job = await convertMp3({ data: { tiktokId: video.id, platform: video.platform || "tiktok", bitrate: 320 } });
       if (current !== version.current) return;
       if (!job.ok || !job.jobId) throw new Error(job.error || "Unable to start MP3 conversion.");
       for (let attempt = 0; attempt < 100; attempt++) {
@@ -110,13 +110,13 @@ export function TikTokDownloader({ language }: { language: Language }) {
       {(loading || video) && <section ref={panel} aria-label={text.ready} className="mx-auto -mt-8 max-w-3xl rounded-xl bg-card p-5 shadow-card">
         {loading && <p role="status" className="flex items-center justify-center gap-2 py-5 text-sm text-muted-foreground"><LoaderCircle className="motion-safe:animate-spin" />{t.fetching}</p>}
         {video && <div className="grid min-w-0 grid-cols-[56px_minmax(0,1fr)] items-start gap-x-3 gap-y-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
-          <img src={`/api/public/tiktok-download?id=${video.id}&variant=thumbnail`} referrerPolicy="no-referrer" onError={event => { const image = event.currentTarget; if (video.cover && image.src !== video.cover) image.src = video.cover; }} alt={t.thumbnail} className="h-14 w-14 shrink-0 rounded-lg border border-border bg-muted object-cover lg:h-auto lg:w-full" />
+          <img src={`/api/public/tiktok-download?id=${video.id}&platform=${video.platform || "tiktok"}&variant=thumbnail`} referrerPolicy="no-referrer" onError={event => { const image = event.currentTarget; if (video.cover && image.src !== video.cover) image.src = video.cover; }} alt={t.thumbnail} className="h-14 w-14 shrink-0 rounded-lg border border-border bg-muted object-cover lg:h-auto lg:w-full" />
           <div className="min-w-0 max-lg:contents">
             <div className="col-start-2 min-w-0 lg:mb-3"><h2 className="line-clamp-2 break-words text-sm font-semibold leading-5 lg:text-base lg:leading-6">{video.title}</h2>{video.author && <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">{video.author}</p>}</div>
             <div className="col-span-2 flex min-w-0 flex-col gap-2">
               {[{ variant: "video", label: text.video, size: video.size }, ...(video.watermark ? [{ variant: "watermark", label: text.watermark, size: video.watermarkSize }] : [])].map(option => <div key={option.variant} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border py-3 lg:block lg:border-0 lg:py-0">
                 <span className="min-w-0 break-words text-sm leading-6 lg:hidden">{option.label}{sizeLabel(option.size)}</span>
-                <Button asChild className="h-auto shrink-0 px-4 py-2 transition active:scale-[0.96] active:brightness-90 lg:w-full lg:whitespace-normal lg:py-3"><a href={`/api/public/tiktok-download?id=${video.id}&variant=${option.variant}`}><span className="lg:hidden">{t.download}</span><span className="hidden lg:inline">{option.label}{sizeLabel(option.size)}</span></a></Button>
+                <Button asChild className="h-auto shrink-0 px-4 py-2 transition active:scale-[0.96] active:brightness-90 lg:w-full lg:whitespace-normal lg:py-3"><a href={`/api/public/tiktok-download?id=${video.id}&platform=${video.platform || "tiktok"}&variant=${option.variant}`}><span className="lg:hidden">{t.download}</span><span className="hidden lg:inline">{option.label}{sizeLabel(option.size)}</span></a></Button>
               </div>)}
                {mp3.status === "done" && mp3.url ? <Button asChild variant="success" className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]"><a href={`/api/public/download?type=mp3&name=tiktok-${video.id}&url=${encodeURIComponent(mp3.url)}`}><Download />{t.download} MP3 · 320 kbps{sizeLabel(mp3.size || 0)}</a></Button> : <Button variant="outline" disabled={mp3.status === "working"} onClick={() => void processMp3()} className="h-auto min-h-11 w-full whitespace-normal border-primary py-3 text-primary transition active:scale-[0.96] active:brightness-90">{mp3.status === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Music2 className="shrink-0 text-chart-2 [&_path]:stroke-chart-1 [&_circle]:fill-chart-2/20" />}{mp3.status === "working" ? `${t.mp3Working} · ${mp3.progress || 0}%` : mp3.status === "error" ? t.mp3Retry : `${t.download} MP3 · 320 kbps (${t.render})`}</Button>}
                {mp3.error && <p role="alert" className="break-words text-sm leading-6 text-destructive">{mp3.error}</p>}
