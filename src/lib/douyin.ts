@@ -14,5 +14,5 @@ export const douyinLinkSchema = z.string().trim().max(4096).superRefine((value, 
   if (!short && !video) context.addIssue({ code: "custom", message: "Please use a public Douyin video link, not a profile, LIVE or photo post." });
 });
 export function isDouyinMediaUrl(value: string) {
-  try { const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password && !url.port && /(^|\.)(douyinvod\.com|douyinpic\.com|douyinstatic\.com|byteimg\.com|ibytedtos\.com)$/i.test(url.hostname); } catch { return false; }
+  try { const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password && !url.port && /(^|\.)(douyinvod\.com|douyinpic\.com|douyinstatic\.com|byteimg\.com|ibytedtos\.com|zjcdn\.com)$/i.test(url.hostname); } catch { return false; }
 }
