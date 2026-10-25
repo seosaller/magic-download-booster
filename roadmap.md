@@ -33,4 +33,4 @@
 - [x] Fix TikTok processing rejection when the provider returns images: null; reported video processed and downloaded as a 2,029,858-byte MP4 with H.264 video and AAC audio, with seven tests passing and design unchanged.
 - [x] Check Evil0ctal's Douyin/TikTok API: official demo API returns 401 UNAUTHENTICATED, so no working anonymous free endpoint is available; integration requires a hosted instance and API access, and the current downloader is unchanged.
 - [x] Connect Evil0ctal's API with verified access and integrate without changing the design; real thumbnail, 1,606,281-byte video with AAC audio and 813,227-byte 320 kbps MP3 downloaded, phone/tablet layouts checked and 11 tests passed. Demo availability remains controlled by its operator.
-- [ ] Add Douyin video links to the existing TikTok page, sharing video, thumbnail and MP3 downloads; verify real downloads and keep separate pages out of this task.
+- [x] Add Douyin links to the existing TikTok page, without separate pages; real share link returned a decoded thumbnail, 1,454,940-byte H.264/AAC video and 303,222-byte 320 kbps MP3, with mobile/tablet fit verified and 15 tests passing.
