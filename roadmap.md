@@ -23,5 +23,5 @@
 - [x] Add Vietnamese default and English, Portuguese, Indonesian home/Reels pages with localized content, navigation and metadata
 - [x] Verify language switching, translated pages and existing downloader controls (all language pages and mobile menus checked; 20 rules tests pass; error-state form checked)
 - [x] Validate pasted Facebook links on client and server with helpful English errors and supported-format tests.
-- [ ] Restore and verify Paste and link processing after validation changes.
-- [ ] Prevent 720p downloads being presented as 1080p and verify actual output resolution and size.
+- [ ] Verify the user's failing Paste/processing case — standard clipboard paste and processing start verified; sample Facebook link returned no media. Waiting for the user's failing video link and browser clipboard context.
+- [x] Prevent 720p downloads being presented as 1080p; native merge produced 14,064 bytes and metadata checked as 1080p, while 720p source was rejected.
