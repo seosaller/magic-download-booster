@@ -29,20 +29,49 @@ export const startMp3 = createServerFn({ method: "POST" })
     const key = data.apiKey || process.env["CLOUDCONVERT_API_KEY"];
     if (!key) return { ok: false, code: "config", error: "Add your CloudConvert API key to convert to MP3. HD/SD downloads are still available." };
     try {
-      // Convert the playable video, not Tikwm's music field: music can omit speech.
+      // Convert the complete playable video; music-only fields can omit speech.
       const source = data.tiktokId
         ? (await (await import("./tiktok.server")).getTikTokVideo(`https://www.tiktok.com/@video/video/${data.tiktokId}`)).play
         : data.source;
+      const body = data.tiktokId
+        ? { ...mp3Job(source, data.bitrate), tasks: { ...mp3Job(source, data.bitrate).tasks, "in-audio": { operation: "import/upload", filename: "source.mp4" } } }
+        : mp3Job(source, data.bitrate);
       const response = await fetch(`${API}/jobs`, {
         method: "POST",
         headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-        body: JSON.stringify(mp3Job(source, data.bitrate)),
+        body: JSON.stringify(body),
       });
-      const json = await response.json() as { data?: { id?: string }; code?: string; message?: string };
+      const json = await response.json() as { data?: { id?: string; tasks?: { name: string; result?: { form?: { url?: string; parameters?: Record<string, string> } } }[] }; code?: string; message?: string };
       if (!response.ok || !json.data?.id) {
         const credits = json.code === "CREDITS_EXCEEDED" || /credit/i.test(json.message ?? "");
         const config = response.status === 401 || response.status === 403;
         return { ok: false, code: credits ? "credits" : config ? "config" : "other", error: credits ? "MP3 conversion credits have run out. Add your CloudConvert API key or try again when credits renew. HD/SD downloads are still available." : config ? "Your CloudConvert API key is invalid or does not allow conversions. Please check your key." : "MP3 conversion could not start. Please try again later. HD/SD downloads are still available." };
+      }
+      if (data.tiktokId) {
+        // Fetch with TikTok's required headers, then upload the actual video.
+        // CloudConvert cannot reliably import TikTok's signed CDN URLs itself.
+        const form = json.data.tasks?.find(task => task.name === "in-audio")?.result?.form;
+        if (!form?.url || !form.parameters || !/^https:\/\//.test(form.url)) return { ok: false, code: "other", error: "MP3 upload could not start. Please try again." };
+        const { pullTikTokMedia } = await import("./tiktok.server");
+        const media = await pullTikTokMedia(source, null);
+        if (!media?.ok || !media.body) return { ok: false, code: "other", error: "The original TikTok audio could not be retrieved. Please process the link again." };
+        const limit = 64 * 1024 * 1024;
+        if (Number(media.headers.get("content-length")) > limit) { await media.body.cancel(); return { ok: false, code: "other", error: "This video is too large for MP3 conversion. Video downloads remain available." }; }
+        const reader = media.body.getReader();
+        const chunks: Uint8Array<ArrayBuffer>[] = [];
+        let bytes = 0;
+        while (true) {
+          const chunk = await reader.read();
+          if (chunk.done) break;
+          bytes += chunk.value.byteLength;
+          if (bytes > limit) { await reader.cancel(); return { ok: false, code: "other", error: "This video is too large for MP3 conversion. Video downloads remain available." }; }
+          chunks.push(new Uint8Array(chunk.value));
+        }
+        const upload = new FormData();
+        for (const [name, value] of Object.entries(form.parameters)) upload.append(name, value);
+        upload.append("file", new Blob(chunks, { type: "video/mp4" }), "source.mp4");
+        const uploaded = await fetch(form.url, { method: "POST", body: upload, signal: AbortSignal.timeout(60000) });
+        if (!uploaded.ok) return { ok: false, code: "other", error: "MP3 upload failed. Please try again." };
       }
       return { ok: true, jobId: json.data.id };
     } catch {

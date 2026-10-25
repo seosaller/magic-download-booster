@@ -24,6 +24,6 @@
 - Downloader information layouts share compact reading styles across languages so mobile and tablet spacing and card density stay consistent.
 - Validate Facebook links with the shared Zod schema in the browser and server function; restrict page-fetch redirects to approved Facebook hosts to prevent arbitrary outbound requests.
 - TikTok pages share their localized downloader and validated server function; use the connected Evil0ctal API server-side first, with Tikwm as an availability backup, and stream downloads by validated video ID with approved HTTPS media hosts and redirect checks so video, thumbnails and MP3 share one verified source.
-- TikTok thumbnails use the same validated ID-based media proxy; MP3 conversion resolves the complete playable video server-side and reuses CloudConvert conversion/status so original speech and music are preserved.
+- TikTok thumbnails use the validated ID-based proxy; MP3 conversion uploads the bounded complete playable video fetched with TikTok headers to CloudConvert, avoiding CDN import failures while preserving speech and music and reusing shared status polling.
 - Reuse resolved public TikTok sources in a bounded, short-lived server cache to avoid duplicate provider requests during thumbnail loading and downloads; cache misses always resolve and validate again.
 - Keep Bun test files outside the application TypeScript compilation to prevent Bun's fetch declarations from overriding Worker/browser fetch types; run the tests with Bun separately.
