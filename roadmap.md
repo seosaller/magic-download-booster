@@ -22,3 +22,4 @@
 - [ ] Verify live Facebook retrieval through the new third option — blocked because the sample link submission did not produce a results panel in the browser check
 - [x] Add Vietnamese default and English, Portuguese, Indonesian home/Reels pages with localized content, navigation and metadata
 - [x] Verify language switching, translated pages and existing downloader controls (all language pages and mobile menus checked; 20 rules tests pass; error-state form checked)
+- [x] Validate pasted Facebook links on client and server with helpful English errors and supported-format tests.
