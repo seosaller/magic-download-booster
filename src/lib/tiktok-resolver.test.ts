@@ -1,5 +1,5 @@
 import { afterEach, expect, it } from "bun:test";
-import { getTikTokVideo } from "./tiktok.server";
+import { getTikwmVideo as getTikTokVideo } from "./tiktok.server";
 
 const originalFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = originalFetch; });

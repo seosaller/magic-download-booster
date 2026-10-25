@@ -1,10 +1,28 @@
 import { isTikTokMediaUrl, type TikTokVideo } from "./tiktok";
 import { z } from "zod";
+import { resolveEvil0ctalVideo } from "./evil0ctal.server";
 
 const responseSchema = z.object({ code: z.number(), data: z.object({ id: z.string(), title: z.string().optional(), cover: z.string().optional(), play: z.string().optional(), wmplay: z.string().optional(), size: z.number().optional(), wm_size: z.number().optional(), images: z.array(z.string()).nullish(), author: z.object({ nickname: z.string().optional() }).optional() }).optional() });
 type ResolvedVideo = { video: TikTokVideo; play: string; wmplay: string | undefined };
 const resolvedVideos = new Map<string, { expires: number; result: ResolvedVideo }>();
 export async function getTikTokVideo(url: string) {
+  const id = /\/video\/(\d+)/.exec(url)?.[1];
+  const cached = resolvedVideos.get(id || url);
+  if (cached && cached.expires > Date.now()) return cached.result;
+  const appKey = process.env['LOVABLE_API_KEY'];
+  const connectionKey = process.env['UDC_EVIL0CTAL_DOUYIN_TIKTOK_API_API_KEY'];
+  if (appKey && connectionKey) {
+    try {
+      const result = await resolveEvil0ctalVideo(url, { appKey, connectionKey });
+      if (resolvedVideos.size >= 100) { const oldest = resolvedVideos.keys().next().value; if (oldest) resolvedVideos.delete(oldest); }
+      const entry = { expires: Date.now() + 240_000, result };
+      resolvedVideos.set(result.video.id, entry);
+      return result;
+    } catch (error) { console.warn("Evil0ctal lookup unavailable; trying Tikwm", error instanceof Error ? error.message : "Lookup failed"); }
+  }
+  return getTikwmVideo(url);
+}
+export async function getTikwmVideo(url: string) {
   const id = /\/video\/(\d+)/.exec(url)?.[1];
   const cached = resolvedVideos.get(id || url);
   if (cached && cached.expires > Date.now()) return cached.result;
