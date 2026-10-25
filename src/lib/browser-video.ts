@@ -49,22 +49,11 @@ export async function mergeBrowserVideo(video: string, audio: string, signal: Ab
     if (typeof output === "string" || !output.byteLength) throw new Error("The processed video is empty. Please try again.");
     const blob = new Blob([new Uint8Array(output)], { type: "video/mp4" });
     if (expectedHeight) {
-      const probeUrl = URL.createObjectURL(blob);
-      const media = document.createElement("video");
-      try {
-        const height = await new Promise<number>((resolve, reject) => {
-          const timer = setTimeout(() => reject(new Error("Unable to verify the processed video resolution.")), 15_000);
-          media.onloadedmetadata = () => { clearTimeout(timer); resolve(media.videoHeight); };
-          media.onerror = () => { clearTimeout(timer); reject(new Error("Unable to verify the processed video resolution.")); };
-          media.preload = "metadata";
-          media.src = probeUrl;
-        });
-        if (height !== expectedHeight) throw new Error(`The source is ${height}p, not ${expectedHeight}p. Please use the available HD/SD download instead.`);
-      } finally {
-        media.removeAttribute("src");
-        media.load();
-        URL.revokeObjectURL(probeUrl);
-      }
+      const code = await ffmpeg.ffprobe(["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height", "-of", "default=noprint_wrappers=1:nokey=1", "output.mp4", "-o", "height.txt"], 15_000);
+      const metadata = await ffmpeg.readFile("height.txt", "utf8");
+      const height = Number(typeof metadata === "string" ? metadata.trim() : "");
+      if (code !== 0 || !height) throw new Error("Unable to verify the processed video resolution.");
+      if (height !== expectedHeight) throw new Error(`The source is ${height}p, not ${expectedHeight}p. Please use the available HD/SD download instead.`);
     }
     progress(100);
     return { url: URL.createObjectURL(blob), size: blob.size };
