@@ -23,4 +23,18 @@ export const tiktokCopy = {
 export function isTikTokMediaUrl(value: string) {
   try { const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password && !url.port && /(^|\.)(tiktokcdn\.com|tiktokcdn-us\.com|tiktokcdn-eu\.com|tikwm\.com)$/.test(url.hostname); } catch { return false; }
 }
-export type TikTokVideo = { id: string; title: string; author: string; cover: string; size: number; watermarkSize: number; watermark: boolean };
+export type TikTokVideo = { id: string; title: string; author: string; cover: string; size: number; watermarkSize: number; watermark: boolean };// Browser-side lookup: Tikwm allows CORS, so each visitor uses their own rate limit instead of the shared server IP.
+export async function resolveTikTokInBrowser(url: string): Promise<TikTokVideo | null> {
+  try {
+    const response = await fetch("https://www.tikwm.com/api/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ url }), signal: AbortSignal.timeout(20000) });
+    if (!response.ok) return null;
+    const body = await response.json() as { code?: number; data?: { id?: unknown; title?: unknown; cover?: unknown; play?: unknown; wmplay?: unknown; size?: unknown; wm_size?: unknown; images?: unknown; author?: { nickname?: unknown } } };
+    const data = body.data;
+    if (body.code !== 0 || !data || typeof data.id !== "string" || !/^\d{10,25}$/.test(data.id)) return null;
+    if (Array.isArray(data.images) && data.images.length) return null;
+    if (typeof data.play !== "string" || !isTikTokMediaUrl(data.play)) return null;
+    const text = (value: unknown) => typeof value === "string" ? value : "";
+    const num = (value: unknown) => typeof value === "number" ? value : 0;
+    return { id: data.id, title: text(data.title) || "TikTok video", author: text(data.author?.nickname), cover: isTikTokMediaUrl(text(data.cover)) ? text(data.cover) : "", size: num(data.size), watermarkSize: num(data.wm_size), watermark: isTikTokMediaUrl(text(data.wmplay)) };
+  } catch { return null; }
+}

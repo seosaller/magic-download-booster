@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Clipboard, X, Download, CircleCheck, LoaderCircle, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fetchTikTok } from "@/lib/tiktok.functions";
-import { tiktokCopy, tiktokLinkError, type TikTokVideo } from "@/lib/tiktok";
+import { tiktokCopy, tiktokLinkError, resolveTikTokInBrowser, type TikTokVideo } from "@/lib/tiktok";
 import { copy, type Language } from "@/lib/i18n";
 import { startMp3, renderStatus } from "@/lib/render.functions";
 
@@ -57,6 +57,9 @@ export function TikTokDownloader({ language }: { language: Language }) {
     setLoading(true); setVideo(null); setAccepted(false); setMp3({ status: "idle" });
     const current = ++version.current;
     try {
+      const local = await resolveTikTokInBrowser(url.trim());
+      if (current !== version.current) return;
+      if (local) { setVideo(local); return; }
       const result = await run({ data: { url } });
       if (current !== version.current) return;
       if (result.ok) setVideo(result.video); else setError(result.error);
@@ -105,7 +108,7 @@ export function TikTokDownloader({ language }: { language: Language }) {
       {(loading || video) && <section ref={panel} aria-label={text.ready} className="mx-auto -mt-8 max-w-3xl rounded-xl bg-card p-5 shadow-card">
         {loading && <p role="status" className="flex items-center justify-center gap-2 py-5 text-sm text-muted-foreground"><LoaderCircle className="motion-safe:animate-spin" />{t.fetching}</p>}
         {video && <div className="grid min-w-0 grid-cols-[56px_minmax(0,1fr)] items-start gap-x-3 gap-y-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
-          <img src={`/api/public/tiktok-download?id=${video.id}&variant=thumbnail`} alt={t.thumbnail} className="h-14 w-14 shrink-0 rounded-lg border border-border bg-muted object-cover lg:h-auto lg:w-full" />
+          <img src={`/api/public/tiktok-download?id=${video.id}&variant=thumbnail`} referrerPolicy="no-referrer" onError={event => { const image = event.currentTarget; if (video.cover && image.src !== video.cover) image.src = video.cover; }} alt={t.thumbnail} className="h-14 w-14 shrink-0 rounded-lg border border-border bg-muted object-cover lg:h-auto lg:w-full" />
           <div className="min-w-0 max-lg:contents">
             <div className="col-start-2 min-w-0 lg:mb-3"><h2 className="line-clamp-2 break-words text-sm font-semibold leading-5 lg:text-base lg:leading-6">{video.title}</h2>{video.author && <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">{video.author}</p>}</div>
             <div className="col-span-2 flex min-w-0 flex-col gap-2">
