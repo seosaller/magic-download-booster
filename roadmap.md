@@ -19,9 +19,11 @@
 - [x] Add 1080p Full HD to home and Reels quality content, preserving existing source-based downloads
 - [x] Add a separate third 1080p option; test native source selection and controlled 1080p video/audio processing, green ready state, size and download
 - [x] Use the existing HD file through the third option when native 1080p is absent; verify source selection and controlled browser download
-- [ ] Verify live Facebook retrieval through the new third option — blocked because the sample link submission did not produce a results panel in the browser check
+- [x] Verify live Facebook retrieval through the third option — share/v/19yCGooSWf processed and downloaded; output was 720×1080, so Full HD labeling remains a separate resolution-integrity issue.
 - [x] Add Vietnamese default and English, Portuguese, Indonesian home/Reels pages with localized content, navigation and metadata
 - [x] Verify language switching, translated pages and existing downloader controls (all language pages and mobile menus checked; 20 rules tests pass; error-state form checked)
 - [x] Validate pasted Facebook links on client and server with helpful English errors and supported-format tests.
-- [ ] Verify the user's failing Paste/processing case — standard clipboard paste and processing start verified; sample Facebook link returned no media. Waiting for the user's failing video link and browser clipboard context.
+- [x] Verify the user's failing Paste/processing case — the supplied share/v/19yCGooSWf link pasted, processed and downloaded successfully.
 - [x] Prevent 720p downloads being presented as 1080p; native merge produced 14,064 bytes and metadata checked as 1080p, while 720p source was rejected.
+- [x] Add TikTok downloader with localized pages, validation, navigation and direct video downloads.
+- [x] Verify a real TikTok download and invalid-link feedback — 2,953,029-byte MP4 with video and audio, four languages, mobile/tablet fit and language switching checked.

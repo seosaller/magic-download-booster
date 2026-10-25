@@ -19,12 +19,17 @@ import { Route as IdRouteImport } from './routes/id'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PtRouteImport } from './routes/pt'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TiktokDownloaderRouteImport } from './routes/tiktok-downloader'
 import { Route as ViRouteImport } from './routes/vi'
 import { Route as EnFacebookReelsDownloaderRouteImport } from './routes/en_.facebook-reels-downloader'
+import { Route as EnTiktokDownloaderRouteImport } from './routes/en_.tiktok-downloader'
 import { Route as IdFacebookReelsDownloaderRouteImport } from './routes/id_.facebook-reels-downloader'
+import { Route as IdTiktokDownloaderRouteImport } from './routes/id_.tiktok-downloader'
 import { Route as PtFacebookReelsDownloaderRouteImport } from './routes/pt_.facebook-reels-downloader'
+import { Route as PtTiktokDownloaderRouteImport } from './routes/pt_.tiktok-downloader'
 import { Route as ViFacebookReelsDownloaderRouteImport } from './routes/vi_.facebook-reels-downloader'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
+import { Route as ApiPublicTiktokDownloadRouteImport } from './routes/api/public/tiktok-download'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -76,6 +81,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TiktokDownloaderRoute = TiktokDownloaderRouteImport.update({
+  id: '/tiktok-downloader',
+  path: '/tiktok-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ViRoute = ViRouteImport.update({
   id: '/vi',
   path: '/vi',
@@ -87,18 +97,33 @@ const EnFacebookReelsDownloaderRoute =
     path: '/en/facebook-reels-downloader',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EnTiktokDownloaderRoute = EnTiktokDownloaderRouteImport.update({
+  id: '/en_/tiktok-downloader',
+  path: '/en/tiktok-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IdFacebookReelsDownloaderRoute =
   IdFacebookReelsDownloaderRouteImport.update({
     id: '/id_/facebook-reels-downloader',
     path: '/id/facebook-reels-downloader',
     getParentRoute: () => rootRouteImport,
   } as any)
+const IdTiktokDownloaderRoute = IdTiktokDownloaderRouteImport.update({
+  id: '/id_/tiktok-downloader',
+  path: '/id/tiktok-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PtFacebookReelsDownloaderRoute =
   PtFacebookReelsDownloaderRouteImport.update({
     id: '/pt_/facebook-reels-downloader',
     path: '/pt/facebook-reels-downloader',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PtTiktokDownloaderRoute = PtTiktokDownloaderRouteImport.update({
+  id: '/pt_/tiktok-downloader',
+  path: '/pt/tiktok-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ViFacebookReelsDownloaderRoute =
   ViFacebookReelsDownloaderRouteImport.update({
     id: '/vi_/facebook-reels-downloader',
@@ -108,6 +133,11 @@ const ViFacebookReelsDownloaderRoute =
 const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
   id: '/api/public/download',
   path: '/api/public/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicTiktokDownloadRoute = ApiPublicTiktokDownloadRouteImport.update({
+  id: '/api/public/tiktok-download',
+  path: '/api/public/tiktok-download',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -122,12 +152,17 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/pt': typeof PtRoute
   '/terms': typeof TermsRoute
+  '/tiktok-downloader': typeof TiktokDownloaderRoute
   '/vi': typeof ViRoute
   '/en/facebook-reels-downloader': typeof EnFacebookReelsDownloaderRoute
+  '/en/tiktok-downloader': typeof EnTiktokDownloaderRoute
   '/id/facebook-reels-downloader': typeof IdFacebookReelsDownloaderRoute
+  '/id/tiktok-downloader': typeof IdTiktokDownloaderRoute
   '/pt/facebook-reels-downloader': typeof PtFacebookReelsDownloaderRoute
+  '/pt/tiktok-downloader': typeof PtTiktokDownloaderRoute
   '/vi/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/tiktok-download': typeof ApiPublicTiktokDownloadRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -140,12 +175,17 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/pt': typeof PtRoute
   '/terms': typeof TermsRoute
+  '/tiktok-downloader': typeof TiktokDownloaderRoute
   '/vi': typeof ViRoute
   '/en/facebook-reels-downloader': typeof EnFacebookReelsDownloaderRoute
+  '/en/tiktok-downloader': typeof EnTiktokDownloaderRoute
   '/id/facebook-reels-downloader': typeof IdFacebookReelsDownloaderRoute
+  '/id/tiktok-downloader': typeof IdTiktokDownloaderRoute
   '/pt/facebook-reels-downloader': typeof PtFacebookReelsDownloaderRoute
+  '/pt/tiktok-downloader': typeof PtTiktokDownloaderRoute
   '/vi/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/tiktok-download': typeof ApiPublicTiktokDownloadRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -159,12 +199,17 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/pt': typeof PtRoute
   '/terms': typeof TermsRoute
+  '/tiktok-downloader': typeof TiktokDownloaderRoute
   '/vi': typeof ViRoute
   '/en_/facebook-reels-downloader': typeof EnFacebookReelsDownloaderRoute
+  '/en_/tiktok-downloader': typeof EnTiktokDownloaderRoute
   '/id_/facebook-reels-downloader': typeof IdFacebookReelsDownloaderRoute
+  '/id_/tiktok-downloader': typeof IdTiktokDownloaderRoute
   '/pt_/facebook-reels-downloader': typeof PtFacebookReelsDownloaderRoute
+  '/pt_/tiktok-downloader': typeof PtTiktokDownloaderRoute
   '/vi_/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/tiktok-download': typeof ApiPublicTiktokDownloadRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -179,12 +224,17 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/pt'
     | '/terms'
+    | '/tiktok-downloader'
     | '/vi'
     | '/en/facebook-reels-downloader'
+    | '/en/tiktok-downloader'
     | '/id/facebook-reels-downloader'
+    | '/id/tiktok-downloader'
     | '/pt/facebook-reels-downloader'
+    | '/pt/tiktok-downloader'
     | '/vi/facebook-reels-downloader'
     | '/api/public/download'
+    | '/api/public/tiktok-download'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -197,12 +247,17 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/pt'
     | '/terms'
+    | '/tiktok-downloader'
     | '/vi'
     | '/en/facebook-reels-downloader'
+    | '/en/tiktok-downloader'
     | '/id/facebook-reels-downloader'
+    | '/id/tiktok-downloader'
     | '/pt/facebook-reels-downloader'
+    | '/pt/tiktok-downloader'
     | '/vi/facebook-reels-downloader'
     | '/api/public/download'
+    | '/api/public/tiktok-download'
   id:
     | '__root__'
     | '/'
@@ -215,12 +270,17 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/pt'
     | '/terms'
+    | '/tiktok-downloader'
     | '/vi'
     | '/en_/facebook-reels-downloader'
+    | '/en_/tiktok-downloader'
     | '/id_/facebook-reels-downloader'
+    | '/id_/tiktok-downloader'
     | '/pt_/facebook-reels-downloader'
+    | '/pt_/tiktok-downloader'
     | '/vi_/facebook-reels-downloader'
     | '/api/public/download'
+    | '/api/public/tiktok-download'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -234,12 +294,17 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   PtRoute: typeof PtRoute
   TermsRoute: typeof TermsRoute
+  TiktokDownloaderRoute: typeof TiktokDownloaderRoute
   ViRoute: typeof ViRoute
   EnFacebookReelsDownloaderRoute: typeof EnFacebookReelsDownloaderRoute
+  EnTiktokDownloaderRoute: typeof EnTiktokDownloaderRoute
   IdFacebookReelsDownloaderRoute: typeof IdFacebookReelsDownloaderRoute
+  IdTiktokDownloaderRoute: typeof IdTiktokDownloaderRoute
   PtFacebookReelsDownloaderRoute: typeof PtFacebookReelsDownloaderRoute
+  PtTiktokDownloaderRoute: typeof PtTiktokDownloaderRoute
   ViFacebookReelsDownloaderRoute: typeof ViFacebookReelsDownloaderRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
+  ApiPublicTiktokDownloadRoute: typeof ApiPublicTiktokDownloadRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -314,6 +379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tiktok-downloader': {
+      id: '/tiktok-downloader'
+      path: '/tiktok-downloader'
+      fullPath: '/tiktok-downloader'
+      preLoaderRoute: typeof TiktokDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vi': {
       id: '/vi'
       path: '/vi'
@@ -328,6 +400,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnFacebookReelsDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en_/tiktok-downloader': {
+      id: '/en_/tiktok-downloader'
+      path: '/en/tiktok-downloader'
+      fullPath: '/en/tiktok-downloader'
+      preLoaderRoute: typeof EnTiktokDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/id_/facebook-reels-downloader': {
       id: '/id_/facebook-reels-downloader'
       path: '/id/facebook-reels-downloader'
@@ -335,11 +414,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IdFacebookReelsDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/id_/tiktok-downloader': {
+      id: '/id_/tiktok-downloader'
+      path: '/id/tiktok-downloader'
+      fullPath: '/id/tiktok-downloader'
+      preLoaderRoute: typeof IdTiktokDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pt_/facebook-reels-downloader': {
       id: '/pt_/facebook-reels-downloader'
       path: '/pt/facebook-reels-downloader'
       fullPath: '/pt/facebook-reels-downloader'
       preLoaderRoute: typeof PtFacebookReelsDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pt_/tiktok-downloader': {
+      id: '/pt_/tiktok-downloader'
+      path: '/pt/tiktok-downloader'
+      fullPath: '/pt/tiktok-downloader'
+      preLoaderRoute: typeof PtTiktokDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vi_/facebook-reels-downloader': {
@@ -356,6 +449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/tiktok-download': {
+      id: '/api/public/tiktok-download'
+      path: '/api/public/tiktok-download'
+      fullPath: '/api/public/tiktok-download'
+      preLoaderRoute: typeof ApiPublicTiktokDownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -370,12 +470,17 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   PtRoute: PtRoute,
   TermsRoute: TermsRoute,
+  TiktokDownloaderRoute: TiktokDownloaderRoute,
   ViRoute: ViRoute,
   EnFacebookReelsDownloaderRoute: EnFacebookReelsDownloaderRoute,
+  EnTiktokDownloaderRoute: EnTiktokDownloaderRoute,
   IdFacebookReelsDownloaderRoute: IdFacebookReelsDownloaderRoute,
+  IdTiktokDownloaderRoute: IdTiktokDownloaderRoute,
   PtFacebookReelsDownloaderRoute: PtFacebookReelsDownloaderRoute,
+  PtTiktokDownloaderRoute: PtTiktokDownloaderRoute,
   ViFacebookReelsDownloaderRoute: ViFacebookReelsDownloaderRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
+  ApiPublicTiktokDownloadRoute: ApiPublicTiktokDownloadRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
