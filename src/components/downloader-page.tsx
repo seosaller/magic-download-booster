@@ -9,6 +9,8 @@ import { HomeContent } from "@/components/home-content";
 import { ReelsContent } from "@/components/reels-content";
 import { FullHdDownload } from "@/components/full-hd-download";
 import { fullHdFallback } from "@/lib/full-hd-fallback";
+import { copy, type Language } from "@/lib/i18n";
+import { LocalizedContent } from "@/components/localized-content";
 import { Download, Music, LoaderCircle, Clipboard, X } from "lucide-react";
 
 type RenderUi = {
@@ -27,7 +29,8 @@ function fmtSize(bytes?: number) {
   return `${Math.max(1, Math.round(bytes / 1e3))} KB`;
 }
 
-export function DownloaderPage({ reels = false }: { reels?: boolean }) {
+export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boolean; language?: Language }) {
+  const t = copy[language];
   const run = useServerFn(fetchFbVideo);
   const begin = useServerFn(startRender);
   const beginMp3 = useServerFn(startMp3);
@@ -243,10 +246,10 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
       <section className="hero-gradient px-4 py-16">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="text-3xl font-bold text-primary-foreground sm:text-4xl">
-            {reels ? "Facebook Reels Downloader" : "Facebook Video Downloader"}
+            {reels ? t.reelsTitle : t.videoTitle}
           </h1>
           <p className="mt-3 text-sm text-primary-foreground/85">
-            {reels ? "Save public Facebook Reels in the available quality, or download their original sound as MP3." : "Free and easy tool for downloading Facebook videos and reels. Just copy the link and paste it below."}
+            {reels ? t.reelsIntro : t.videoIntro}
           </p>
 
           <form
@@ -259,7 +262,8 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
               required
               value={url}
               onChange={(e) => { setUrl(e.target.value); setPasteError(""); }}
-              placeholder={reels ? "Paste Facebook Reel URL..." : "Paste Facebook video / reel URL..."}
+              aria-label={reels ? t.reelPlaceholder : t.placeholder}
+              placeholder={reels ? t.reelPlaceholder : t.placeholder}
               className="min-w-0 w-full rounded-lg bg-transparent px-3 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground lg:flex-1"
             />
             <Button
@@ -273,19 +277,19 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
               className="h-11 shrink-0 gap-2 px-4 text-primary transition active:scale-[0.96] active:brightness-95"
             >
               {url ? <X /> : <Clipboard />}
-              {url ? "Clear" : "Paste"}
+              {url ? t.clear : t.paste}
             </Button>
             <Button
               type="submit"
               disabled={loading}
               className="col-span-2 h-11 w-full rounded-lg px-6 text-sm font-semibold transition active:scale-[0.96] active:brightness-90 lg:w-auto lg:shrink-0"
             >
-              {loading ? "Processing..." : "Download"}
+              {loading ? t.processing : t.download}
             </Button>
           </form>
           {pasteError && <p role="alert" className="mt-2 text-sm text-primary-foreground">{pasteError}</p>}
           <p className="mt-3 text-xs text-primary-foreground/80">
-            {reels ? "Public Reel links: facebook.com/reel/... or facebook.com/share/r/..." : "Ex. https://www.facebook.com/watch?v=554413541934974 or https://fb.watch/lMDZjV1O0t/"}
+            {reels ? t.reelExample : "Ex. https://www.facebook.com/watch?v=554413541934974 or https://fb.watch/lMDZjV1O0t/"}
           </p>
         </div>
       </section>
@@ -295,7 +299,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
           <section ref={resultsPanel} className="mx-auto -mt-8 max-w-3xl rounded-xl bg-card p-5 shadow-card">
             {loading && (
               <p className="py-6 text-center text-sm text-muted-foreground">
-                Fetching your video...
+                {t.fetching}
               </p>
             )}
 
@@ -322,19 +326,19 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                   <div className="col-span-2 flex min-w-0 flex-col gap-2">
                     {result.links.map((l) => (
                       <div key={l.quality} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border py-3 lg:block lg:border-0 lg:py-0">
-                        <span className="min-w-0 text-sm lg:hidden">Quality: {l.quality}{l.size ? ` (${fmtSize(l.size)})` : ""}</span>
+                        <span className="min-w-0 text-sm lg:hidden">{t.quality}: {l.quality}{l.size ? ` (${fmtSize(l.size)})` : ""}</span>
                       <Button asChild className="h-auto shrink-0 px-4 py-2 transition active:scale-[0.96] active:brightness-90 lg:w-full lg:py-3">
                       <a
                         href={dl(l.url, "mp4", l.quality)}
                       >
-                        <span className="lg:hidden">Download</span>
-                        <span className="hidden lg:inline">Download {l.quality}{l.size ? ` (${fmtSize(l.size)})` : ""}</span>
+                        <span className="lg:hidden">{t.download}</span>
+                        <span className="hidden lg:inline">{t.download} {l.quality}{l.size ? ` (${fmtSize(l.size)})` : ""}</span>
                       </a>
                       </Button>
                       </div>
                     ))}
 
-                    <FullHdDownload key={result.fullHd?.video ?? "unavailable"} source={result.fullHd} fallback={fullHdFallback(result.fullHd, result.links)} />
+                    <FullHdDownload language={language} key={result.fullHd?.video ?? "unavailable"} source={result.fullHd} fallback={fullHdFallback(result.fullHd, result.links)} />
 
                     {result.render && result.render.height !== 1080 && render.state === "idle" && (
                       <Button
@@ -344,7 +348,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                         className="h-auto whitespace-normal border-primary px-4 py-3 text-primary transition active:scale-[0.96]"
                       >
                         <Download />
-                        Download {result.render.label} ({result.render.height}p
+                        {t.download} {result.render.label} ({result.render.height}p
                         {result.render.size
                           ? ` · ~${fmtSize(result.render.size)}`
                           : ""}
@@ -355,7 +359,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                     {render.state === "working" && (
                       <div className="rounded-lg border border-border p-4">
                         <p className="text-sm font-semibold">
-                          Processing high quality video... {Math.round(render.progress)}%
+                          {t.workingVideo} {Math.round(render.progress)}%
                         </p>
                         <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
                           <div
@@ -364,7 +368,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                           />
                         </div>
                         <p className="mt-2 text-xs text-muted-foreground">
-                          Combining the original video and audio. Keep this page open. Free processing uses your device; large files may need CloudConvert.
+                          {t.processingNote}
                         </p>
                       </div>
                     )}
@@ -380,7 +384,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                         )}
                         className="w-full cursor-pointer rounded-lg px-4 py-3 text-center text-sm font-semibold transition active:scale-[0.96] active:brightness-90"
                       >
-                        Save {result.render?.label ?? "HQ"} file{render.size ? ` · ${fmtSize(render.size)}` : ""}
+                        {t.save} {result.render?.label ?? "HQ"}{render.size ? ` · ${fmtSize(render.size)}` : ""}
                       </a>
                       </Button>
                     )}
@@ -393,7 +397,7 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                         </p>
                         {render.needKey && (
                           <p className="mt-2 text-xs text-muted-foreground">
-                            The HD/SD downloads above are still available.
+                            {t.available}
                           </p>
                         )}
                         <Button
@@ -402,20 +406,20 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                           onClick={() => void onFreeRender()}
                           className="mt-2 text-primary"
                         >
-                          Retry processing
+                          {t.retry}
                         </Button>
-                        <Button type="button" variant="outline" onClick={() => void onRender()} className="mt-2 whitespace-normal">Use CloudConvert instead</Button>
+                        <Button type="button" variant="outline" onClick={() => void onRender()} className="mt-2 whitespace-normal">{t.cloud}</Button>
                       </div>
                     )}
 
                     {mp3.state === "done" && mp3.url ? (
                       <Button asChild variant="success" className="h-auto w-full whitespace-normal py-3 transition active:scale-[0.96] active:brightness-90">
-                        <a href={dl(mp3.url, "mp3", `audio-${mp3Bitrate}kbps`)}><Download />Download MP3 · {mp3Bitrate} kbps{mp3.size ? ` · ${fmtSize(mp3.size)}` : ""}</a>
+                        <a href={dl(mp3.url, "mp3", `audio-${mp3Bitrate}kbps`)}><Download />{t.download} MP3 · {mp3Bitrate} kbps{mp3.size ? ` · ${fmtSize(mp3.size)}` : ""}</a>
                       </Button>
                     ) : (
                       <Button type="button" variant="outline" onClick={() => void onMp3()} disabled={mp3.state === "working"} className="h-auto w-full whitespace-normal border-primary py-3 text-primary transition active:scale-[0.96] active:brightness-90">
                         {mp3.state === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Music className="text-chart-2 [&_path]:stroke-chart-1 [&_circle]:fill-chart-2/20" />}
-                        {mp3.state === "working" ? `Rendering MP3 · ${mp3Bitrate} kbps… ${mp3.progress}%` : mp3.state === "error" ? `Retry MP3 · ${mp3Bitrate} kbps` : `Download MP3 · ${mp3Bitrate} kbps (render)`}
+                        {mp3.state === "working" ? `${t.mp3Working} · ${mp3Bitrate} kbps… ${mp3.progress}%` : mp3.state === "error" ? `${t.mp3Retry} · ${mp3Bitrate} kbps` : `${t.download} MP3 · ${mp3Bitrate} kbps (${t.render})`}
                       </Button>
                     )}
                     {mp3.state === "working" && <div role="progressbar" aria-label="MP3 conversion" aria-valuenow={mp3.progress} aria-valuemin={0} aria-valuemax={100} className="h-2 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary transition-all" style={{ width: `${mp3.progress}%` }} /></div>}
@@ -424,29 +428,29 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                     {(keyOpen || apiKey) && (
                       <div className="rounded-lg border border-border p-3 text-left">
                         <p className="text-sm font-semibold">
-                          Your CloudConvert API key
+                          {t.key}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Conversion credits depend on your CloudConvert plan. Get a key{" "}
+                          {t.keyBefore}{" "}
                           <a
                             href="https://cloudconvert.com/dashboard/api/v2/keys"
                             target="_blank"
                             rel="noreferrer"
                             className="cursor-pointer font-medium text-primary underline"
                           >
-                            from CloudConvert
+                            {t.keyLink}
                           </a>{" "}
-                          and paste it below. Your saved key is stored in this browser and sent securely when you request a conversion.
+                          {t.keyAfter}
                         </p>
                         <div className="mt-2 flex gap-2">
                           <input
                             type="password"
                             value={apiKey}
                             onChange={(e) => setApiKey(e.target.value)}
-                            placeholder="Paste your API key"
+                            placeholder={t.keyPlaceholder}
                             className="min-w-0 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
                           />
-                          <button
+                          <Button
                             type="button"
                             onClick={() => {
                               localStorage.setItem("cc_api_key", apiKey.trim());
@@ -455,20 +459,20 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
                             }}
                             className="cursor-pointer rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition active:scale-[0.96] active:brightness-90 hover:bg-primary/90"
                           >
-                            Save
-                          </button>
+                            {t.save}
+                          </Button>
                         </div>
                       </div>
                     )}
 
                     {result.thumbnail && (
                       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border py-3 lg:block lg:border-0 lg:py-0">
-                        <span className="min-w-0 text-sm lg:hidden">Thumbnail image</span>
+                        <span className="min-w-0 text-sm lg:hidden">{t.thumbnail}</span>
                         <Button asChild variant="outline" className="h-auto shrink-0 px-4 py-2 transition active:scale-[0.96] active:brightness-95 lg:w-full lg:py-3">
                       <a
                         href={dl(result.thumbnail, "jpg", "thumb")}
                       >
-                        <span className="lg:hidden">Download</span><span className="hidden lg:inline">Download Image</span>
+                        <span className="lg:hidden">{t.download}</span><span className="hidden lg:inline">{t.image}</span>
                       </a>
                         </Button>
                       </div>
@@ -480,7 +484,10 @@ export function DownloaderPage({ reels = false }: { reels?: boolean }) {
           </section>
         )}
 
-        {reels ? <ReelsContent /> : <HomeContent onStart={() => {
+        {language !== "en" ? <LocalizedContent language={language} reels={reels} onStart={() => {
+          urlInput.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+          urlInput.current?.focus({ preventScroll: true });
+        }} /> : reels ? <ReelsContent /> : <HomeContent onStart={() => {
           urlInput.current?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "center" });
           urlInput.current?.focus({ preventScroll: true });
         }} />}

@@ -20,3 +20,5 @@
 - [x] Add a separate third 1080p option; test native source selection and controlled 1080p video/audio processing, green ready state, size and download
 - [x] Use the existing HD file through the third option when native 1080p is absent; verify source selection and controlled browser download
 - [ ] Verify live Facebook retrieval through the new third option — blocked because the sample link submission did not produce a results panel in the browser check
+- [x] Add Vietnamese default and English, Portuguese, Indonesian home/Reels pages with localized content, navigation and metadata
+- [x] Verify language switching, translated pages and existing downloader controls (all language pages and mobile menus checked; 20 rules tests pass; error-state form checked)
