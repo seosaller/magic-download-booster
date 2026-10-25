@@ -6,14 +6,14 @@ export const Route = createFileRoute("/api/public/tiktok-download")({
     const id = query.get("id");
     const variant = query.get("variant");
     const platform = query.get("platform") || "tiktok";
-    if (platform !== "tiktok" && platform !== "douyin") return new Response("Invalid download platform.", { status: 400 });
-    if (!id || !/^\d{10,25}$/.test(id) || !["video", "watermark", "thumbnail"].includes(variant || "")) return new Response("Invalid TikTok download request.", { status: 400 });
+    if (platform !== "tiktok" && platform !== "douyin" && platform !== "kuaishou") return new Response("Invalid download platform.", { status: 400 });
+    if (!id || !(platform === "kuaishou" ? /^[a-zA-Z0-9]{10,32}$/ : /^\d{10,25}$/).test(id) || !["video", "watermark", "thumbnail"].includes(variant || "")) return new Response("Invalid video download request.", { status: 400 });
     try {
       const { getTikTokVideo, pullTikTokMedia } = await import("@/lib/tiktok.server");
       const thumbnail = variant === "thumbnail";
       // ID-derived Tikwm media links work even when re-resolving is rate-limited or blocked.
       const direct = thumbnail ? `https://www.tikwm.com/video/cover/${id}.webp` : `https://www.tikwm.com/video/media/${variant === "watermark" ? "wmplay" : "play"}/${id}.mp4`;
-      const source = await getTikTokVideo(platform === "douyin" ? `https://www.douyin.com/video/${id}` : `https://www.tiktok.com/@video/video/${id}`).catch(() => undefined);
+      const source = await getTikTokVideo(platform === "kuaishou" ? `https://www.kuaishou.com/short-video/${id}` : platform === "douyin" ? `https://www.douyin.com/video/${id}` : `https://www.tiktok.com/@video/video/${id}`).catch(() => undefined);
       const target = (thumbnail ? source?.video.cover : variant === "watermark" ? source?.wmplay : source?.play) || (platform === "tiktok" ? direct : "");
       let upstream = await pullTikTokMedia(target, thumbnail ? null : request.headers.get("range"), platform).catch(() => undefined);
       if (!upstream?.ok && target !== direct && platform === "tiktok") upstream = await pullTikTokMedia(direct, thumbnail ? null : request.headers.get("range"));
