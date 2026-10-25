@@ -31,4 +31,4 @@
 - [x] Add real 320 kbps TikTok MP3 conversion — downloaded 422,366-byte MP3, verified 320000 bits/s audio, green ready button and actual size; 11 tests pass.
 - [x] Match TikTok video results to the Facebook design — real thumbnail and 2,953,029-byte video download verified at 360/394/768/1280 widths with no overflow or runtime errors.
 - [x] Fix TikTok processing rejection when the provider returns images: null; reported video processed and downloaded as a 2,029,858-byte MP4 with H.264 video and AAC audio, with seven tests passing and design unchanged.
-- [ ] Check Evil0ctal's Douyin/TikTok API for a working free endpoint; integrate it if available and verify the real download flow.
+- [x] Check Evil0ctal's Douyin/TikTok API: official demo API returns 401 UNAUTHENTICATED, so no working anonymous free endpoint is available; integration requires a hosted instance and API access, and the current downloader is unchanged.
