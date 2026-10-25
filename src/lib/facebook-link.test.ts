@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "bun:test";
 import { facebookLinkSchema, facebookRequestSchema, MAX_FACEBOOK_LINK_LENGTH } from "./facebook-link";
 
 describe("Facebook link validation", () => {
