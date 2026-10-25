@@ -86,9 +86,8 @@ export function TikTokDownloader({ language }: { language: Language }) {
     }
   }
   return <div className="min-w-0 bg-background">
-    <section className="hero-gradient px-4 pb-10 pt-7 sm:pt-9 lg:py-16">
+    <section className="hero-gradient px-4 py-10 sm:py-12 lg:py-16">
       <div className="mx-auto min-w-0 max-w-3xl text-center">
-        <Music2 aria-hidden="true" className="mx-auto mb-3 size-8 text-primary-foreground" />
         <h1 className="break-words text-2xl font-bold leading-tight text-primary-foreground sm:text-3xl lg:text-4xl">{text.title}</h1>
         <p className="mt-3 break-words text-sm leading-6 text-primary-foreground/85">{text.intro}</p>
         <form noValidate onSubmit={event => void submit(event)} className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl bg-card p-2 shadow-card lg:flex">
@@ -96,24 +95,28 @@ export function TikTokDownloader({ language }: { language: Language }) {
           <Button type="button" variant={url ? "destructive" : "outline"} disabled={loading} aria-label={url ? t.clear : t.paste} title={url ? t.clear : t.paste} className="h-11 w-11 shrink-0 px-0 transition active:scale-[0.96] lg:w-auto lg:px-4" onClick={() => { if (url) { version.current++; setUrl(""); setError(""); setAccepted(false); setVideo(null); setMp3({ status: "idle" }); input.current?.focus(); } else void paste(); }}>
             {url ? <X /> : <Clipboard />}<span className="hidden lg:inline">{url ? t.clear : t.paste}</span>
           </Button>
-          <Button type="submit" disabled={loading} className="col-span-2 h-11 w-full px-6 transition active:scale-[0.96] lg:w-auto">{loading && <LoaderCircle className="motion-safe:animate-spin" />}{loading ? t.processing : t.download}</Button>
+          <Button type="submit" disabled={loading} className="col-span-2 h-11 w-full rounded-lg px-6 text-sm font-semibold transition active:scale-[0.96] active:brightness-90 lg:w-auto lg:shrink-0">{loading ? t.processing : t.download}</Button>
         </form>
         {accepted && !error && <p role="status" className="mt-3 flex items-center gap-2 rounded-lg bg-card p-3 text-left text-sm text-success lg:hidden"><CircleCheck />{t.linkAccepted}</p>}
         {error && <p id="tiktok-error" role="alert" className="mt-3 break-words rounded-lg bg-card p-3 text-left text-sm text-destructive">{error}</p>}
       </div>
     </section>
     <main className="container mx-auto px-4">
-      {(loading || video) && <section ref={panel} aria-label={text.ready} className="mx-auto -mt-6 max-w-3xl rounded-lg bg-card p-4 shadow-card sm:p-5">
+      {(loading || video) && <section ref={panel} aria-label={text.ready} className="mx-auto -mt-8 max-w-3xl rounded-xl bg-card p-5 shadow-card">
         {loading && <p role="status" className="flex items-center justify-center gap-2 py-5 text-sm text-muted-foreground"><LoaderCircle className="motion-safe:animate-spin" />{t.fetching}</p>}
-        {video && <div className="grid min-w-0 grid-cols-[64px_minmax(0,1fr)] items-start gap-3 sm:grid-cols-[80px_minmax(0,1fr)] lg:grid-cols-[110px_minmax(0,1fr)]">
-          <img src={`/api/public/tiktok-download?id=${video.id}&variant=thumbnail`} alt={t.thumbnail} className="aspect-[3/4] w-full shrink-0 rounded-lg bg-muted object-cover lg:row-span-2" />
-          <div className="min-w-0"><h2 className="line-clamp-3 break-words text-sm font-semibold leading-5 lg:line-clamp-2">{video.title}</h2>{video.author && <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">{video.author}</p>}</div>
-            <div className="col-span-2 grid min-w-0 gap-2 [&_a]:min-w-0 [&_a]:break-words [&_a]:px-3 [&_a]:text-sm [&_button]:min-w-0 [&_button]:break-words [&_button]:px-3 [&_button]:text-sm lg:col-span-1 lg:col-start-2">
-              <Button asChild variant="success" className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]"><a href={`/api/public/tiktok-download?id=${video.id}&variant=video`}><Download />{text.video}{sizeLabel(video.size)}</a></Button>
-              {video.watermark && <Button asChild variant="outline" className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]"><a href={`/api/public/tiktok-download?id=${video.id}&variant=watermark`}><Download />{text.watermark}{sizeLabel(video.watermarkSize)}</a></Button>}
-               {mp3.status === "done" && mp3.url ? <Button asChild variant="success" className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]"><a href={`/api/public/download?type=mp3&name=tiktok-${video.id}&url=${encodeURIComponent(mp3.url)}`}><Download />{t.download} MP3 · 320 kbps{sizeLabel(mp3.size || 0)}</a></Button> : <Button variant="outline" disabled={mp3.status === "working"} onClick={() => void processMp3()} className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]">{mp3.status === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Music2 className="text-chart-2 [&_path]:stroke-chart-1 [&_circle]:fill-chart-2/20" />}{mp3.status === "working" ? `${t.mp3Working} · ${mp3.progress || 0}%` : mp3.status === "error" ? t.mp3Retry : `${t.download} MP3 · 320 kbps`}</Button>}
+        {video && <div className="grid min-w-0 grid-cols-[56px_minmax(0,1fr)] items-start gap-x-3 gap-y-4 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-5">
+          <img src={`/api/public/tiktok-download?id=${video.id}&variant=thumbnail`} alt={t.thumbnail} className="h-14 w-14 shrink-0 rounded-lg border border-border bg-muted object-cover lg:h-auto lg:w-full" />
+          <div className="min-w-0 max-lg:contents">
+            <div className="col-start-2 min-w-0 lg:mb-3"><h2 className="line-clamp-2 break-words text-sm font-semibold leading-5 lg:text-base lg:leading-6">{video.title}</h2>{video.author && <p className="mt-1 break-words text-xs leading-5 text-muted-foreground">{video.author}</p>}</div>
+            <div className="col-span-2 flex min-w-0 flex-col gap-2">
+              {[{ variant: "video", label: text.video, size: video.size }, ...(video.watermark ? [{ variant: "watermark", label: text.watermark, size: video.watermarkSize }] : [])].map(option => <div key={option.variant} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border py-3 lg:block lg:border-0 lg:py-0">
+                <span className="min-w-0 break-words text-sm leading-6 lg:hidden">{option.label}{sizeLabel(option.size)}</span>
+                <Button asChild className="h-auto shrink-0 px-4 py-2 transition active:scale-[0.96] active:brightness-90 lg:w-full lg:whitespace-normal lg:py-3"><a href={`/api/public/tiktok-download?id=${video.id}&variant=${option.variant}`}><span className="lg:hidden">{t.download}</span><span className="hidden lg:inline">{option.label}{sizeLabel(option.size)}</span></a></Button>
+              </div>)}
+               {mp3.status === "done" && mp3.url ? <Button asChild variant="success" className="h-auto min-h-11 w-full whitespace-normal py-3 transition active:scale-[0.96]"><a href={`/api/public/download?type=mp3&name=tiktok-${video.id}&url=${encodeURIComponent(mp3.url)}`}><Download />{t.download} MP3 · 320 kbps{sizeLabel(mp3.size || 0)}</a></Button> : <Button variant="outline" disabled={mp3.status === "working"} onClick={() => void processMp3()} className="h-auto min-h-11 w-full whitespace-normal border-primary py-3 text-primary transition active:scale-[0.96] active:brightness-90">{mp3.status === "working" ? <LoaderCircle className="motion-safe:animate-spin" /> : <Music2 className="shrink-0 text-chart-2 [&_path]:stroke-chart-1 [&_circle]:fill-chart-2/20" />}{mp3.status === "working" ? `${t.mp3Working} · ${mp3.progress || 0}%` : mp3.status === "error" ? t.mp3Retry : `${t.download} MP3 · 320 kbps (${t.render})`}</Button>}
                {mp3.error && <p role="alert" className="break-words text-sm leading-6 text-destructive">{mp3.error}</p>}
             </div>
+          </div>
         </div>}
       </section>}
       <div className="download-content mx-auto max-w-5xl">
