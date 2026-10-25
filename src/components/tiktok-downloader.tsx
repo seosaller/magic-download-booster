@@ -57,12 +57,14 @@ export function TikTokDownloader({ language }: { language: Language }) {
     setLoading(true); setVideo(null); setAccepted(false); setMp3({ status: "idle" });
     const current = ++version.current;
     try {
-      const local = await resolveTikTokInBrowser(url.trim());
-      if (current !== version.current) return;
-      if (local) { setVideo(local); return; }
       const result = await run({ data: { url } });
       if (current !== version.current) return;
-      if (result.ok) setVideo(result.video); else setError(result.error);
+      if (result.ok) setVideo(result.video);
+      else {
+        const local = await resolveTikTokInBrowser(url.trim());
+        if (current !== version.current) return;
+        if (local) setVideo(local); else setError(result.error);
+      }
     } catch { if (current === version.current) setError("Unable to process this TikTok link. Please check your connection and try again."); }
     finally { if (current === version.current) setLoading(false); }
   }

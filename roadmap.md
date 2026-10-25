@@ -32,4 +32,4 @@
 - [x] Match TikTok video results to the Facebook design — real thumbnail and 2,953,029-byte video download verified at 360/394/768/1280 widths with no overflow or runtime errors.
 - [x] Fix TikTok processing rejection when the provider returns images: null; reported video processed and downloaded as a 2,029,858-byte MP4 with H.264 video and AAC audio, with seven tests passing and design unchanged.
 - [x] Check Evil0ctal's Douyin/TikTok API: official demo API returns 401 UNAUTHENTICATED, so no working anonymous free endpoint is available; integration requires a hosted instance and API access, and the current downloader is unchanged.
-- [ ] Connect Evil0ctal's API using verified API access, then integrate and test TikTok video, thumbnail and MP3 source resolution without changing the design.
+- [x] Connect Evil0ctal's API with verified access and integrate without changing the design; real thumbnail, 1,606,281-byte video with AAC audio and 813,227-byte 320 kbps MP3 downloaded, phone/tablet layouts checked and 11 tests passed. Demo availability remains controlled by its operator.
