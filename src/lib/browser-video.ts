@@ -49,10 +49,11 @@ export async function mergeBrowserVideo(video: string, audio: string, signal: Ab
     if (typeof output === "string" || !output.byteLength) throw new Error("The processed video is empty. Please try again.");
     const blob = new Blob([new Uint8Array(output)], { type: "video/mp4" });
     if (expectedHeight) {
-      const code = await ffmpeg.ffprobe(["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height", "-of", "default=noprint_wrappers=1:nokey=1", "output.mp4", "-o", "height.txt"], 15_000);
+      await ffmpeg.ffprobe(["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height", "-of", "default=noprint_wrappers=1:nokey=1", "output.mp4", "-o", "height.txt"], 15_000);
       const metadata = await ffmpeg.readFile("height.txt", "utf8");
       const height = Number(typeof metadata === "string" ? metadata.trim() : "");
-      if (code !== 0 || !height) throw new Error("Unable to verify the processed video resolution.");
+      // This WASM core returns -1 even when ffprobe writes valid metadata.
+      if (!Number.isInteger(height) || height <= 0) throw new Error("Unable to verify the processed video resolution.");
       if (height !== expectedHeight) throw new Error(`The source is ${height}p, not ${expectedHeight}p. Please use the available HD/SD download instead.`);
     }
     progress(100);
