@@ -16,7 +16,10 @@ export async function getTikTokVideo(url: string) {
   if (platform === "kuaishou") {
     const result = await resolveKuaishouVideo(url);
     if (resolvedVideos.size >= 100) { const oldest = resolvedVideos.keys().next().value; if (oldest) resolvedVideos.delete(oldest); }
-    resolvedVideos.set(`kuaishou:${result.video.id}`, { expires: Date.now() + 240_000, result });
+    const entry = { expires: Date.now() + 240_000, result };
+    resolvedVideos.set(`kuaishou:${result.video.id}`, entry);
+    if (resolvedVideos.size >= 100) { const oldest = resolvedVideos.keys().next().value; if (oldest) resolvedVideos.delete(oldest); }
+    resolvedVideos.set(`kuaishou:${id || url}`, entry);
     return result;
   }
   const appKey = process.env['LOVABLE_API_KEY'];
