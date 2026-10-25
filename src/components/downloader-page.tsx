@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { startRender, startMp3, renderStatus } from "@/lib/render.functions";
 import { mp3Source } from "@/lib/mp3";
+import { facebookLinkError, MAX_FACEBOOK_LINK_LENGTH } from "@/lib/facebook-link";
 import { assertLocalVideoSize } from "@/lib/video-merge";
 import { Button } from "@/components/ui/button";
 import { HomeContent } from "@/components/home-content";
@@ -44,6 +45,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
   const [apiKey, setApiKey] = useState("");
   const [keyOpen, setKeyOpen] = useState(false);
   const [pasteError, setPasteError] = useState("");
+  const [linkError, setLinkError] = useState("");
   const urlInput = useRef<HTMLInputElement>(null);
   const resultsPanel = useRef<HTMLElement>(null);
   const localController = useRef<AbortController | null>(null);
@@ -86,6 +88,9 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const validationError = facebookLinkError(url);
+    setLinkError(validationError);
+    if (validationError) { urlInput.current?.focus(); return; }
     clearLocalVideo();
     setLoading(true);
     setResult(null);
@@ -109,6 +114,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
     try {
       const text = await navigator.clipboard.readText();
       setUrl(text.trim());
+      setLinkError(facebookLinkError(text));
     } catch {
       setPasteError("Clipboard access was denied. Please paste the link into the box manually.");
     }
@@ -254,14 +260,26 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
 
           <form
             onSubmit={onSubmit}
+            noValidate
             className="mt-6 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded-xl bg-card p-2 shadow-card lg:flex"
           >
             <input
               type="url"
               ref={urlInput}
               required
+              maxLength={MAX_FACEBOOK_LINK_LENGTH}
               value={url}
-              onChange={(e) => { setUrl(e.target.value); setPasteError(""); }}
+              onChange={(e) => { setUrl(e.target.value); setPasteError(""); setLinkError(linkError ? facebookLinkError(e.target.value) : ""); }}
+              onPaste={(e) => {
+                e.preventDefault();
+                const text = e.clipboardData.getData("text").trim();
+                setUrl(text);
+                setPasteError("");
+                setLinkError(facebookLinkError(text));
+              }}
+              onBlur={() => { if (url) setLinkError(facebookLinkError(url)); }}
+              aria-invalid={Boolean(linkError)}
+              aria-describedby={linkError ? "facebook-link-error" : undefined}
               aria-label={reels ? t.reelPlaceholder : t.placeholder}
               placeholder={reels ? t.reelPlaceholder : t.placeholder}
               className="min-w-0 w-full rounded-lg bg-transparent px-3 py-3 text-sm text-foreground outline-none placeholder:text-muted-foreground lg:flex-1"
@@ -273,7 +291,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
               aria-label={url ? t.clear : t.paste}
               title={url ? t.clear : t.paste}
               onClick={() => {
-                if (url) { setUrl(""); setPasteError(""); urlInput.current?.focus(); }
+                if (url) { setUrl(""); setPasteError(""); setLinkError(""); urlInput.current?.focus(); }
                 else void pasteLink();
               }}
               className={`h-11 w-11 shrink-0 gap-2 px-0 transition active:scale-[0.96] active:brightness-95 lg:w-auto lg:px-4 ${url ? "" : "text-primary"}`}
@@ -289,6 +307,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
               {loading ? t.processing : t.download}
             </Button>
           </form>
+          {linkError && <p id="facebook-link-error" role="alert" className="mt-3 rounded-lg bg-card px-3 py-2 text-left text-sm leading-6 text-destructive">{linkError}</p>}
           {pasteError && <p role="alert" className="mt-2 text-sm text-primary-foreground">{pasteError}</p>}
           <p className="mt-3 break-words text-xs leading-5 text-primary-foreground/80">
             {reels ? t.reelExample : "Ex. https://www.facebook.com/watch?v=554413541934974 or https://fb.watch/lMDZjV1O0t/"}

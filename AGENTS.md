@@ -22,3 +22,4 @@
 - Language-specific downloader routes reuse DownloaderPage and shared translation dictionaries; Vietnamese is the unprefixed default, while explicit language routes render the same processing flow without duplication.
 - Determine the document language and navigation from the current route, not browser storage, so SSR and language links remain consistent.
 - Downloader information layouts share compact reading styles across languages so mobile and tablet spacing and card density stay consistent.
+- Validate Facebook links with the shared Zod schema in the browser and server function; restrict page-fetch redirects to approved Facebook hosts to prevent arbitrary outbound requests.

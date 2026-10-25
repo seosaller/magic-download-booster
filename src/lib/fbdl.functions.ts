@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { findFullHdSource, type FullHdSource } from "./full-hd";
+import { facebookRequestSchema, isFacebookPageUrl } from "./facebook-link";
 
 export type FbResult = {
   ok: boolean;
@@ -146,7 +147,8 @@ function firstMatch(html: string, patterns: RegExp[]) {
   return undefined;
 }
 
-async function fetchHtml(url: string, mobile: boolean) {
+async function fetchHtml(url: string, mobile: boolean, redirects = 0): Promise<string> {
+  if (!isFacebookPageUrl(new URL(url)) || redirects > 5) throw new Error("Unsupported Facebook redirect.");
   const res = await fetch(url, {
     headers: {
       "user-agent": mobile
@@ -159,8 +161,13 @@ async function fetchHtml(url: string, mobile: boolean) {
       "sec-fetch-site": "none",
       "upgrade-insecure-requests": "1",
     },
-    redirect: "follow",
+    redirect: "manual",
   });
+  if (res.status >= 300 && res.status < 400) {
+    const location = res.headers.get("location");
+    if (!location) throw new Error("Missing Facebook redirect.");
+    return fetchHtml(new URL(location, url).href, mobile, redirects + 1);
+  }
   return await res.text();
 }
 
@@ -253,12 +260,7 @@ function renderVariants(id: string) {
 }
 
 export const fetchFbVideo = createServerFn({ method: "POST" })
-  .inputValidator((input: { url: string }) => {
-    const url = String(input?.url ?? "").trim();
-    if (!/^https?:\/\/([\w-]+\.)*(facebook\.com|fb\.watch|fb\.me)\//i.test(url))
-      throw new Error("Please paste a valid Facebook video URL.");
-    return { url };
-  })
+  .inputValidator((input: { url: string }) => facebookRequestSchema.parse(input))
   .handler(async ({ data }): Promise<FbResult> => {
     const id = videoId(data.url);
     const variants = [
