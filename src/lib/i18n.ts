@@ -14,6 +14,7 @@ export function languageFromPath(path: string): Language {
 }
 export const copy = {
   en: {
+    linkAccepted: 'Link accepted',
     videoTitle: 'Facebook Video Downloader', reelsTitle: 'Facebook Reels Downloader',
     videoIntro: 'Download public Facebook videos and Reels in available quality, or save their original sound as 320 kbps MP3.',
     reelsIntro: 'Save public Facebook Reels in the available quality, or download their original sound as 320 kbps MP3.',
@@ -31,6 +32,7 @@ export const copy = {
     rights: 'Download only content you own or have permission to save.', independent: 'Independent service. Not affiliated with Facebook or Meta.',
   },
   vi: {
+    linkAccepted: 'Đã nhận liên kết',
     videoTitle: 'Trình tải video Facebook', reelsTitle: 'Trình tải Facebook Reels',
     videoIntro: 'Tải video và Reels công khai trên Facebook với chất lượng có sẵn, hoặc lưu âm thanh gốc dưới dạng MP3 320 kbps.',
     reelsIntro: 'Tải Facebook Reels công khai với chất lượng có sẵn, hoặc lưu âm thanh gốc dưới dạng MP3 320 kbps.',
@@ -48,6 +50,7 @@ export const copy = {
     rights: 'Chỉ tải nội dung bạn sở hữu hoặc được phép lưu.', independent: 'Dịch vụ độc lập. Không liên kết với Facebook hoặc Meta.',
   },
   pt: {
+    linkAccepted: 'Link aceito',
     videoTitle: 'Baixar vídeos do Facebook', reelsTitle: 'Baixar Reels do Facebook',
     videoIntro: 'Baixe vídeos e Reels públicos do Facebook na qualidade disponível ou salve o áudio original em MP3 de 320 kbps.',
     reelsIntro: 'Baixe Reels públicos do Facebook na qualidade disponível ou salve o áudio original em MP3 de 320 kbps.',
@@ -65,6 +68,7 @@ export const copy = {
     rights: 'Baixe apenas conteúdo que você possui ou tem permissão para salvar.', independent: 'Serviço independente. Sem vínculo com Facebook ou Meta.',
   },
   id: {
+    linkAccepted: 'Tautan diterima',
     videoTitle: 'Pengunduh Video Facebook', reelsTitle: 'Pengunduh Facebook Reels',
     videoIntro: 'Unduh video dan Reels publik Facebook dalam kualitas yang tersedia, atau simpan audio aslinya sebagai MP3 320 kbps.',
     reelsIntro: 'Unduh Facebook Reels publik dalam kualitas yang tersedia, atau simpan audio aslinya sebagai MP3 320 kbps.',
