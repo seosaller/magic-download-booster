@@ -12,6 +12,14 @@ it("accepts Douyin short and direct video links in the existing TikTok flow", ()
 it("rejects unsupported posts and insecure or lookalike Douyin links", () => {
   for (const url of ["https://www.douyin.com/user/123", "https://live.douyin.com/123", "https://www.douyin.com/note/123", "http://v.douyin.com/test/", "https://v.douyin.com.evil.test/test/", "https://user@v.douyin.com/test/"]) expect(douyinLinkSchema.safeParse(url).success).toBe(false);
 });
+it("accepts the supplied jingxuan modal link and resolves its exact video ID", () => {
+  const url = "https://www.douyin.com/jingxuan?modal_id=7668653276732198194";
+  expect(shortVideoLinkSchema.safeParse(url).success).toBe(true);
+  expect(douyinLinkSchema.parse(url)).toBe("https://www.douyin.com/video/7668653276732198194");
+});
+it("rejects missing, malformed or duplicated modal video IDs", () => {
+  for (const query of ["", "?modal_id=abc", "?modal_id=7668653276732198194&modal_id=1234567890123456789"]) expect(douyinLinkSchema.safeParse(`https://www.douyin.com/jingxuan${query}`).success).toBe(false);
+});
 it("normalizes Douyin sources while retaining the platform and actual size", () => {
   const result = normalizeEvil0ctalVideo({ kind: "video", platform: "douyin", content_id: "7126745726494821640", media: { video: { url: "https://v5-dy-ov-experiment.zjcdn.com/video.mp4", size_bytes: 1454940 }, covers: [{ url: "https://p3-pc-sign.douyinpic.com/cover.jpeg" }] } });
   expect(result.video.platform).toBe("douyin");

@@ -11,7 +11,12 @@ export const douyinLinkSchema = z.string().trim().max(4096).superRefine((value, 
   }
   const short = url.hostname === "v.douyin.com" && /^\/[a-zA-Z0-9_-]+\/?$/.test(url.pathname);
   const video = /^\/video\/\d+\/?$/.test(url.pathname) || (url.hostname === "www.iesdouyin.com" && /^\/share\/video\/\d+\/?$/.test(url.pathname));
-  if (!short && !video) context.addIssue({ code: "custom", message: "Please use a public Douyin video link, not a profile, LIVE or photo post." });
+  const modal = ["douyin.com", "www.douyin.com", "m.douyin.com"].includes(url.hostname) && /^\/(?:jingxuan|discover|recommend)?\/?$/.test(url.pathname) && url.searchParams.getAll("modal_id").length === 1 && /^\d{10,25}$/.test(url.searchParams.get("modal_id") || "");
+  if (!short && !video && !modal) context.addIssue({ code: "custom", message: "Please use a public Douyin video link, not a profile, LIVE or photo post." });
+}).transform(value => {
+  const url = new URL(value);
+  const id = url.searchParams.get("modal_id");
+  return id && /^\/(?:jingxuan|discover|recommend)?\/?$/.test(url.pathname) ? `https://www.douyin.com/video/${id}` : value;
 });
 export function isDouyinMediaUrl(value: string) {
   try { const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password && !url.port && /(^|\.)(douyinvod\.com|douyinpic\.com|douyinstatic\.com|byteimg\.com|ibytedtos\.com|zjcdn\.com)$/i.test(url.hostname); } catch { return false; }

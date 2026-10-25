@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isShortVideoMediaUrl, shortVideoLinkSchema, type TikTokVideo } from "./tiktok";
-import { downloadPlatform } from "./douyin";
+import { downloadPlatform, douyinLinkSchema } from "./douyin";
 
 const mediaSchema = z.object({ url: z.string(), size_bytes: z.number().nonnegative().nullish(), watermark: z.boolean().nullish() });
 const videoSchema = z.object({
@@ -25,7 +25,8 @@ export function normalizeEvil0ctalVideo(input: unknown) {
 }
 
 export async function resolveEvil0ctalVideo(url: string, credentials: { appKey: string; connectionKey: string }) {
-  const validated = shortVideoLinkSchema.parse(url);
+  const checked = shortVideoLinkSchema.parse(url);
+  const validated = downloadPlatform(checked) === "douyin" ? douyinLinkSchema.parse(checked) : checked;
   const platform = downloadPlatform(validated);
   const base = "https://connector-gateway.lovable.dev/udc_evil0ctal_douyin_tiktok_api";
   async function request(path: string) {
