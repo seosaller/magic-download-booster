@@ -19,19 +19,24 @@ export type RenderStatus = {
 const API = "https://api.cloudconvert.com/v2";
 
 export const startMp3 = createServerFn({ method: "POST" })
-  .inputValidator((input: { source: string; apiKey?: string; bitrate?: number }) => {
+  .inputValidator((input: { source?: string; tiktokId?: string; apiKey?: string; bitrate?: number }) => {
     const source = String(input?.source ?? "");
-    if (!isFacebookMediaUrl(source)) throw new Error("Invalid audio source.");
-    return { source, apiKey: String(input?.apiKey ?? "").trim().slice(0, 600), bitrate: parseMp3Bitrate(input?.bitrate) };
+    const tiktokId = input?.tiktokId;
+    if (tiktokId ? !/^\d{10,25}$/.test(tiktokId) : !isFacebookMediaUrl(source)) throw new Error("Invalid audio source.");
+    return { source, tiktokId, apiKey: String(input?.apiKey ?? "").trim().slice(0, 600), bitrate: parseMp3Bitrate(input?.bitrate) };
   })
   .handler(async ({ data }): Promise<RenderStart> => {
     const key = data.apiKey || process.env["CLOUDCONVERT_API_KEY"];
     if (!key) return { ok: false, code: "config", error: "Add your CloudConvert API key to convert to MP3. HD/SD downloads are still available." };
     try {
+      // Convert the playable video, not Tikwm's music field: music can omit speech.
+      const source = data.tiktokId
+        ? (await (await import("./tiktok.server")).getTikTokVideo(`https://www.tiktok.com/@video/video/${data.tiktokId}`)).play
+        : data.source;
       const response = await fetch(`${API}/jobs`, {
         method: "POST",
         headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-        body: JSON.stringify(mp3Job(data.source, data.bitrate)),
+        body: JSON.stringify(mp3Job(source, data.bitrate)),
       });
       const json = await response.json() as { data?: { id?: string }; code?: string; message?: string };
       if (!response.ok || !json.data?.id) {
