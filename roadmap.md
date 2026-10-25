@@ -25,3 +25,5 @@
 - [x] Validate pasted Facebook links on client and server with helpful English errors and supported-format tests.
 - [ ] Verify the user's failing Paste/processing case — standard clipboard paste and processing start verified; sample Facebook link returned no media. Waiting for the user's failing video link and browser clipboard context.
 - [x] Prevent 720p downloads being presented as 1080p; native merge produced 14,064 bytes and metadata checked as 1080p, while 720p source was rejected.
+- [ ] Add TikTok downloader with localized pages, validation, navigation and direct video downloads.
+- [ ] Verify a real TikTok download and invalid-link feedback.
