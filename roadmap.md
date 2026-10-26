@@ -36,4 +36,4 @@
 - [x] Add Douyin links to the existing TikTok page, without separate pages; real share link returned a decoded thumbnail, 1,454,940-byte H.264/AAC video and 303,222-byte 320 kbps MP3, with mobile/tablet fit verified and 15 tests passing.
 - [x] Add Kuaishou to the existing downloader using the working public parser; supplied KSpsbe22 thumbnail decoded, 41,816,069-byte 720×1280 H.264/AAC video downloaded, and genuine 320 kbps MP3 downloaded; 15 tests passed. Public parser availability remains controlled by its operator.
 - [x] Remove Douyin, Kuaishou and the Evil0ctal API from the downloader; TikTok resolves through Tikwm browser-first (each visitor's own rate limit) with the server function as fallback — no free unlimited TikTok API exists.
-- [ ] Verify the TikTok-only flow end-to-end after the removal (paste, process, video + MP3 download).
+- [x] Verify the TikTok-only flow end-to-end after the removal — 2,953,029-byte video and 422,366-byte 320 kbps MP3 downloaded, no errors; 8 tests pass.
