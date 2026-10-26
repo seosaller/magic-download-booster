@@ -1,39 +1,11 @@
-import { isTikTokMediaUrl, isShortVideoMediaUrl, shortVideoLinkSchema, type TikTokVideo } from "./tiktok";
-import { downloadPlatform, type DownloadPlatform } from "./douyin";
+import { isTikTokMediaUrl, tiktokLinkSchema, type TikTokVideo } from "./tiktok";
 import { z } from "zod";
-import { resolveEvil0ctalVideo } from "./evil0ctal.server";
-import { resolveKuaishouVideo } from "./kuaishou.server";
 
 const responseSchema = z.object({ code: z.number(), data: z.object({ id: z.string(), title: z.string().optional(), cover: z.string().optional(), play: z.string().optional(), wmplay: z.string().optional(), size: z.number().optional(), wm_size: z.number().optional(), images: z.array(z.string()).nullish(), author: z.object({ nickname: z.string().optional() }).optional() }).optional() });
 type ResolvedVideo = { video: TikTokVideo; play: string; wmplay: string | undefined };
 const resolvedVideos = new Map<string, { expires: number; result: ResolvedVideo }>();
 export async function getTikTokVideo(url: string) {
-  url = shortVideoLinkSchema.parse(url);
-  const platform = downloadPlatform(url);
-  const id = /\/(?:video|short-video)\/([a-zA-Z0-9]+)/.exec(url)?.[1];
-  const cached = resolvedVideos.get(platform !== "tiktok" ? `${platform}:${id || url}` : id || url);
-  if (cached && cached.expires > Date.now()) return cached.result;
-  if (platform === "kuaishou") {
-    const result = await resolveKuaishouVideo(url);
-    if (resolvedVideos.size >= 100) { const oldest = resolvedVideos.keys().next().value; if (oldest) resolvedVideos.delete(oldest); }
-    const entry = { expires: Date.now() + 240_000, result };
-    resolvedVideos.set(`kuaishou:${result.video.id}`, entry);
-    if (resolvedVideos.size >= 100) { const oldest = resolvedVideos.keys().next().value; if (oldest) resolvedVideos.delete(oldest); }
-    resolvedVideos.set(`kuaishou:${id || url}`, entry);
-    return result;
-  }
-  const appKey = process.env['LOVABLE_API_KEY'];
-  const connectionKey = process.env['UDC_EVIL0CTAL_DOUYIN_TIKTOK_API_API_KEY'];
-  if (appKey && connectionKey) {
-    try {
-      const result = await resolveEvil0ctalVideo(url, { appKey, connectionKey });
-      if (resolvedVideos.size >= 100) { const oldest = resolvedVideos.keys().next().value; if (oldest) resolvedVideos.delete(oldest); }
-      const entry = { expires: Date.now() + 240_000, result };
-      resolvedVideos.set(platform === "douyin" ? `douyin:${result.video.id}` : result.video.id, entry);
-      return result;
-    } catch (error) { if (platform === "douyin") throw error; console.warn("Evil0ctal lookup unavailable; trying Tikwm", error instanceof Error ? error.message : "Lookup failed"); }
-  }
-  if (platform === "douyin") throw new Error("Douyin downloads are temporarily unavailable. Please try again later.");
+  url = tiktokLinkSchema.parse(url);
   return getTikwmVideo(url);
 }
 export async function getTikwmVideo(url: string) {
@@ -63,11 +35,11 @@ export async function getTikwmVideo(url: string) {
   resolvedVideos.set(data.id, { expires: Date.now() + 240_000, result });
   return result;
 }
-export async function pullTikTokMedia(target: string, range: string | null, platform: DownloadPlatform = "tiktok") {
+export async function pullTikTokMedia(target: string, range: string | null) {
   let url = target;
   for (let redirects = 0; redirects < 5; redirects++) {
-    if (!isShortVideoMediaUrl(url, platform)) return undefined;
-    const response = await fetch(url, { redirect: "manual", headers: { "User-Agent": "Mozilla/5.0", Referer: platform === "kuaishou" ? "https://www.kuaishou.com/" : platform === "douyin" ? "https://www.douyin.com/" : "https://www.tiktok.com/", ...(range ? { Range: range } : {}) }, signal: AbortSignal.timeout(25000) });
+    if (!isTikTokMediaUrl(url)) return undefined;
+    const response = await fetch(url, { redirect: "manual", headers: { "User-Agent": "Mozilla/5.0", Referer: "https://www.tiktok.com/", ...(range ? { Range: range } : {}) }, signal: AbortSignal.timeout(25000) });
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");
       if (!location) return undefined;
