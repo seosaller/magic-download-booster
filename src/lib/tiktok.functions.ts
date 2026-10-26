@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { shortVideoLinkSchema } from "./tiktok";
+import { tiktokLinkSchema } from "./tiktok";
 
 export const fetchTikTok = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => z.object({ url: shortVideoLinkSchema }).parse(input))
+  .inputValidator((input: unknown) => z.object({ url: tiktokLinkSchema }).parse(input))
   .handler(async ({ data }) => {
     try {
       const { getTikTokVideo } = await import("./tiktok.server");
