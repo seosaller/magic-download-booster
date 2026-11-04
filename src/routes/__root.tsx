@@ -120,6 +120,24 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  // Download links run in a hidden frame so a failed file request never replaces the page.
+  useEffect(() => {
+    function onClick(event: MouseEvent) {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return;
+      const link = (event.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!link) return;
+      const url = new URL(link.href, window.location.href);
+      if (url.origin !== window.location.origin || !/^\/api\/public\/(download|tiktok-download)$/.test(url.pathname)) return;
+      event.preventDefault();
+      const frame = document.createElement("iframe");
+      frame.hidden = true;
+      frame.src = url.href;
+      document.body.appendChild(frame);
+      setTimeout(() => frame.remove(), 120_000);
+    }
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
