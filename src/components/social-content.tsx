@@ -11,11 +11,11 @@ export function SocialContent({ language, platform }: { language: Language; plat
   return <div className="mx-auto max-w-5xl space-y-12 pb-12 sm:space-y-16 sm:pb-16">
     <section>
       <h2 className="text-center text-xl font-bold text-foreground sm:text-2xl">{c.howTitle}</h2>
-      <ol className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{c.steps.map(([title, body], i) => { const Icon = stepIcons[i]; return <li key={title} className="rounded-xl bg-card p-4 shadow-card"><div className="flex items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><Icon className="h-5 w-5" /></span><h3 className="text-sm font-semibold text-foreground">{i + 1}. {title}</h3></div><p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p></li>; })}</ol>
+      <ol className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{c.steps.map(([title, body], i) => { const Icon = stepIcons[i] ?? Download; return <li key={title} className="rounded-xl bg-card p-4 shadow-card"><div className="flex items-center gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><Icon className="h-5 w-5" /></span><h3 className="text-sm font-semibold text-foreground">{i + 1}. {title}</h3></div><p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p></li>; })}</ol>
     </section>
     <section>
       <h2 className="text-center text-xl font-bold text-foreground sm:text-2xl">{c.whyTitle}</h2>
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">{c.features.map(([title, body], i) => { const Icon = featureIcons[i]; return <div key={title} className="flex gap-3 rounded-xl bg-card p-4 shadow-card"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success"><Icon className="h-5 w-5" /></span><div><h3 className="text-sm font-semibold text-foreground">{title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{body}</p></div></div>; })}</div>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">{c.features.map(([title, body], i) => { const Icon = featureIcons[i] ?? Sparkles; return <div key={title} className="flex gap-3 rounded-xl bg-card p-4 shadow-card"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success/10 text-success"><Icon className="h-5 w-5" /></span><div><h3 className="text-sm font-semibold text-foreground">{title}</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">{body}</p></div></div>; })}</div>
     </section>
     <section className="rounded-xl bg-muted p-5 text-center">
       <h2 className="text-lg font-semibold text-foreground">{c.linksTitle}</h2>
