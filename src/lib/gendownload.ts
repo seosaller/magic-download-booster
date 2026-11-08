@@ -5,7 +5,7 @@ export function isGenDownloadMediaUrl(value: string) {
     const url = new URL(value);
     if (url.protocol !== "https:" || url.username || url.password || url.port) return false;
     if (["gendownload.com", "dl.gendownload.com", "www.gendownload.com"].includes(url.hostname)) return url.pathname === "/api/stream" && Boolean(url.searchParams.get("t")) && /^\d+$/.test(url.searchParams.get("i") || "");
-    return /(^|\.)(douyinvod\.com|douyinpic\.com|douyincdn\.com|byteimg\.com|ibytedtos\.com|pstatp\.com|twimg\.com|fbcdn\.net|fbsbx\.com|tiktokcdn\.com|tiktokcdn-us\.com|tiktokcdn-eu\.com|tikwm\.com)$/.test(url.hostname);
+    return /(^|\.)(douyinvod\.com|douyinpic\.com|douyincdn\.com|byteimg\.com|ibytedtos\.com|pstatp\.com|twimg\.com|cdninstagram\.com|instagram\.com|fbcdn\.net|fbsbx\.com|tiktokcdn\.com|tiktokcdn-us\.com|tiktokcdn-eu\.com|tikwm\.com)$/.test(url.hostname);
   } catch { return false; }
 }
 const genFormatSchema = z.object({ label: z.string(), type: z.string(), ext: z.string(), filesize: z.number().nonnegative().nullish(), url: z.string() });

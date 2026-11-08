@@ -23,7 +23,8 @@
 - Determine the document language and navigation from the current route, not browser storage, so SSR and language links remain consistent.
 - Downloader information layouts share compact reading styles across languages so mobile and tablet spacing and card density stay consistent.
 - Validate Facebook links with the shared Zod schema in the browser and server function; restrict page-fetch redirects to approved Facebook hosts to prevent arbitrary outbound requests.
-- The TikTok downloader supports TikTok links only (Douyin, Kuaishou and the Evil0ctal API were removed); it resolves through Tikwm browser-first with the server function as fallback, keyed by numeric video ID.
+- TikTok retains its existing Tikwm resolution with GenDownload as an alternative; Douyin, Twitter/X and Threads use separate localized routes sharing SocialDownloader and a validated GenDownload adapter, keeping platform flows independent.
+- GenDownload is called without credentials as documented; download proxies validate every media redirect against approved public provider/CDN hosts so submitted addresses cannot become arbitrary outbound requests.
 - TikTok thumbnails use the validated ID-based proxy; MP3 conversion uploads the bounded complete playable video fetched with TikTok headers to CloudConvert, avoiding CDN import failures while preserving speech and music and reusing shared status polling.
 - Reuse resolved public TikTok sources in a bounded, short-lived server cache to avoid duplicate provider requests during thumbnail loading and downloads; cache misses always resolve and validate again.
 - Keep Bun test files outside the application TypeScript compilation to prevent Bun's fetch declarations from overriding Worker/browser fetch types; run the tests with Bun separately.
