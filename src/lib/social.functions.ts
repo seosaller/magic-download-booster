@@ -6,7 +6,8 @@ export const fetchSocialVideo = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     try {
       const { extractGenDownload } = await import("./gendownload.server");
-      return { ok: true as const, video: await extractGenDownload(data.url) };
+      const url = data.platform === "threads" ? await (await import("./threads.server")).resolveThreadsPost(data.url) : data.url;
+      return { ok: true as const, video: await extractGenDownload(url) };
     } catch (error) {
       return { ok: false as const, error: error instanceof Error ? error.message : "Unable to retrieve the video. Please try again." };
     }
