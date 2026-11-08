@@ -37,5 +37,6 @@
 - [x] Add Kuaishou to the existing downloader using the working public parser; supplied KSpsbe22 thumbnail decoded, 41,816,069-byte 720×1280 H.264/AAC video downloaded, and genuine 320 kbps MP3 downloaded; 15 tests passed. Public parser availability remains controlled by its operator.
 - [x] Remove Douyin, Kuaishou and the Evil0ctal API from the downloader; TikTok resolves through Tikwm browser-first (each visitor's own rate limit) with the server function as fallback — no free unlimited TikTok API exists.
 - [x] Verify the TikTok-only flow end-to-end after the removal — 2,953,029-byte video and 422,366-byte 320 kbps MP3 downloaded, no errors; 8 tests pass.
-- [ ] Add GenDownload as an alternative and support Douyin, Twitter/X and Threads downloads.
-- [ ] Verify provider access, download flows and mobile/tablet layouts.
+- [x] Add GenDownload as an alternative and support Douyin, Twitter/X and Threads downloads with separate localized pages.
+- [x] Verify provider access and layouts — Douyin 30,741,005-byte H.264/AAC 1920×1080 and Threads 4,906,539-byte H.264/AAC 720×1280 downloaded through the UI without page navigation; phone/tablet/desktop fit checked.
+- [ ] Verify a successful Twitter/X download — GenDownload returned 422 for one public example and timed out for three others; waiting on the provider returning a working source.
