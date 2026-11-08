@@ -6,6 +6,7 @@ import { fetchSocialVideo } from "@/lib/social.functions";
 import { socialCopy, socialLinkError, type SocialPlatform } from "@/lib/social";
 import type { GenVideo } from "@/lib/gendownload";
 import { copy, type Language } from "@/lib/i18n";
+import { SocialContent } from "@/components/social-content";
 
 export function SocialDownloader({ language, platform }: { language: Language; platform: SocialPlatform }) {
   const t = copy[language];
@@ -82,6 +83,7 @@ export function SocialDownloader({ language, platform }: { language: Language; p
         </div>}
       </section>}
       <section className="download-content mx-auto max-w-3xl py-8 sm:py-10 lg:py-16"><p className="text-center text-sm leading-6 text-muted-foreground">{text.note}</p></section>
+      <SocialContent language={language} platform={platform} />
     </main>
   </div>;
 }
