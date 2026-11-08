@@ -29,6 +29,7 @@ import { Route as PtFacebookReelsDownloaderRouteImport } from './routes/pt_.face
 import { Route as PtTiktokDownloaderRouteImport } from './routes/pt_.tiktok-downloader'
 import { Route as ViFacebookReelsDownloaderRouteImport } from './routes/vi_.facebook-reels-downloader'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
+import { Route as ApiPublicSocialDownloadRouteImport } from './routes/api/public/social-download'
 import { Route as ApiPublicTiktokDownloadRouteImport } from './routes/api/public/tiktok-download'
 
 const IndexRoute = IndexRouteImport.update({
@@ -135,6 +136,11 @@ const ApiPublicDownloadRoute = ApiPublicDownloadRouteImport.update({
   path: '/api/public/download',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSocialDownloadRoute = ApiPublicSocialDownloadRouteImport.update({
+  id: '/api/public/social-download',
+  path: '/api/public/social-download',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicTiktokDownloadRoute = ApiPublicTiktokDownloadRouteImport.update({
   id: '/api/public/tiktok-download',
   path: '/api/public/tiktok-download',
@@ -162,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/pt/tiktok-downloader': typeof PtTiktokDownloaderRoute
   '/vi/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/social-download': typeof ApiPublicSocialDownloadRoute
   '/api/public/tiktok-download': typeof ApiPublicTiktokDownloadRoute
 }
 export interface FileRoutesByTo {
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/pt/tiktok-downloader': typeof PtTiktokDownloaderRoute
   '/vi/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/social-download': typeof ApiPublicSocialDownloadRoute
   '/api/public/tiktok-download': typeof ApiPublicTiktokDownloadRoute
 }
 export interface FileRoutesById {
@@ -209,6 +217,7 @@ export interface FileRoutesById {
   '/pt_/tiktok-downloader': typeof PtTiktokDownloaderRoute
   '/vi_/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
+  '/api/public/social-download': typeof ApiPublicSocialDownloadRoute
   '/api/public/tiktok-download': typeof ApiPublicTiktokDownloadRoute
 }
 export interface FileRouteTypes {
@@ -234,6 +243,7 @@ export interface FileRouteTypes {
     | '/pt/tiktok-downloader'
     | '/vi/facebook-reels-downloader'
     | '/api/public/download'
+    | '/api/public/social-download'
     | '/api/public/tiktok-download'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/pt/tiktok-downloader'
     | '/vi/facebook-reels-downloader'
     | '/api/public/download'
+    | '/api/public/social-download'
     | '/api/public/tiktok-download'
   id:
     | '__root__'
@@ -280,6 +291,7 @@ export interface FileRouteTypes {
     | '/pt_/tiktok-downloader'
     | '/vi_/facebook-reels-downloader'
     | '/api/public/download'
+    | '/api/public/social-download'
     | '/api/public/tiktok-download'
   fileRoutesById: FileRoutesById
 }
@@ -304,6 +316,7 @@ export interface RootRouteChildren {
   PtTiktokDownloaderRoute: typeof PtTiktokDownloaderRoute
   ViFacebookReelsDownloaderRoute: typeof ViFacebookReelsDownloaderRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
+  ApiPublicSocialDownloadRoute: typeof ApiPublicSocialDownloadRoute
   ApiPublicTiktokDownloadRoute: typeof ApiPublicTiktokDownloadRoute
 }
 
@@ -449,6 +462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicDownloadRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/social-download': {
+      id: '/api/public/social-download'
+      path: '/api/public/social-download'
+      fullPath: '/api/public/social-download'
+      preLoaderRoute: typeof ApiPublicSocialDownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/tiktok-download': {
       id: '/api/public/tiktok-download'
       path: '/api/public/tiktok-download'
@@ -480,6 +500,7 @@ const rootRouteChildren: RootRouteChildren = {
   PtTiktokDownloaderRoute: PtTiktokDownloaderRoute,
   ViFacebookReelsDownloaderRoute: ViFacebookReelsDownloaderRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
+  ApiPublicSocialDownloadRoute: ApiPublicSocialDownloadRoute,
   ApiPublicTiktokDownloadRoute: ApiPublicTiktokDownloadRoute,
 }
 export const routeTree = rootRouteImport
