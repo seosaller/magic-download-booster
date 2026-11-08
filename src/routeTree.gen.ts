@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DouyinDownloaderRouteImport } from './routes/douyin-downloader'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as FacebookReelsDownloaderRouteImport } from './routes/facebook-reels-downloader'
 import { Route as HelpRouteImport } from './routes/help'
@@ -19,14 +20,25 @@ import { Route as IdRouteImport } from './routes/id'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PtRouteImport } from './routes/pt'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as ThreadsDownloaderRouteImport } from './routes/threads-downloader'
 import { Route as TiktokDownloaderRouteImport } from './routes/tiktok-downloader'
+import { Route as TwitterDownloaderRouteImport } from './routes/twitter-downloader'
 import { Route as ViRouteImport } from './routes/vi'
+import { Route as EnDouyinDownloaderRouteImport } from './routes/en_.douyin-downloader'
 import { Route as EnFacebookReelsDownloaderRouteImport } from './routes/en_.facebook-reels-downloader'
+import { Route as EnThreadsDownloaderRouteImport } from './routes/en_.threads-downloader'
 import { Route as EnTiktokDownloaderRouteImport } from './routes/en_.tiktok-downloader'
+import { Route as EnTwitterDownloaderRouteImport } from './routes/en_.twitter-downloader'
+import { Route as IdDouyinDownloaderRouteImport } from './routes/id_.douyin-downloader'
 import { Route as IdFacebookReelsDownloaderRouteImport } from './routes/id_.facebook-reels-downloader'
+import { Route as IdThreadsDownloaderRouteImport } from './routes/id_.threads-downloader'
 import { Route as IdTiktokDownloaderRouteImport } from './routes/id_.tiktok-downloader'
+import { Route as IdTwitterDownloaderRouteImport } from './routes/id_.twitter-downloader'
+import { Route as PtDouyinDownloaderRouteImport } from './routes/pt_.douyin-downloader'
 import { Route as PtFacebookReelsDownloaderRouteImport } from './routes/pt_.facebook-reels-downloader'
+import { Route as PtThreadsDownloaderRouteImport } from './routes/pt_.threads-downloader'
 import { Route as PtTiktokDownloaderRouteImport } from './routes/pt_.tiktok-downloader'
+import { Route as PtTwitterDownloaderRouteImport } from './routes/pt_.twitter-downloader'
 import { Route as ViFacebookReelsDownloaderRouteImport } from './routes/vi_.facebook-reels-downloader'
 import { Route as ApiPublicDownloadRouteImport } from './routes/api/public/download'
 import { Route as ApiPublicSocialDownloadRouteImport } from './routes/api/public/social-download'
@@ -45,6 +57,11 @@ const AboutRoute = AboutRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DouyinDownloaderRoute = DouyinDownloaderRouteImport.update({
+  id: '/douyin-downloader',
+  path: '/douyin-downloader',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnRoute = EnRouteImport.update({
@@ -82,14 +99,29 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ThreadsDownloaderRoute = ThreadsDownloaderRouteImport.update({
+  id: '/threads-downloader',
+  path: '/threads-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TiktokDownloaderRoute = TiktokDownloaderRouteImport.update({
   id: '/tiktok-downloader',
   path: '/tiktok-downloader',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TwitterDownloaderRoute = TwitterDownloaderRouteImport.update({
+  id: '/twitter-downloader',
+  path: '/twitter-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ViRoute = ViRouteImport.update({
   id: '/vi',
   path: '/vi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnDouyinDownloaderRoute = EnDouyinDownloaderRouteImport.update({
+  id: '/en_/douyin-downloader',
+  path: '/en/douyin-downloader',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EnFacebookReelsDownloaderRoute =
@@ -98,9 +130,24 @@ const EnFacebookReelsDownloaderRoute =
     path: '/en/facebook-reels-downloader',
     getParentRoute: () => rootRouteImport,
   } as any)
+const EnThreadsDownloaderRoute = EnThreadsDownloaderRouteImport.update({
+  id: '/en_/threads-downloader',
+  path: '/en/threads-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnTiktokDownloaderRoute = EnTiktokDownloaderRouteImport.update({
   id: '/en_/tiktok-downloader',
   path: '/en/tiktok-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnTwitterDownloaderRoute = EnTwitterDownloaderRouteImport.update({
+  id: '/en_/twitter-downloader',
+  path: '/en/twitter-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IdDouyinDownloaderRoute = IdDouyinDownloaderRouteImport.update({
+  id: '/id_/douyin-downloader',
+  path: '/id/douyin-downloader',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IdFacebookReelsDownloaderRoute =
@@ -109,9 +156,24 @@ const IdFacebookReelsDownloaderRoute =
     path: '/id/facebook-reels-downloader',
     getParentRoute: () => rootRouteImport,
   } as any)
+const IdThreadsDownloaderRoute = IdThreadsDownloaderRouteImport.update({
+  id: '/id_/threads-downloader',
+  path: '/id/threads-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IdTiktokDownloaderRoute = IdTiktokDownloaderRouteImport.update({
   id: '/id_/tiktok-downloader',
   path: '/id/tiktok-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IdTwitterDownloaderRoute = IdTwitterDownloaderRouteImport.update({
+  id: '/id_/twitter-downloader',
+  path: '/id/twitter-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PtDouyinDownloaderRoute = PtDouyinDownloaderRouteImport.update({
+  id: '/pt_/douyin-downloader',
+  path: '/pt/douyin-downloader',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PtFacebookReelsDownloaderRoute =
@@ -120,9 +182,19 @@ const PtFacebookReelsDownloaderRoute =
     path: '/pt/facebook-reels-downloader',
     getParentRoute: () => rootRouteImport,
   } as any)
+const PtThreadsDownloaderRoute = PtThreadsDownloaderRouteImport.update({
+  id: '/pt_/threads-downloader',
+  path: '/pt/threads-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PtTiktokDownloaderRoute = PtTiktokDownloaderRouteImport.update({
   id: '/pt_/tiktok-downloader',
   path: '/pt/tiktok-downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PtTwitterDownloaderRoute = PtTwitterDownloaderRouteImport.update({
+  id: '/pt_/twitter-downloader',
+  path: '/pt/twitter-downloader',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ViFacebookReelsDownloaderRoute =
@@ -151,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/douyin-downloader': typeof DouyinDownloaderRoute
   '/en': typeof EnRoute
   '/facebook-reels-downloader': typeof FacebookReelsDownloaderRoute
   '/help': typeof HelpRoute
@@ -158,14 +231,25 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/pt': typeof PtRoute
   '/terms': typeof TermsRoute
+  '/threads-downloader': typeof ThreadsDownloaderRoute
   '/tiktok-downloader': typeof TiktokDownloaderRoute
+  '/twitter-downloader': typeof TwitterDownloaderRoute
   '/vi': typeof ViRoute
+  '/en/douyin-downloader': typeof EnDouyinDownloaderRoute
   '/en/facebook-reels-downloader': typeof EnFacebookReelsDownloaderRoute
+  '/en/threads-downloader': typeof EnThreadsDownloaderRoute
   '/en/tiktok-downloader': typeof EnTiktokDownloaderRoute
+  '/en/twitter-downloader': typeof EnTwitterDownloaderRoute
+  '/id/douyin-downloader': typeof IdDouyinDownloaderRoute
   '/id/facebook-reels-downloader': typeof IdFacebookReelsDownloaderRoute
+  '/id/threads-downloader': typeof IdThreadsDownloaderRoute
   '/id/tiktok-downloader': typeof IdTiktokDownloaderRoute
+  '/id/twitter-downloader': typeof IdTwitterDownloaderRoute
+  '/pt/douyin-downloader': typeof PtDouyinDownloaderRoute
   '/pt/facebook-reels-downloader': typeof PtFacebookReelsDownloaderRoute
+  '/pt/threads-downloader': typeof PtThreadsDownloaderRoute
   '/pt/tiktok-downloader': typeof PtTiktokDownloaderRoute
+  '/pt/twitter-downloader': typeof PtTwitterDownloaderRoute
   '/vi/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/social-download': typeof ApiPublicSocialDownloadRoute
@@ -175,6 +259,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/douyin-downloader': typeof DouyinDownloaderRoute
   '/en': typeof EnRoute
   '/facebook-reels-downloader': typeof FacebookReelsDownloaderRoute
   '/help': typeof HelpRoute
@@ -182,14 +267,25 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/pt': typeof PtRoute
   '/terms': typeof TermsRoute
+  '/threads-downloader': typeof ThreadsDownloaderRoute
   '/tiktok-downloader': typeof TiktokDownloaderRoute
+  '/twitter-downloader': typeof TwitterDownloaderRoute
   '/vi': typeof ViRoute
+  '/en/douyin-downloader': typeof EnDouyinDownloaderRoute
   '/en/facebook-reels-downloader': typeof EnFacebookReelsDownloaderRoute
+  '/en/threads-downloader': typeof EnThreadsDownloaderRoute
   '/en/tiktok-downloader': typeof EnTiktokDownloaderRoute
+  '/en/twitter-downloader': typeof EnTwitterDownloaderRoute
+  '/id/douyin-downloader': typeof IdDouyinDownloaderRoute
   '/id/facebook-reels-downloader': typeof IdFacebookReelsDownloaderRoute
+  '/id/threads-downloader': typeof IdThreadsDownloaderRoute
   '/id/tiktok-downloader': typeof IdTiktokDownloaderRoute
+  '/id/twitter-downloader': typeof IdTwitterDownloaderRoute
+  '/pt/douyin-downloader': typeof PtDouyinDownloaderRoute
   '/pt/facebook-reels-downloader': typeof PtFacebookReelsDownloaderRoute
+  '/pt/threads-downloader': typeof PtThreadsDownloaderRoute
   '/pt/tiktok-downloader': typeof PtTiktokDownloaderRoute
+  '/pt/twitter-downloader': typeof PtTwitterDownloaderRoute
   '/vi/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/social-download': typeof ApiPublicSocialDownloadRoute
@@ -200,6 +296,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/douyin-downloader': typeof DouyinDownloaderRoute
   '/en': typeof EnRoute
   '/facebook-reels-downloader': typeof FacebookReelsDownloaderRoute
   '/help': typeof HelpRoute
@@ -207,14 +304,25 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/pt': typeof PtRoute
   '/terms': typeof TermsRoute
+  '/threads-downloader': typeof ThreadsDownloaderRoute
   '/tiktok-downloader': typeof TiktokDownloaderRoute
+  '/twitter-downloader': typeof TwitterDownloaderRoute
   '/vi': typeof ViRoute
+  '/en_/douyin-downloader': typeof EnDouyinDownloaderRoute
   '/en_/facebook-reels-downloader': typeof EnFacebookReelsDownloaderRoute
+  '/en_/threads-downloader': typeof EnThreadsDownloaderRoute
   '/en_/tiktok-downloader': typeof EnTiktokDownloaderRoute
+  '/en_/twitter-downloader': typeof EnTwitterDownloaderRoute
+  '/id_/douyin-downloader': typeof IdDouyinDownloaderRoute
   '/id_/facebook-reels-downloader': typeof IdFacebookReelsDownloaderRoute
+  '/id_/threads-downloader': typeof IdThreadsDownloaderRoute
   '/id_/tiktok-downloader': typeof IdTiktokDownloaderRoute
+  '/id_/twitter-downloader': typeof IdTwitterDownloaderRoute
+  '/pt_/douyin-downloader': typeof PtDouyinDownloaderRoute
   '/pt_/facebook-reels-downloader': typeof PtFacebookReelsDownloaderRoute
+  '/pt_/threads-downloader': typeof PtThreadsDownloaderRoute
   '/pt_/tiktok-downloader': typeof PtTiktokDownloaderRoute
+  '/pt_/twitter-downloader': typeof PtTwitterDownloaderRoute
   '/vi_/facebook-reels-downloader': typeof ViFacebookReelsDownloaderRoute
   '/api/public/download': typeof ApiPublicDownloadRoute
   '/api/public/social-download': typeof ApiPublicSocialDownloadRoute
@@ -226,6 +334,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/douyin-downloader'
     | '/en'
     | '/facebook-reels-downloader'
     | '/help'
@@ -233,14 +342,25 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/pt'
     | '/terms'
+    | '/threads-downloader'
     | '/tiktok-downloader'
+    | '/twitter-downloader'
     | '/vi'
+    | '/en/douyin-downloader'
     | '/en/facebook-reels-downloader'
+    | '/en/threads-downloader'
     | '/en/tiktok-downloader'
+    | '/en/twitter-downloader'
+    | '/id/douyin-downloader'
     | '/id/facebook-reels-downloader'
+    | '/id/threads-downloader'
     | '/id/tiktok-downloader'
+    | '/id/twitter-downloader'
+    | '/pt/douyin-downloader'
     | '/pt/facebook-reels-downloader'
+    | '/pt/threads-downloader'
     | '/pt/tiktok-downloader'
+    | '/pt/twitter-downloader'
     | '/vi/facebook-reels-downloader'
     | '/api/public/download'
     | '/api/public/social-download'
@@ -250,6 +370,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/douyin-downloader'
     | '/en'
     | '/facebook-reels-downloader'
     | '/help'
@@ -257,14 +378,25 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/pt'
     | '/terms'
+    | '/threads-downloader'
     | '/tiktok-downloader'
+    | '/twitter-downloader'
     | '/vi'
+    | '/en/douyin-downloader'
     | '/en/facebook-reels-downloader'
+    | '/en/threads-downloader'
     | '/en/tiktok-downloader'
+    | '/en/twitter-downloader'
+    | '/id/douyin-downloader'
     | '/id/facebook-reels-downloader'
+    | '/id/threads-downloader'
     | '/id/tiktok-downloader'
+    | '/id/twitter-downloader'
+    | '/pt/douyin-downloader'
     | '/pt/facebook-reels-downloader'
+    | '/pt/threads-downloader'
     | '/pt/tiktok-downloader'
+    | '/pt/twitter-downloader'
     | '/vi/facebook-reels-downloader'
     | '/api/public/download'
     | '/api/public/social-download'
@@ -274,6 +406,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/contact'
+    | '/douyin-downloader'
     | '/en'
     | '/facebook-reels-downloader'
     | '/help'
@@ -281,14 +414,25 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/pt'
     | '/terms'
+    | '/threads-downloader'
     | '/tiktok-downloader'
+    | '/twitter-downloader'
     | '/vi'
+    | '/en_/douyin-downloader'
     | '/en_/facebook-reels-downloader'
+    | '/en_/threads-downloader'
     | '/en_/tiktok-downloader'
+    | '/en_/twitter-downloader'
+    | '/id_/douyin-downloader'
     | '/id_/facebook-reels-downloader'
+    | '/id_/threads-downloader'
     | '/id_/tiktok-downloader'
+    | '/id_/twitter-downloader'
+    | '/pt_/douyin-downloader'
     | '/pt_/facebook-reels-downloader'
+    | '/pt_/threads-downloader'
     | '/pt_/tiktok-downloader'
+    | '/pt_/twitter-downloader'
     | '/vi_/facebook-reels-downloader'
     | '/api/public/download'
     | '/api/public/social-download'
@@ -299,6 +443,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  DouyinDownloaderRoute: typeof DouyinDownloaderRoute
   EnRoute: typeof EnRoute
   FacebookReelsDownloaderRoute: typeof FacebookReelsDownloaderRoute
   HelpRoute: typeof HelpRoute
@@ -306,14 +451,25 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   PtRoute: typeof PtRoute
   TermsRoute: typeof TermsRoute
+  ThreadsDownloaderRoute: typeof ThreadsDownloaderRoute
   TiktokDownloaderRoute: typeof TiktokDownloaderRoute
+  TwitterDownloaderRoute: typeof TwitterDownloaderRoute
   ViRoute: typeof ViRoute
+  EnDouyinDownloaderRoute: typeof EnDouyinDownloaderRoute
   EnFacebookReelsDownloaderRoute: typeof EnFacebookReelsDownloaderRoute
+  EnThreadsDownloaderRoute: typeof EnThreadsDownloaderRoute
   EnTiktokDownloaderRoute: typeof EnTiktokDownloaderRoute
+  EnTwitterDownloaderRoute: typeof EnTwitterDownloaderRoute
+  IdDouyinDownloaderRoute: typeof IdDouyinDownloaderRoute
   IdFacebookReelsDownloaderRoute: typeof IdFacebookReelsDownloaderRoute
+  IdThreadsDownloaderRoute: typeof IdThreadsDownloaderRoute
   IdTiktokDownloaderRoute: typeof IdTiktokDownloaderRoute
+  IdTwitterDownloaderRoute: typeof IdTwitterDownloaderRoute
+  PtDouyinDownloaderRoute: typeof PtDouyinDownloaderRoute
   PtFacebookReelsDownloaderRoute: typeof PtFacebookReelsDownloaderRoute
+  PtThreadsDownloaderRoute: typeof PtThreadsDownloaderRoute
   PtTiktokDownloaderRoute: typeof PtTiktokDownloaderRoute
+  PtTwitterDownloaderRoute: typeof PtTwitterDownloaderRoute
   ViFacebookReelsDownloaderRoute: typeof ViFacebookReelsDownloaderRoute
   ApiPublicDownloadRoute: typeof ApiPublicDownloadRoute
   ApiPublicSocialDownloadRoute: typeof ApiPublicSocialDownloadRoute
@@ -341,6 +497,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/douyin-downloader': {
+      id: '/douyin-downloader'
+      path: '/douyin-downloader'
+      fullPath: '/douyin-downloader'
+      preLoaderRoute: typeof DouyinDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en': {
@@ -392,11 +555,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/threads-downloader': {
+      id: '/threads-downloader'
+      path: '/threads-downloader'
+      fullPath: '/threads-downloader'
+      preLoaderRoute: typeof ThreadsDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tiktok-downloader': {
       id: '/tiktok-downloader'
       path: '/tiktok-downloader'
       fullPath: '/tiktok-downloader'
       preLoaderRoute: typeof TiktokDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/twitter-downloader': {
+      id: '/twitter-downloader'
+      path: '/twitter-downloader'
+      fullPath: '/twitter-downloader'
+      preLoaderRoute: typeof TwitterDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vi': {
@@ -406,11 +583,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ViRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en_/douyin-downloader': {
+      id: '/en_/douyin-downloader'
+      path: '/en/douyin-downloader'
+      fullPath: '/en/douyin-downloader'
+      preLoaderRoute: typeof EnDouyinDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/en_/facebook-reels-downloader': {
       id: '/en_/facebook-reels-downloader'
       path: '/en/facebook-reels-downloader'
       fullPath: '/en/facebook-reels-downloader'
       preLoaderRoute: typeof EnFacebookReelsDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en_/threads-downloader': {
+      id: '/en_/threads-downloader'
+      path: '/en/threads-downloader'
+      fullPath: '/en/threads-downloader'
+      preLoaderRoute: typeof EnThreadsDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en_/tiktok-downloader': {
@@ -420,11 +611,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EnTiktokDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en_/twitter-downloader': {
+      id: '/en_/twitter-downloader'
+      path: '/en/twitter-downloader'
+      fullPath: '/en/twitter-downloader'
+      preLoaderRoute: typeof EnTwitterDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/id_/douyin-downloader': {
+      id: '/id_/douyin-downloader'
+      path: '/id/douyin-downloader'
+      fullPath: '/id/douyin-downloader'
+      preLoaderRoute: typeof IdDouyinDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/id_/facebook-reels-downloader': {
       id: '/id_/facebook-reels-downloader'
       path: '/id/facebook-reels-downloader'
       fullPath: '/id/facebook-reels-downloader'
       preLoaderRoute: typeof IdFacebookReelsDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/id_/threads-downloader': {
+      id: '/id_/threads-downloader'
+      path: '/id/threads-downloader'
+      fullPath: '/id/threads-downloader'
+      preLoaderRoute: typeof IdThreadsDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/id_/tiktok-downloader': {
@@ -434,6 +646,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IdTiktokDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/id_/twitter-downloader': {
+      id: '/id_/twitter-downloader'
+      path: '/id/twitter-downloader'
+      fullPath: '/id/twitter-downloader'
+      preLoaderRoute: typeof IdTwitterDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pt_/douyin-downloader': {
+      id: '/pt_/douyin-downloader'
+      path: '/pt/douyin-downloader'
+      fullPath: '/pt/douyin-downloader'
+      preLoaderRoute: typeof PtDouyinDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pt_/facebook-reels-downloader': {
       id: '/pt_/facebook-reels-downloader'
       path: '/pt/facebook-reels-downloader'
@@ -441,11 +667,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PtFacebookReelsDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pt_/threads-downloader': {
+      id: '/pt_/threads-downloader'
+      path: '/pt/threads-downloader'
+      fullPath: '/pt/threads-downloader'
+      preLoaderRoute: typeof PtThreadsDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pt_/tiktok-downloader': {
       id: '/pt_/tiktok-downloader'
       path: '/pt/tiktok-downloader'
       fullPath: '/pt/tiktok-downloader'
       preLoaderRoute: typeof PtTiktokDownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pt_/twitter-downloader': {
+      id: '/pt_/twitter-downloader'
+      path: '/pt/twitter-downloader'
+      fullPath: '/pt/twitter-downloader'
+      preLoaderRoute: typeof PtTwitterDownloaderRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/vi_/facebook-reels-downloader': {
@@ -483,6 +723,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  DouyinDownloaderRoute: DouyinDownloaderRoute,
   EnRoute: EnRoute,
   FacebookReelsDownloaderRoute: FacebookReelsDownloaderRoute,
   HelpRoute: HelpRoute,
@@ -490,14 +731,25 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   PtRoute: PtRoute,
   TermsRoute: TermsRoute,
+  ThreadsDownloaderRoute: ThreadsDownloaderRoute,
   TiktokDownloaderRoute: TiktokDownloaderRoute,
+  TwitterDownloaderRoute: TwitterDownloaderRoute,
   ViRoute: ViRoute,
+  EnDouyinDownloaderRoute: EnDouyinDownloaderRoute,
   EnFacebookReelsDownloaderRoute: EnFacebookReelsDownloaderRoute,
+  EnThreadsDownloaderRoute: EnThreadsDownloaderRoute,
   EnTiktokDownloaderRoute: EnTiktokDownloaderRoute,
+  EnTwitterDownloaderRoute: EnTwitterDownloaderRoute,
+  IdDouyinDownloaderRoute: IdDouyinDownloaderRoute,
   IdFacebookReelsDownloaderRoute: IdFacebookReelsDownloaderRoute,
+  IdThreadsDownloaderRoute: IdThreadsDownloaderRoute,
   IdTiktokDownloaderRoute: IdTiktokDownloaderRoute,
+  IdTwitterDownloaderRoute: IdTwitterDownloaderRoute,
+  PtDouyinDownloaderRoute: PtDouyinDownloaderRoute,
   PtFacebookReelsDownloaderRoute: PtFacebookReelsDownloaderRoute,
+  PtThreadsDownloaderRoute: PtThreadsDownloaderRoute,
   PtTiktokDownloaderRoute: PtTiktokDownloaderRoute,
+  PtTwitterDownloaderRoute: PtTwitterDownloaderRoute,
   ViFacebookReelsDownloaderRoute: ViFacebookReelsDownloaderRoute,
   ApiPublicDownloadRoute: ApiPublicDownloadRoute,
   ApiPublicSocialDownloadRoute: ApiPublicSocialDownloadRoute,
