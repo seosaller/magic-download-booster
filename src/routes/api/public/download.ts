@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { isGenDownloadMediaUrl } from "@/lib/gendownload";
 
 export const Route = createFileRoute("/api/public/download")({
   server: {
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/api/public/download")({
         if (
           !/(^|\.)(fbcdn\.net|facebook\.com|fbsbx\.com|cloudconvert\.com)$/i.test(
             host,
-          )
+          ) && !isGenDownloadMediaUrl(target)
         )
           return new Response("Host not allowed", { status: 403 });
 
@@ -39,6 +40,10 @@ export const Route = createFileRoute("/api/public/download")({
           };
           if (withRange && range) h["range"] = range;
           try {
+            if (isGenDownloadMediaUrl(sourceUrl)) {
+              const { pullGenMedia } = await import("@/lib/gendownload.server");
+              return await pullGenMedia(sourceUrl, withRange ? range : null);
+            }
             return await fetch(sourceUrl, { headers: h, redirect: "follow" });
           } catch {
             return undefined;

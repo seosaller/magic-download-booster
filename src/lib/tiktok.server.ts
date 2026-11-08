@@ -6,7 +6,19 @@ type ResolvedVideo = { video: TikTokVideo; play: string; wmplay: string | undefi
 const resolvedVideos = new Map<string, { expires: number; result: ResolvedVideo }>();
 export async function getTikTokVideo(url: string) {
   url = tiktokLinkSchema.parse(url);
-  return getTikwmVideo(url);
+  try { return await getTikwmVideo(url); }
+  catch (originalError) {
+    try {
+      const { extractGenDownload } = await import("./gendownload.server");
+      const extracted = await extractGenDownload(url);
+      const format = extracted.formats.find(format => format.ext === "mp4");
+      const id = /\/video\/(\d+)/.exec(url)?.[1];
+      if (!format || !id) throw originalError;
+      const result = { video: { id, title: extracted.title, author: extracted.author, cover: extracted.thumbnail, size: format.size, watermarkSize: 0, watermark: false }, play: format.url, wmplay: undefined };
+      resolvedVideos.set(id, { expires: Date.now() + 240_000, result });
+      return result;
+    } catch { throw originalError; }
+  }
 }
 export async function getTikwmVideo(url: string) {
   const id = /\/video\/(\d+)/.exec(url)?.[1];
@@ -38,7 +50,8 @@ export async function getTikwmVideo(url: string) {
 export async function pullTikTokMedia(target: string, range: string | null) {
   let url = target;
   for (let redirects = 0; redirects < 5; redirects++) {
-    if (!isTikTokMediaUrl(url)) return undefined;
+    const { isGenDownloadMediaUrl } = await import("./gendownload");
+    if (!isTikTokMediaUrl(url) && !isGenDownloadMediaUrl(url)) return undefined;
     const response = await fetch(url, { redirect: "manual", headers: { "User-Agent": "Mozilla/5.0", Referer: "https://www.tiktok.com/", ...(range ? { Range: range } : {}) }, signal: AbortSignal.timeout(25000) });
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get("location");

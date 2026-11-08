@@ -316,5 +316,9 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
         last = { ok: false, links: [], error: "Unable to retrieve the video. Please check the public Facebook link and try again." };
       }
     }
-    return last;
+    try {
+      const { extractGenDownload } = await import("./gendownload.server");
+      const alternative = await extractGenDownload(data.url);
+      return { ok: true, title: alternative.title, thumbnail: alternative.thumbnail, links: alternative.formats.filter(format => format.ext === "mp4").map(format => ({ quality: format.label, url: format.url, size: format.size || undefined })) };
+    } catch { return last; }
   });
