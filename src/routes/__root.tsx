@@ -127,7 +127,7 @@ function RootComponent() {
       const link = (event.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
       if (!link) return;
       const url = new URL(link.href, window.location.href);
-      if (url.origin !== window.location.origin || !/^\/api\/public\/(download|tiktok-download)$/.test(url.pathname)) return;
+      if (url.origin !== window.location.origin || !/^\/api\/public\/(download|tiktok-download|social-download)$/.test(url.pathname)) return;
       event.preventDefault();
       const frame = document.createElement("iframe");
       frame.hidden = true;

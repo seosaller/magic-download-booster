@@ -10,7 +10,7 @@ export const languagePaths = {
 export function languageFromPath(path: string): Language {
   const first = path.split('/')[1];
   if (first === 'en' || first === 'pt' || first === 'id' || first === 'vi') return first;
-  return path === '/' || path === '/facebook-reels-downloader' || path === '/tiktok-downloader' ? 'vi' : 'en';
+  return path === '/' || /^\/(facebook-reels|tiktok|douyin|twitter|threads)-downloader$/.test(path) ? 'vi' : 'en';
 }
 export const copy = {
   en: {
