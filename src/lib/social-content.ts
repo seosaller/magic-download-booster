@@ -1,7 +1,7 @@
 import type { Language } from "./i18n";
 import { socialNames, type SocialPlatform } from "./social";
 
-const links = { douyin: "v.douyin.com/… · douyin.com/video/…", twitter: "x.com/user/status/… · twitter.com/user/status/…", threads: "threads.net/@user/post/… · threads.com/@user/post/…" } as const;
+const links = { douyin: "v.douyin.com/… · douyin.com/video/…", twitter: "x.com/user/status/… · twitter.com/user/status/…", threads: "threads.net/@user/post/… · threads.com/@user/post/… · threads.com/share/…" } as const;
 
 export function socialContent(language: Language, platform: SocialPlatform) {
   const n = socialNames[platform];

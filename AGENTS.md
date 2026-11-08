@@ -28,3 +28,4 @@
 - TikTok thumbnails use the validated ID-based proxy; MP3 conversion uploads the bounded complete playable video fetched with TikTok headers to CloudConvert, avoiding CDN import failures while preserving speech and music and reusing shared status polling.
 - Reuse resolved public TikTok sources in a bounded, short-lived server cache to avoid duplicate provider requests during thumbnail loading and downloads; cache misses always resolve and validate again.
 - Keep Bun test files outside the application TypeScript compilation to prevent Bun's fetch declarations from overriding Worker/browser fetch types; run the tests with Bun separately.
+- Threads share redirects stay on validated official post/share URLs; public post extraction selects each carousel video's best playable version separately and excludes replies, while GenDownload is a disclosed fallback when the full list cannot be read.

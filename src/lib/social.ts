@@ -20,7 +20,7 @@ export function validSocialLink(value: string, platform: SocialPlatform) {
     if (url.protocol !== "https:" || url.username || url.password || url.port || /\s/.test(value)) return false;
     if (platform === "douyin") return (url.hostname === "v.douyin.com" && /^\/[\w-]+\/?$/.test(url.pathname)) || (["douyin.com", "www.douyin.com"].includes(url.hostname) && (/^\/video\/\d+\/?$/.test(url.pathname) || (["/jingxuan", "/discover", "/recommend", "/"].includes(url.pathname) && /^\d{10,25}$/.test(url.searchParams.get("modal_id") || ""))));
     if (platform === "twitter") return ["twitter.com", "www.twitter.com", "mobile.twitter.com", "x.com", "www.x.com"].includes(url.hostname) && /^\/(?:[\w]+\/status|i\/web\/status)\/\d+(?:\/video\/\d+)?\/?$/.test(url.pathname);
-    return ["threads.net", "www.threads.net", "threads.com", "www.threads.com"].includes(url.hostname) && /^\/@[^/]+\/post\/[\w-]+\/?$/.test(url.pathname);
+    return ["threads.net", "www.threads.net", "threads.com", "www.threads.com"].includes(url.hostname) && (/^\/@[^/]+\/post\/[\w-]+\/?$/.test(url.pathname) || /^\/share\/[\w-]+\/?$/.test(url.pathname));
   } catch { return false; }
 }
 export const socialRequestSchema = z.object({ platform: z.enum(socialPlatforms), url: z.string().trim().max(4096) }).superRefine((data, context) => {

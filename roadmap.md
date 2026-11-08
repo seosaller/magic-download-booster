@@ -40,3 +40,4 @@
 - [x] Add GenDownload as an alternative and support Douyin, Twitter/X and Threads downloads with separate localized pages.
 - [x] Verify provider access and layouts — Douyin 30,741,005-byte H.264/AAC 1920×1080 and Threads 4,906,539-byte H.264/AAC 720×1280 downloaded through the UI without page navigation; phone/tablet/desktop fit checked.
 - [ ] Verify a successful Twitter/X download — GenDownload returned 422 for one public example and timed out for three others; waiting on the provider returning a working source.
+- [x] Support Threads share links and separate carousel video downloads; supplied link downloaded 14,406,771-byte H.264/AAC MP4 without navigation, 12 tests pass including three-video carousel extraction and redirect safety; real multi-video post remains unverified because the supplied post contains one video.
