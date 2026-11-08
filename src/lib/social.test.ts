@@ -14,6 +14,12 @@ it("accepts Threads posts on both official domains", () => {
   expect(validSocialLink("https://www.threads.net/@user/post/ABC-123", "threads")).toBe(true);
   expect(validSocialLink("https://www.threads.com/@user/post/ABC-123", "threads")).toBe(true);
 });
+it("accepts the supplied Threads share link on official domains", () => {
+  expect(validSocialLink("https://www.threads.com/share/GiR_Jpr1K", "threads")).toBe(true);
+  expect(validSocialLink("https://www.threads.net/share/GiR_Jpr1K/", "threads")).toBe(true);
+  expect(validSocialLink("https://www.threads.com.evil.example/share/GiR_Jpr1K", "threads")).toBe(false);
+  expect(validSocialLink("https://www.threads.com/share/", "threads")).toBe(false);
+});
 it("rejects other platforms, credentials, insecure links and profiles", () => {
   expect(validSocialLink("https://x.com.evil.example/user/status/1234", "twitter")).toBe(false);
   expect(validSocialLink("https://user:pass@x.com/user/status/1234", "twitter")).toBe(false);
