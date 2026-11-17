@@ -4,6 +4,7 @@ import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { startRender, startMp3, renderStatus } from "@/lib/render.functions";
 import { mp3Source } from "@/lib/mp3";
 import type { NativeSource } from "@/lib/facebook-streams";
+import { visibleNativeSources } from "@/lib/facebook-download-options";
 import { facebookLinkError, MAX_FACEBOOK_LINK_LENGTH } from "@/lib/facebook-link";
 import { assertLocalVideoSize } from "@/lib/video-merge";
 import { Button } from "@/components/ui/button";
@@ -379,7 +380,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
                       </div>
                     ))}
 
-                    {render.state === "idle" && (result.sources ?? []).filter(source => source.height !== 1080 && (source.width ?? 0) >= 1080 && source.height >= 1080).map(source => (
+                    {render.state === "idle" && visibleNativeSources(result.sources ?? []).map(source => (
                       <Button
                         key={source.video}
                         type="button"

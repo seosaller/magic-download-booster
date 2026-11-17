@@ -17,7 +17,7 @@
 - Home-page informational content is isolated in HomeContent so copy and presentation changes do not modify the downloader's processing or conversion states.
 - Video and Reels content routes use the shared DownloaderPage with page-specific copy and supporting content, so downloads and conversion behavior stay consistent without duplicated processing logic.
 - Completed conversion downloads use the shared success Button variant and semantic success tokens so ready states remain consistent across themes and pages.
-- Facebook download controls omit the dedicated Full HD processor; preserve extraction metadata and shared higher-resolution processing so other downloads remain unchanged.
+- Facebook native download choices use visibleNativeSources to omit landscape and portrait Full HD; preserve extraction metadata and shared higher-resolution processing so other downloads remain unchanged.
 - Facebook native streams use width and height with inherited DASH MIME types; classify 2K/4K by the short edge, verify muxed dimensions and audio, and preserve all available native quality choices to avoid portrait-height mislabeling.
 - Facebook media proxies validate every redirect, return no-store errors instead of cross-origin redirects, and relay failed iframe downloads to the parent page so expired sources do not fail silently or trigger CORS failures.
 
