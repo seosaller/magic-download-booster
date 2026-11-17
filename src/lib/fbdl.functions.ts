@@ -136,7 +136,7 @@ function parse(html: string): FbResult {
     };
 
   const render = sources.find(source => source.label === "4K" || source.label === "2K") ?? sources[0];
-  return { ok: true, title, thumbnail, links, render, sources, audio: sources[0]?.audio, fullHd: sources.find(source => source.height === 1080) };
+  return { ok: true, title, thumbnail, links, render, sources, audio: sources[0]?.audio, fullHd: sources.find(source => Math.min(source.width || source.height, source.height) === 1080) };
 
 }
 
@@ -229,6 +229,8 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
           if (parsed.fullHd) {
             const [videoSize, audioSize] = await Promise.all([headSize(parsed.fullHd.video), headSize(parsed.fullHd.audio)]);
             parsed.fullHd.size = videoSize && audioSize ? videoSize + audioSize : undefined;
+            const match = parsed.sources?.find(source => source.video === parsed.fullHd?.video);
+            if (match && parsed.fullHd.size) match.size = parsed.fullHd.size;
           }
           parsed.originalUrl = data.url;
           parsed.extractedAt = Date.now();
