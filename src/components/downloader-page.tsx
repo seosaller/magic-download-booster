@@ -7,6 +7,7 @@ import type { NativeSource } from "@/lib/facebook-streams";
 import { visibleDownloadLinks, visibleNativeSources } from "@/lib/facebook-download-options";
 import { facebookLinkError, MAX_FACEBOOK_LINK_LENGTH } from "@/lib/facebook-link";
 import { assertLocalVideoSize } from "@/lib/video-merge";
+import { mergeBrowserVideo } from "@/lib/browser-video";
 import { Button } from "@/components/ui/button";
 import { HomeContent } from "@/components/home-content";
 import { ReelsContent } from "@/components/reels-content";
@@ -178,7 +179,6 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
       }
       setResult(previous => previous ? { ...previous, render: source } : previous);
       assertLocalVideoSize(source.size ?? 0);
-      const { mergeBrowserVideo } = await import("@/lib/browser-video");
       const output = await mergeBrowserVideo(source.video, source.audio, controller.signal, (progress) => {
         if (requestVersion.current === version && !controller.signal.aborted) setRender({ state: "working", progress });
       }, source.height, "width" in source && typeof source.width === "number" ? source.width : undefined);

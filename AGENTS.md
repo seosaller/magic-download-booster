@@ -11,6 +11,7 @@
 
 - MP3 jobs refresh Facebook signed sources and upload bounded original audio/playable video bytes to CloudConvert's native conversion task; validate MP3 output bytes in the proxy, never rename media, because URL imports can be blocked by CDN headers.
 - High-quality video defaults to lazy-loaded, single-thread browser FFmpeg stream copying with bounded media size and cancellable workers; CloudConvert is an explicit fallback, keeping native resolution and sound without requiring conversion credits for local processing.
+- Keep the browser-safe video helper in the downloader's module graph and load FFmpeg only inside its click-driven function; this avoids a late local-module factory lookup after preview updates without running FFmpeg during SSR.
 - Keep processing WASM asset pointers in public/wasm, externalize large binaries with lovable-assets, and load pointer URLs only from browser event-driven code; binary source imports break deployment and large repository files exceed commit limits.
 - MP3 and video processing keep independent UI states; CloudConvert jobs share the existing status endpoint, while local video outputs use revocable blob URLs so neither blocks direct video downloads.
 - Shared header and footer are mounted around the root Outlet; information pages are separate content routes with their own metadata and use the shared InfoPage layout to keep navigation and typography consistent.
