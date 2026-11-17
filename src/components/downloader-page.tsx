@@ -380,11 +380,12 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
                       </div>
                     ))}
 
-                    {render.state === "idle" && visibleNativeSources(result.sources ?? []).map(source => (
+                    {visibleNativeSources(result.sources ?? []).map(source => (
                       <Button
                         key={source.video}
                         type="button"
                         variant="outline"
+                        disabled={render.state === "working"}
                         onClick={() => void onFreeRender(source)}
                         className="h-auto whitespace-normal border-primary px-4 py-3 text-primary transition active:scale-[0.96]"
                       >
@@ -396,7 +397,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
                         )
                       </Button>
                     ))}
-                    {!(result.sources ?? []).some(source => source.label === "2K") && !result.links.some(link => /^(2K|1440p)$/i.test(link.quality)) && <p role="status" className="text-xs text-muted-foreground">2K unavailable: this source does not supply a verified native 2K stream.</p>}
+                    {!visibleNativeSources(result.sources ?? []).some(source => source.label === "2K") && !visibleDownloadLinks(result.links).some(link => /^(2K|1440p)$/i.test(link.quality)) && <Button type="button" variant="outline" disabled title="This source does not supply a verified native 2K stream." className="h-auto whitespace-normal border-primary px-4 py-3 text-primary"><Download />2K · Not available</Button>}
 
                     {render.state === "working" && (
                       <div className="rounded-lg border border-border p-4">
