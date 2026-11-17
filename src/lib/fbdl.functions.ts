@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
-import { findFullHdSource, type FullHdSource } from "./full-hd";
+import type { FullHdSource } from "./full-hd";
+import { facebookStreams, type NativeSource } from "./facebook-streams";
 import { facebookRequestSchema, isFacebookPageUrl } from "./facebook-link";
 
 export type FbResult = {
@@ -9,6 +10,10 @@ export type FbResult = {
   thumbnail?: string | undefined;
   links: { quality: string; url: string; size?: number | undefined }[];
   fullHd?: FullHdSource | undefined;
+  sources?: NativeSource[] | undefined;
+  extractedAt?: number | undefined;
+  originalUrl?: string | undefined;
+  audio?: string | undefined;
   render?:
     | {
         label: string;
@@ -31,90 +36,6 @@ function unescapeJson(s: string) {
     .replace(/\\t/g, "\t")
     .replace(/\\\\/g, "\\");
 }
-
-function xmlAttr(tag: string, name: string) {
-  const m = tag.match(new RegExp(`${name}="([^"]*)"`));
-  return m?.[1];
-}
-
-/** Pull the best video-only + audio-only DASH streams for a high-res render. */
-function parseDash(html: string): FbResult["render"] {
-  const m = html.match(
-    /"(?:dash_manifest|dash_manifest_xml_string)"\s*:\s*"((?:\\.|[^"\\])*)"/,
-  );
-  if (!m?.[1]) return undefined;
-  const xml = unescapeJson(m[1]);
-
-  const reps = xml.match(/<Representation\b[\s\S]*?<\/Representation>/g) ?? [];
-  let bestVideo: { url: string; height: number } | undefined;
-  let bestAudio: { url: string; rate: number } | undefined;
-
-  for (const rep of reps) {
-    const base = rep.match(/<BaseURL>([\s\S]*?)<\/BaseURL>/)?.[1];
-    if (!base) continue;
-    const url = base
-      .replace(/&amp;/g, "&")
-      .replace(/<!\[CDATA\[|\]\]>/g, "")
-      .trim();
-    if (!url.startsWith("http")) continue;
-    const mime = xmlAttr(rep, "mimeType") ?? "";
-    const bandwidth = Number(xmlAttr(rep, "bandwidth") ?? 0);
-    if (mime.startsWith("video")) {
-      const height = Number(xmlAttr(rep, "height") ?? 0);
-      if (!bestVideo || height > bestVideo.height) bestVideo = { url, height };
-    } else if (mime.startsWith("audio")) {
-      if (!bestAudio || bandwidth > bestAudio.rate)
-        bestAudio = { url, rate: bandwidth };
-    }
-  }
-
-  if (!bestVideo || !bestAudio || bestVideo.height <= 0) return undefined;
-  return build(bestVideo, bestAudio);
-}
-
-function build(
-  v: { url: string; height: number },
-  a: { url: string },
-): FbResult["render"] {
-  const h = v.height;
-  const label =
-    h >= 2000 ? "4K" : h >= 1300 ? "2K" : h >= 1000 ? "1080p" : `${h}p`;
-  return { label, height: h, video: v.url, audio: a.url };
-}
-
-/** Newer Facebook pages ship the streams as JSON representations instead of DASH XML. */
-function parseRepresentations(html: string): FbResult["render"] {
-  let bestVideo: { url: string; height: number } | undefined;
-  let bestAudio: { url: string; rate: number } | undefined;
-
-  // The JSON blob is often embedded escaped inside a <script> string.
-  const plain = html.replace(/\\"/g, '"').replace(/\\\//g, "/");
-
-  for (const text of [html, plain]) {
-    const segments = text.split(/"representation_id"\s*:/).slice(1);
-    for (const seg of segments) {
-      const chunk = seg.slice(0, 4000);
-      const rawUrl = chunk.match(/"base_url"\s*:\s*"((?:\\.|[^"\\])*)"/)?.[1];
-      if (!rawUrl) continue;
-      const url = unescapeJson(rawUrl).replace(/&amp;/g, "&");
-      if (!url.startsWith("http")) continue;
-      const mime = chunk.match(/"mime_type"\s*:\s*"(video|audio)/)?.[1];
-      if (mime === "video") {
-        const height = Number(chunk.match(/"height"\s*:\s*(\d+)/)?.[1] ?? 0);
-        if (!bestVideo || height > bestVideo.height)
-          bestVideo = { url, height };
-      } else if (mime === "audio") {
-        const rate = Number(chunk.match(/"bandwidth"\s*:\s*(\d+)/)?.[1] ?? 0);
-        if (!bestAudio || rate > bestAudio.rate) bestAudio = { url, rate };
-      }
-    }
-    if (bestVideo && bestAudio && bestVideo.height > 0) break;
-  }
-
-  if (!bestVideo || !bestAudio || bestVideo.height <= 0) return undefined;
-  return build(bestVideo, bestAudio);
-}
-
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
@@ -205,7 +126,8 @@ function parse(html: string): FbResult {
   if (sd?.startsWith("http") && sd !== hd)
     links.push({ quality: "SD", url: sd });
 
-  if (!links.length)
+  const sources = facebookStreams(html);
+  if (!links.length && !sources.length)
     return {
       ok: false,
       links: [],
@@ -213,12 +135,9 @@ function parse(html: string): FbResult {
         "No video was found at this link. The video must be public; private or login-only videos are not supported.",
     };
 
-  const render =
-    parseDash(html) ??
-    parseDash(html.replace(/\\"/g, '"').replace(/\\\//g, "/")) ??
-    parseRepresentations(html);
+  const render = sources.find(source => source.label === "4K" || source.label === "2K") ?? sources[0];
+  return { ok: true, title, thumbnail, links, render, sources, audio: sources[0]?.audio, fullHd: sources.find(source => source.height === 1080) };
 
-  return { ok: true, title, thumbnail, links, render, fullHd: findFullHdSource(html) };
 }
 
 async function headSize(url: string): Promise<number | undefined> {
@@ -284,6 +203,8 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
               try {
                 const alt = parse(await fetchHtml(rv.url, rv.mobile));
                 if (alt.render) parsed.render = alt.render;
+                if (alt.sources?.length) parsed.sources = alt.sources;
+                if (alt.audio) parsed.audio = alt.audio;
                 if (alt.fullHd) parsed.fullHd = alt.fullHd;
               } catch {
                 /* keep the plain HD/SD links */
@@ -309,6 +230,8 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
             const [videoSize, audioSize] = await Promise.all([headSize(parsed.fullHd.video), headSize(parsed.fullHd.audio)]);
             parsed.fullHd.size = videoSize && audioSize ? videoSize + audioSize : undefined;
           }
+          parsed.originalUrl = data.url;
+          parsed.extractedAt = Date.now();
           return parsed;
         }
         last = parsed;
@@ -319,6 +242,6 @@ export const fetchFbVideo = createServerFn({ method: "POST" })
     try {
       const { extractGenDownload } = await import("./gendownload.server");
       const alternative = await extractGenDownload(data.url);
-      return { ok: true, title: alternative.title, thumbnail: alternative.thumbnail, links: alternative.formats.filter(format => format.ext === "mp4").map(format => ({ quality: format.label, url: format.url, size: format.size || undefined })) };
+      return { ok: true, originalUrl: data.url, extractedAt: Date.now(), title: alternative.title, thumbnail: alternative.thumbnail, audio: alternative.audioFormats?.[0]?.url, links: alternative.formats.filter(format => format.ext === "mp4").map(format => ({ quality: format.label, url: format.url, size: format.size || undefined })) };
     } catch { return last; }
   });

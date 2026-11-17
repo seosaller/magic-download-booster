@@ -2,13 +2,13 @@ import type { FbResult } from "./fbdl.functions";
 import { isGenDownloadMediaUrl } from "./gendownload";
 
 export function mp3Source(result: FbResult): string | undefined {
-  return result.render?.audio ?? result.links.find((link) => link.quality === "SD")?.url ?? result.links[0]?.url;
+  return result.audio ?? result.render?.audio ?? result.fullHd?.audio ?? result.links.find((link) => link.quality === "SD")?.url ?? result.links[0]?.url;
 }
 
 export function isFacebookMediaUrl(value: string): boolean {
   try {
     const url = new URL(value);
-    return (url.protocol === "https:" && /(^|\.)(fbcdn\.net|facebook\.com|fbsbx\.com)$/i.test(url.hostname) && !url.username && !url.password) || isGenDownloadMediaUrl(value);
+    return (url.protocol === "https:" && /(^|\.)(fbcdn\.net|facebook\.com|fbsbx\.com)$/i.test(url.hostname) && !url.username && !url.password && !url.port) || isGenDownloadMediaUrl(value);
   } catch {
     return false;
   }

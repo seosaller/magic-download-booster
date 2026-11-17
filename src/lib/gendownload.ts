@@ -10,10 +10,11 @@ export function isGenDownloadMediaUrl(value: string) {
 }
 const genFormatSchema = z.object({ label: z.string(), type: z.string(), ext: z.string(), filesize: z.number().nonnegative().nullish(), url: z.string() });
 export const genResponseSchema = z.object({ title: z.string().nullish(), thumbnail: z.string().nullish(), author: z.string().nullish(), formats: z.array(genFormatSchema) });
-export type GenVideo = { title: string; thumbnail: string; author: string; formats: { label: string; ext: string; size: number; url: string }[] };
+export type GenVideo = { audioFormats?: { ext: string; url: string; size: number }[] | undefined; title: string; thumbnail: string; author: string; formats: { label: string; ext: string; size: number; url: string }[] };
 export function normalizeGenVideo(body: unknown): GenVideo {
   const result = genResponseSchema.parse(body);
   const formats = result.formats.filter(format => format.type === "video" && ["mp4", "webm", "mov"].includes(format.ext.toLowerCase()) && isGenDownloadMediaUrl(format.url)).map(format => ({ label: format.label, ext: format.ext.toLowerCase(), size: format.filesize || 0, url: format.url }));
   if (!formats.length) throw new Error("No downloadable video was found. The post must be public and contain a video.");
-  return { title: result.title || "Video", author: result.author || "", thumbnail: result.thumbnail && isGenDownloadMediaUrl(result.thumbnail) ? result.thumbnail : "", formats };
+  const audioFormats = result.formats.filter(format => format.type === "audio" && ["m4a", "mp3", "webm", "aac", "ogg"].includes(format.ext.toLowerCase()) && isGenDownloadMediaUrl(format.url)).map(format => ({ ext: format.ext.toLowerCase(), url: format.url, size: format.filesize || 0 }));
+  return { audioFormats, title: result.title || "Video", author: result.author || "", thumbnail: result.thumbnail && isGenDownloadMediaUrl(result.thumbnail) ? result.thumbnail : "", formats };
 }

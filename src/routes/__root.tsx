@@ -9,7 +9,7 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -120,6 +120,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [downloadError, setDownloadError] = useState("");
   // Download links run in a hidden frame so a failed file request never replaces the page.
   useEffect(() => {
     function onClick(event: MouseEvent) {
@@ -129,14 +130,22 @@ function RootComponent() {
       const url = new URL(link.href, window.location.href);
       if (url.origin !== window.location.origin || !/^\/api\/public\/(download|tiktok-download|social-download)$/.test(url.pathname)) return;
       event.preventDefault();
+      setDownloadError("");
       const frame = document.createElement("iframe");
       frame.hidden = true;
+      frame.dataset['download'] = "true";
       frame.src = url.href;
       document.body.appendChild(frame);
       setTimeout(() => frame.remove(), 120_000);
     }
     document.addEventListener("click", onClick);
-    return () => document.removeEventListener("click", onClick);
+    function onMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin || event.data?.type !== "download-error" || typeof event.data.message !== "string") return;
+      const ownedFrame = [...document.querySelectorAll("iframe[data-download]")].some(frame => (frame as HTMLIFrameElement).contentWindow === event.source);
+      if (ownedFrame) setDownloadError(event.data.message);
+    }
+    window.addEventListener("message", onMessage);
+    return () => { document.removeEventListener("click", onClick); window.removeEventListener("message", onMessage); };
   }, []);
 
   return (
@@ -144,6 +153,7 @@ function RootComponent() {
       <div className="flex min-h-screen flex-col bg-background text-foreground">
         <SiteHeader />
         <Outlet />
+        {downloadError && <div role="alert" className="container mx-auto px-4 py-3 text-center text-sm text-destructive">{downloadError}</div>}
         <SiteFooter />
       </div>
     </QueryClientProvider>

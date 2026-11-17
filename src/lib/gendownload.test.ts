@@ -9,6 +9,7 @@ it("keeps original playable video instead of music-only audio", () => {
   expect(video.formats).toHaveLength(1);
   expect(video.formats[0]?.size).toBe(2029858);
   expect(video.formats[0]?.label).toBe("720p");
+  expect(video.audioFormats?.[0]?.url).toBe("https://gendownload.com/api/stream?t=abc&i=1");
 });
 it("rejects arbitrary outbound addresses and fake GenDownload domains", () => {
   expect(isGenDownloadMediaUrl("https://127.0.0.1/video.mp4")).toBe(false);

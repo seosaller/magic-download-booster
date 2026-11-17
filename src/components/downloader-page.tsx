@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { startRender, startMp3, renderStatus } from "@/lib/render.functions";
 import { mp3Source } from "@/lib/mp3";
+import type { NativeSource } from "@/lib/facebook-streams";
 import { facebookLinkError, MAX_FACEBOOK_LINK_LENGTH } from "@/lib/facebook-link";
 import { assertLocalVideoSize } from "@/lib/video-merge";
 import { Button } from "@/components/ui/button";
@@ -161,8 +162,8 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
     }
   }
 
-  async function onFreeRender() {
-    const source = result?.render;
+  async function onFreeRender(selected?: NativeSource) {
+    let source = selected ?? result?.render;
     if (!source || render.state === "working") return;
     clearLocalVideo();
     const controller = new AbortController();
@@ -170,11 +171,17 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
     const version = requestVersion.current;
     setRender({ state: "working", progress: 5 });
     try {
+      if (result?.originalUrl && Date.now() - (result.extractedAt ?? 0) > 60_000) {
+        const fresh = await run({ data: { url: result.originalUrl } });
+        source = fresh.sources?.find(item => item.label === source?.label && item.height === source?.height);
+        if (!source) throw new Error("This native resolution is no longer available. Process the Facebook link again or use HD/SD.");
+      }
+      setResult(previous => previous ? { ...previous, render: source } : previous);
       assertLocalVideoSize(source.size ?? 0);
       const { mergeBrowserVideo } = await import("@/lib/browser-video");
       const output = await mergeBrowserVideo(source.video, source.audio, controller.signal, (progress) => {
         if (requestVersion.current === version && !controller.signal.aborted) setRender({ state: "working", progress });
-      });
+      }, source.height, "width" in source && typeof source.width === "number" ? source.width : undefined);
       if (requestVersion.current !== version || controller.signal.aborted) { URL.revokeObjectURL(output.url); return; }
       localFile.current = output.url;
       setRender({ state: "done", progress: 100, url: output.url, size: output.size });
@@ -217,7 +224,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
         return;
       }
       if (status.status === "error" || tries >= 120) {
-        setMp3({ state: "error", progress: 0, error: status.status === "error" ? "MP3 conversion failed. The video may have no audio, the link may have expired, or the service may be unavailable. HD/SD downloads are still available." : "MP3 conversion took too long. Please try again.", needKey: status.code === "credits" });
+        setMp3({ state: "error", progress: 0, error: status.status === "error" ? status.error ?? "MP3 conversion failed. Process the Facebook link again." : "MP3 conversion took too long. Please try again.", needKey: status.code === "credits" });
         if (status.code === "credits") setKeyOpen(true);
         return;
       }
@@ -234,7 +241,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
     const version = requestVersion.current;
     setMp3({ state: "working", progress: 5 });
     try {
-      const started = await beginMp3({ data: { source, apiKey, bitrate: mp3Bitrate } });
+      const started = await beginMp3({ data: { source, ...(result?.originalUrl ? { facebookUrl: result.originalUrl } : {}), apiKey, bitrate: mp3Bitrate } });
       if (requestVersion.current !== version) return;
       if (!started.ok || !started.jobId) {
         const needKey = started.code === "credits" || started.code === "config";
@@ -375,21 +382,23 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
 
                     <FullHdDownload language={language} key={result.fullHd?.video ?? "unavailable"} source={result.fullHd} />
 
-                    {result.render && result.render.height !== 1080 && render.state === "idle" && (
+                    {render.state === "idle" && (result.sources ?? []).filter(source => source.height !== 1080 && (source.width ?? 0) >= 1080 && source.height >= 1080).map(source => (
                       <Button
+                        key={source.video}
                         type="button"
                         variant="outline"
-                        onClick={() => void onFreeRender()}
+                        onClick={() => void onFreeRender(source)}
                         className="h-auto whitespace-normal border-primary px-4 py-3 text-primary transition active:scale-[0.96]"
                       >
                         <Download />
-                        {t.download} {result.render.label} ({result.render.height}p
-                        {result.render.size
-                          ? ` · ~${fmtSize(result.render.size)}`
+                        {t.download} {source.label} ({source.width}×{source.height}
+                        {source.size
+                          ? ` · ~${fmtSize(source.size)}`
                           : ""}
                         )
                       </Button>
-                    )}
+                    ))}
+                    {!(result.sources ?? []).some(source => source.label === "2K") && !result.links.some(link => /^(2K|1440p)$/i.test(link.quality)) && <p role="status" className="text-xs text-muted-foreground">2K unavailable: this source does not supply a verified native 2K stream.</p>}
 
                     {render.state === "working" && (
                       <div className="rounded-lg border border-border p-4">

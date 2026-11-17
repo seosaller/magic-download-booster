@@ -9,7 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- MP3 jobs use CloudConvert's native conversion task with the original audio stream or playable video as fallback, never an extension rename, so speech and music remain together.
+- MP3 jobs refresh Facebook signed sources and upload bounded original audio/playable video bytes to CloudConvert's native conversion task; validate MP3 output bytes in the proxy, never rename media, because URL imports can be blocked by CDN headers.
 - High-quality video defaults to lazy-loaded, single-thread browser FFmpeg stream copying with bounded media size and cancellable workers; CloudConvert is an explicit fallback, keeping native resolution and sound without requiring conversion credits for local processing.
 - Keep processing WASM asset pointers in public/wasm, externalize large binaries with lovable-assets, and load pointer URLs only from browser event-driven code; binary source imports break deployment and large repository files exceed commit limits.
 - MP3 and video processing keep independent UI states; CloudConvert jobs share the existing status endpoint, while local video outputs use revocable blob URLs so neither blocks direct video downloads.
@@ -18,6 +18,8 @@
 - Video and Reels content routes use the shared DownloaderPage with page-specific copy and supporting content, so downloads and conversion behavior stay consistent without duplicated processing logic.
 - Completed conversion downloads use the shared success Button variant and semantic success tokens so ready states remain consistent across themes and pages.
 - Native 1080p is selected independently and processed in FullHdDownload; verify output metadata before offering the download, and show unavailable when absent rather than substituting lower-resolution HD.
+- Facebook native streams use width and height with inherited DASH MIME types; classify 2K/4K by the short edge, verify muxed dimensions and audio, and preserve all available native quality choices to avoid portrait-height mislabeling.
+- Facebook media proxies validate every redirect, return no-store errors instead of cross-origin redirects, and relay failed iframe downloads to the parent page so expired sources do not fail silently or trigger CORS failures.
 
 - Language-specific downloader routes reuse DownloaderPage and shared translation dictionaries; Vietnamese is the unprefixed default, while explicit language routes render the same processing flow without duplication.
 - Determine the document language and navigation from the current route, not browser storage, so SSR and language links remain consistent.
