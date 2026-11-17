@@ -4,7 +4,7 @@ import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { startRender, startMp3, renderStatus } from "@/lib/render.functions";
 import { mp3Source } from "@/lib/mp3";
 import type { NativeSource } from "@/lib/facebook-streams";
-import { visibleNativeSources } from "@/lib/facebook-download-options";
+import { visibleDownloadLinks, visibleNativeSources } from "@/lib/facebook-download-options";
 import { facebookLinkError, MAX_FACEBOOK_LINK_LENGTH } from "@/lib/facebook-link";
 import { assertLocalVideoSize } from "@/lib/video-merge";
 import { Button } from "@/components/ui/button";
@@ -366,7 +366,7 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
                     {result.title}
                   </h2>
                   <div className="col-span-2 flex min-w-0 flex-col gap-2">
-                    {result.links.map((l) => (
+                    {visibleDownloadLinks(result.links).map((l) => (
                       <div key={l.quality} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-border py-3 lg:block lg:border-0 lg:py-0">
                         <span className="min-w-0 text-sm lg:hidden">{t.quality}: {l.quality}{l.size ? ` (${fmtSize(l.size)})` : ""}</span>
                       <Button asChild className="h-auto shrink-0 px-4 py-2 transition active:scale-[0.96] active:brightness-90 lg:w-full lg:py-3">
