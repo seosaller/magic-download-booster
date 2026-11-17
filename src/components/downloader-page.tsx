@@ -9,7 +9,6 @@ import { assertLocalVideoSize } from "@/lib/video-merge";
 import { Button } from "@/components/ui/button";
 import { HomeContent } from "@/components/home-content";
 import { ReelsContent } from "@/components/reels-content";
-import { FullHdDownload } from "@/components/full-hd-download";
 import { copy, type Language } from "@/lib/i18n";
 import { LocalizedContent } from "@/components/localized-content";
 import { Download, Music, LoaderCircle, Clipboard, X, CircleCheck } from "lucide-react";
@@ -379,8 +378,6 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
                       </Button>
                       </div>
                     ))}
-
-                    <FullHdDownload language={language} key={result.fullHd?.video ?? "unavailable"} source={result.fullHd} />
 
                     {render.state === "idle" && (result.sources ?? []).filter(source => source.height !== 1080 && (source.width ?? 0) >= 1080 && source.height >= 1080).map(source => (
                       <Button

@@ -44,3 +44,5 @@
 - [x] Verify actual Facebook 320 kbps MP3 and native muxed video downloads, complete decoding, 56 regression tests and preview build; genuine 2K engine tested with controlled fixtures, not a live Facebook 2K source.
 - [x] Sweep alternate downloader flows: read TikTok, social/carousel extraction and shared conversion code; fix silent proxy failures and TikTok container headers without changing settings or historical jobs.
 - [x] Support Threads share links and separate carousel video downloads; supplied link downloaded 14,406,771-byte H.264/AAC MP4 without navigation, 12 tests pass including three-video carousel extraction and redirect safety; real multi-video post remains unverified because the supplied post contains one video.
+
+- [x] Remove the dedicated Facebook 1080p control and related home/Reels content in all languages; preserve other download processing.
