@@ -4,7 +4,7 @@ import { fetchFbVideo, type FbResult } from "@/lib/fbdl.functions";
 import { startRender, startMp3, renderStatus } from "@/lib/render.functions";
 import { mp3Source } from "@/lib/mp3";
 import type { NativeSource } from "@/lib/facebook-streams";
-import { visibleDownloadLinks, visibleNativeSources } from "@/lib/facebook-download-options";
+import { fullHdReplacement, visibleDownloadLinks, visibleNativeSources } from "@/lib/facebook-download-options";
 import { facebookLinkError, MAX_FACEBOOK_LINK_LENGTH } from "@/lib/facebook-link";
 import { assertLocalVideoSize } from "@/lib/video-merge";
 import { mergeBrowserVideo } from "@/lib/browser-video";
@@ -397,7 +397,28 @@ export function DownloaderPage({ reels = false, language = "vi" }: { reels?: boo
                         )
                       </Button>
                     ))}
-                    {!visibleNativeSources(result.sources ?? []).some(source => source.label === "2K") && !visibleDownloadLinks(result.links).some(link => /^(2K|1440p)$/i.test(link.quality)) && <Button type="button" variant="outline" disabled title="This source does not supply a verified native 2K stream." className="h-auto whitespace-normal border-primary px-4 py-3 text-primary"><Download />2K · Not available</Button>}
+                    {(() => {
+                      const sources = result.sources ?? [];
+                      if (sources.some(source => Math.min(source.width || source.height, source.height) >= 1440) || visibleDownloadLinks(result.links).some(link => /^(2K|4K|1440p|2160p)/i.test(link.quality))) return null;
+                      const replacement = fullHdReplacement(sources, result.links);
+                      if (replacement?.kind === "native") {
+                        const source = replacement.source;
+                        return (
+                          <Button type="button" variant="outline" disabled={render.state === "working"} onClick={() => void onFreeRender({ ...source, label: "1080p" })} className="h-auto whitespace-normal border-primary px-4 py-3 text-primary transition active:scale-[0.96]">
+                            <Download />{t.download} Full HD 1080p ({source.width}×{source.height}{source.size ? ` · ~${fmtSize(source.size)}` : ""})
+                          </Button>
+                        );
+                      }
+                      if (replacement?.kind === "link") {
+                        const link = replacement.link;
+                        return (
+                          <Button asChild variant="outline" className="h-auto whitespace-normal border-primary px-4 py-3 text-primary transition active:scale-[0.96]">
+                            <a href={dl(link.url, "mp4", "1080p")}><Download />{t.download} Full HD 1080p{link.size ? ` (${fmtSize(link.size)})` : ""}</a>
+                          </Button>
+                        );
+                      }
+                      return <Button type="button" variant="outline" disabled title="This source does not supply a verified native 2K or 1080p stream." className="h-auto whitespace-normal border-primary px-4 py-3 text-primary"><Download />2K · Not available</Button>;
+                    })()}
 
                     {render.state === "working" && (
                       <div className="rounded-lg border border-border p-4">

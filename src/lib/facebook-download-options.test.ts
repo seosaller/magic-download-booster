@@ -24,3 +24,11 @@ it("hides native choices explicitly labeled 1080p and retains portrait 2K", () =
   ];
   expect(visibleNativeSources(sources).map(source => source.video)).toEqual(["2k"]);
 });
+it("offers native Full HD 1080p only when no 2K exists", async () => {
+  const { fullHdReplacement } = await import("./facebook-download-options");
+  const fhd = { label: "1080p", width: 1080, height: 1920, video: "fhd", audio: "a" };
+  expect(fullHdReplacement([fhd], [])?.kind).toBe("native");
+  expect(fullHdReplacement([fhd, { label: "2K", width: 1440, height: 2560, video: "2k", audio: "a" }], [])).toBeUndefined();
+  expect(fullHdReplacement([], [{ quality: "1080p" }])).toEqual({ kind: "link", link: { quality: "1080p" } });
+  expect(fullHdReplacement([{ label: "720p", width: 720, height: 1280, video: "hd", audio: "a" }], [{ quality: "HD" }])).toBeUndefined();
+});
